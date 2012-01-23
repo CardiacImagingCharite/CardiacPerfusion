@@ -9,6 +9,7 @@
 
 #include "ui_KardioPerfusion.h"
 #include "KardioPerfusion.h"
+#include "dicomselectordialog.h"
 
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
@@ -16,7 +17,6 @@
 #include "vtkSmartPointer.h"
 #include "vtkKWImage.h"
 #include "vtkImageData.h"
-
 #include "vtkCamera.h"
 #include "vtkInteractorStyleTrackballCamera.h"
 #include "vtkObjectFactory.h"
@@ -30,12 +30,11 @@
 #include "vtkVolume16Reader.h"
 
 #include "itkGDCMSeriesFileNames.h"
-
 #include "itkOrientedImage.h"
 #include "itkImageSeriesReader.h"
 #include "itkGDCMImageIO.h"
 #include "itkDicomImageIO2.h"
-
+#include <boost/assign.hpp>
 
 #include "QFileDialog.h"
 #include "qstring.h"
@@ -106,13 +105,20 @@ private:
 };
 vtkStandardNewMacro(KeyPressInteractorStyle);
 
+const DicomTagList SimpleView::CTModelHeaderFields = boost::assign::list_of
+  (DicomTagType("Patient Name", "0010|0010"))
+  (DicomTagType("#Slices",CTImageTreeItem::getNumberOfFramesTag()))
+  (DicomTagType("AcquisitionDatetime","0008|002a"));
+
 // Constructor
-SimpleView::SimpleView() 
+SimpleView::SimpleView():imageModel(CTModelHeaderFields),pendingAction(-1) 
 {
   this->showFullScreen();
   this->ui = new Ui_SimpleView;
   this->ui->setupUi(this);
   
+  this->ui->treeView->setModel( &imageModel );
+   
   for(int i = 0; i < 4; i++)
   {
 	  m_pViewer[i] = vtkSmartPointer<vtkImageViewer2>::New();
@@ -120,10 +126,13 @@ SimpleView::SimpleView()
 	  m_pViewer[i]->Render();
   }
 
- 
+  this->ui->qvtk_axial->SetRenderWindow(m_pViewer[0]->GetRenderWindow());
   // Set up action signals and slots
   connect(this->ui->actionOpenFile, SIGNAL(triggered()), this, SLOT(slotOpenFile()));
   connect(this->ui->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
+  connect(this->ui->treeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+	   this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
+
   
 };
 
@@ -136,11 +145,7 @@ SimpleView::~SimpleView()
 // Action to be taken upon file open 
 void SimpleView::slotOpenFile()
 {
-/*	QString dirName =
-	 QFileDialog::getExistingDirectory(QDir::currentDirPath(), this, "get existing directory",
-	 "Choose a directory");
-	*/ 
-	QString fname = QFileDialog::getOpenFileName(
+/*	QString fname = QFileDialog::getOpenFileName(
     this,
     tr("Select a file to open"),
     ".",
@@ -149,6 +154,76 @@ void SimpleView::slotOpenFile()
 	if (!fname.isEmpty()) {
 		SimpleView::loadFile(fname);
 	}
+	*/
+	QStringList fnames = QFileDialog::getOpenFileNames(
+    this,
+    tr("Select one or more files to open"),
+    ".",
+    "", 0, QFileDialog::ReadOnly|QFileDialog::HideNameFilterDetails);
+  setFiles( fnames );
+}
+
+void SimpleView::setFiles(const QStringList &names) {
+  if (!names.empty()) {
+    DicomSelectorDialogPtr selectDialog( new DicomSelectorDialog( this ) );
+    selectDialog->setFilesOrDirectories( names );
+    loadDicomData( selectDialog );
+  }
+}
+
+void SimpleView::loadDicomData(DicomSelectorDialogPtr dicomSelector) {
+  dicomSelector->exec();
+  dicomSelector->getSelectedImageDataList(imageModel);
+}
+
+void SimpleView::onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
+  int numSelected = this->ui->treeView->selectionModel()->selectedRows().size();
+  if (numSelected == 0) 
+    this->ui->statusbar->clearMessage();
+  else
+    this->ui->statusbar->showMessage( QString::number( numSelected ) + tr(" item(s) selected") );
+}
+
+void SimpleView::on_treeView_doubleClicked(const QModelIndex &index) {
+  if (index.isValid()) {
+    TreeItem &item = imageModel.getItem( index );
+    if (item.isA(typeid(CTImageTreeItem))) {
+      if (displayedCTImage && &item == displayedCTImage->getBaseItem()) {
+	setImage( NULL );
+      } else {
+	setImage( dynamic_cast<CTImageTreeItem*>(&item) );
+      }
+    }/* else if (item.isA(typeid(BinaryImageTreeItem))) {
+      BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item);
+      if (displayedSegments.find( SegItem->getVTKConnector() )==displayedSegments.end()) {
+	segmentShow( SegItem );
+      } else {
+	segmentHide( SegItem );
+      }
+    }
+	*/
+  }
+}
+
+void SimpleView::setImage(const CTImageTreeItem *imageItem) {
+  vtkImageData *vtkImage = NULL;
+  CTImageTreeItem::ConnectorHandle connectorPtr;
+  if (imageItem) {
+    connectorPtr = imageItem->getVTKConnector();
+    vtkImage = connectorPtr->getVTKImageData();
+  }
+  if (connectorPtr != displayedCTImage) {
+   /* while(!displayedSegments.empty()) {
+      segmentHide( dynamic_cast<const BinaryImageTreeItem*>((*displayedSegments.begin())->getBaseItem()) );
+    }*/
+    //mprView->setImage( vtkImage );
+	  m_pViewer[0]->SetInput(vtkImage);
+	  
+	//volumeView->setImage( vtkImage );
+    if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->clearActiveDown();
+    displayedCTImage = connectorPtr;
+    if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->setActive();
+  }
 }
 
 void SimpleView::slotExit() {

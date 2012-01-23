@@ -14,7 +14,7 @@
    <string>SimpleView</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="Icons/icons.qrc">
+   <iconset resource="../Icons/icons.qrc">
     <normaloff>:/Icons/help.png</normaloff>:/Icons/help.png</iconset>
   </property>
   <property name="iconSize">
@@ -99,13 +99,6 @@
      <set>QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
     </property>
    </widget>
-   <zorder>splitter</zorder>
-   <zorder>qvtk_axial</zorder>
-   <zorder>qvtk_sagittal</zorder>
-   <zorder>qvtk_coronal</zorder>
-   <zorder>qvtk_3d</zorder>
-   <zorder>label</zorder>
-   <zorder>treeView</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -157,7 +150,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="Icons/icons.qrc">
+    <iconset resource="../Icons/icons.qrc">
      <normaloff>:/Icons/fileopen.png</normaloff>:/Icons/fileopen.png</iconset>
    </property>
    <property name="text">
@@ -176,7 +169,7 @@
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset resource="Icons/icons.qrc">
+    <iconset resource="../Icons/icons.qrc">
      <normaloff>:/Icons/print.png</normaloff>:/Icons/print.png</iconset>
    </property>
    <property name="text">
@@ -185,7 +178,7 @@
   </action>
   <action name="actionHelp">
    <property name="icon">
-    <iconset resource="Icons/icons.qrc">
+    <iconset resource="../Icons/icons.qrc">
      <normaloff>:/Icons/help.png</normaloff>:/Icons/help.png</iconset>
    </property>
    <property name="text">
@@ -194,7 +187,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="Icons/icons.qrc">
+    <iconset resource="../Icons/icons.qrc">
      <normaloff>:/Icons/filesave.png</normaloff>:/Icons/filesave.png</iconset>
    </property>
    <property name="text">
@@ -210,7 +203,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="Icons/icons.qrc"/>
+  <include location="../Icons/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

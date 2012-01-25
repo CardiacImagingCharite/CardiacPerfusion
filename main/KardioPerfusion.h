@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    SimpleView.h
+  Module:    KardioPerfusion.h
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
@@ -14,8 +14,8 @@
   statement of authorship are reproduced on all copies.
 
 =========================================================================*/
-#ifndef SimpleView_H
-#define SimpleView_H
+#ifndef KardioPerfusion_H
+#define KardioPerfusion_H
 
 #include <QMainWindow>
 #include <QObject>
@@ -30,18 +30,18 @@
   vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 // Forward Qt class declarations
-class Ui_SimpleView;
+class Ui_KardioPerfusion;
 class DicomSelectorDialog;
 
-class SimpleView : public QMainWindow
+class KardioPerfusion : public QMainWindow
 {
   Q_OBJECT
 
 public:
 
   // Constructor/Destructor
-  SimpleView(); 
-  ~SimpleView();
+  KardioPerfusion(); 
+  ~KardioPerfusion();
   void loadFile(QString fname);
   void setFiles(const QStringList &names);
 
@@ -60,11 +60,14 @@ private:
 
 	typedef std::auto_ptr<DicomSelectorDialog> DicomSelectorDialogPtr;
 	vtkSmartPointer<vtkImageViewer2> m_pViewer[4];
+
     // Designer form
-    Ui_SimpleView *ui;
+    Ui_KardioPerfusion *ui;
 
 	void loadDicomData(DicomSelectorDialogPtr dicomSelector);
 	void setImage(const CTImageTreeItem *imageItem);
+
+	void setCustomStyle();
 
 	CTImageTreeModel imageModel;
 	CTImageTreeItem::ConnectorHandle displayedCTImage;
@@ -73,4 +76,4 @@ private:
     int pendingAction;
 };
 
-#endif // SimpleView_H
+#endif // KardioPerfusion_H

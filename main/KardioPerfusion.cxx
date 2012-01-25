@@ -39,94 +39,46 @@
 #include "QFileDialog.h"
 #include "qstring.h"
 
-// Define interaction style
-class KeyPressInteractorStyle : public vtkInteractorStyleTrackballCamera
-{
-  public:
-    static KeyPressInteractorStyle* New();
-    vtkTypeMacro(KeyPressInteractorStyle, vtkInteractorStyleTrackballCamera);
- 
-    virtual void OnKeyPress() 
-    {
-      // Get the keypress
-      vtkRenderWindowInteractor *rwi = this->Interactor;
-      std::string key = rwi->GetKeySym();
+#include "MyTestInteractorStyle.h"
 
-      // Output the key that was pressed
-      std::cout << "Pressed " << key << std::endl;
- 
-      // Handle an arrow key
-      if(key == "Up")
-        {
-        std::cout << "The up arrow was pressed." << std::endl;
-        }
- 
-      // Handle a "normal" key
-      if(key == "a")
-        {
-        std::cout << "The a key was pressed." << std::endl;
-		m_viewer->SetSliceOrientation((m_viewer->GetSliceOrientation()+1)%3);
-        }
- 
-      // Forward events
-      vtkInteractorStyleTrackballCamera::OnKeyPress();
-    }
- 
-	virtual void OnMouseWheelForward()
-	{
-		m_viewer->SetSlice(m_viewer->GetSlice()+1);
-		m_viewer->Render();
-		
-	}
-	
-	virtual void OnMouseWheelBackward()
-	{
-		m_viewer->SetSlice(m_viewer->GetSlice()-1);
-		m_viewer->Render();
-	}
+vtkStandardNewMacro(MyTestInteractorStyle);
 
-	virtual void OnLeftButtonDown()
-	{
-	
-	}
-
-	virtual void OnLeftButtonUp()
-	{
-	
-	}
-
-	void setImageViewer(vtkImageViewer2 * viewer)
-	{
-		this->m_viewer = viewer;
-	}
-
-private:
-	vtkImageViewer2* m_viewer;
-};
-vtkStandardNewMacro(KeyPressInteractorStyle);
-
-const DicomTagList SimpleView::CTModelHeaderFields = boost::assign::list_of
+const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
   (DicomTagType("Patient Name", "0010|0010"))
   (DicomTagType("#Slices",CTImageTreeItem::getNumberOfFramesTag()))
   (DicomTagType("AcquisitionDatetime","0008|002a"));
 
 // Constructor
-SimpleView::SimpleView():imageModel(CTModelHeaderFields),pendingAction(-1) 
+KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction(-1) 
 {
   this->showFullScreen();
-  this->ui = new Ui_SimpleView;
+  this->ui = new Ui_KardioPerfusion;
   this->ui->setupUi(this);
   
   this->ui->treeView->setModel( &imageModel );
    
+  vtkImageData* blank = vtkImageData::New();
+  blank->SetDimensions(10, 10, 1);
+  blank->AllocateScalars();
+  for (int i = 0; i < 10; i++)
+      for (int j = 0; j < 10; j++)
+          blank->SetScalarComponentFromDouble(i, j, 0, 0, 0);
+  blank->Update();
+
   for(int i = 0; i < 4; i++)
   {
 	  m_pViewer[i] = vtkSmartPointer<vtkImageViewer2>::New();
-	  m_pViewer[i]->GetRenderer()->SetBackground(0,0,0);
-	  m_pViewer[i]->Render();
+	  m_pViewer[i]->SetInput(blank);
+	  m_pViewer[i]->GetRenderer()->ResetCamera();
+//	  m_pViewer[i]->GetRenderer()->SetBackground(0,0,0);
+//	  m_pViewer[i]->Render();
   }
-
+  
   this->ui->qvtk_axial->SetRenderWindow(m_pViewer[0]->GetRenderWindow());
+  this->ui->qvtk_sagittal->SetRenderWindow(m_pViewer[1]->GetRenderWindow());
+  this->ui->qvtk_coronal->SetRenderWindow(m_pViewer[2]->GetRenderWindow());
+  this->ui->qvtk_3d->SetRenderWindow(m_pViewer[3]->GetRenderWindow());
+
   // Set up action signals and slots
   connect(this->ui->actionOpenFile, SIGNAL(triggered()), this, SLOT(slotOpenFile()));
   connect(this->ui->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
@@ -136,14 +88,14 @@ SimpleView::SimpleView():imageModel(CTModelHeaderFields),pendingAction(-1)
   
 };
 
-SimpleView::~SimpleView()
+KardioPerfusion::~KardioPerfusion()
 {
   // The smart pointers should clean up
 
 }
 
 // Action to be taken upon file open 
-void SimpleView::slotOpenFile()
+void KardioPerfusion::slotOpenFile()
 {
 /*	QString fname = QFileDialog::getOpenFileName(
     this,
@@ -152,7 +104,7 @@ void SimpleView::slotOpenFile()
     "", 0, QFileDialog::ReadOnly|QFileDialog::HideNameFilterDetails);
 	
 	if (!fname.isEmpty()) {
-		SimpleView::loadFile(fname);
+		KardioPerfusion::loadFile(fname);
 	}
 	*/
 	QStringList fnames = QFileDialog::getOpenFileNames(
@@ -163,7 +115,7 @@ void SimpleView::slotOpenFile()
   setFiles( fnames );
 }
 
-void SimpleView::setFiles(const QStringList &names) {
+void KardioPerfusion::setFiles(const QStringList &names) {
   if (!names.empty()) {
     DicomSelectorDialogPtr selectDialog( new DicomSelectorDialog( this ) );
     selectDialog->setFilesOrDirectories( names );
@@ -171,12 +123,12 @@ void SimpleView::setFiles(const QStringList &names) {
   }
 }
 
-void SimpleView::loadDicomData(DicomSelectorDialogPtr dicomSelector) {
+void KardioPerfusion::loadDicomData(DicomSelectorDialogPtr dicomSelector) {
   dicomSelector->exec();
   dicomSelector->getSelectedImageDataList(imageModel);
 }
 
-void SimpleView::onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
+void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
   int numSelected = this->ui->treeView->selectionModel()->selectedRows().size();
   if (numSelected == 0) 
     this->ui->statusbar->clearMessage();
@@ -184,7 +136,7 @@ void SimpleView::onSelectionChanged(const QItemSelection & selected, const QItem
     this->ui->statusbar->showMessage( QString::number( numSelected ) + tr(" item(s) selected") );
 }
 
-void SimpleView::on_treeView_doubleClicked(const QModelIndex &index) {
+void KardioPerfusion::on_treeView_doubleClicked(const QModelIndex &index) {
   if (index.isValid()) {
     TreeItem &item = imageModel.getItem( index );
     if (item.isA(typeid(CTImageTreeItem))) {
@@ -205,7 +157,7 @@ void SimpleView::on_treeView_doubleClicked(const QModelIndex &index) {
   }
 }
 
-void SimpleView::setImage(const CTImageTreeItem *imageItem) {
+void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
   vtkImageData *vtkImage = NULL;
   CTImageTreeItem::ConnectorHandle connectorPtr;
   if (imageItem) {
@@ -217,8 +169,26 @@ void SimpleView::setImage(const CTImageTreeItem *imageItem) {
       segmentHide( dynamic_cast<const BinaryImageTreeItem*>((*displayedSegments.begin())->getBaseItem()) );
     }*/
     //mprView->setImage( vtkImage );
-	  m_pViewer[0]->SetInput(vtkImage);
-	  
+
+	  for(int i=0;i<3;i++)
+	  {
+		m_pViewer[i]->SetInput(vtkImage);
+		m_pViewer[i]->GetRenderer()->ResetCamera();
+		m_pViewer[i]->SetColorLevel(128);
+		m_pViewer[i]->SetColorWindow(254);
+		m_pViewer[i]->Render();
+	  }
+
+	  m_pViewer[0]->SetSliceOrientationToXY();
+	  m_pViewer[1]->SetSliceOrientationToXZ();
+	  m_pViewer[2]->SetSliceOrientationToYZ();
+
+	  for(int i = 0; i < 3; i++)
+	  {
+		m_pViewer[i]->Render();
+	  }
+
+	  setCustomStyle();
 	//volumeView->setImage( vtkImage );
     if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->clearActiveDown();
     displayedCTImage = connectorPtr;
@@ -226,11 +196,33 @@ void SimpleView::setImage(const CTImageTreeItem *imageItem) {
   }
 }
 
-void SimpleView::slotExit() {
+void KardioPerfusion::setCustomStyle()
+{
+	// An interactor and a style
+    vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor[4];
+
+	vtkSmartPointer<MyTestInteractorStyle> style[3]; 
+
+	//get the output of the itkKWImage in the VTK format
+	for(int i = 0; i < 3; i++)
+	{
+		renderWindowInteractor[i] = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+		style[i] =  vtkSmartPointer<MyTestInteractorStyle>::New();
+		
+		m_pViewer[i]->SetupInteractor(renderWindowInteractor[i]);
+		style[i]->setImageViewer(m_pViewer[i]);
+
+		renderWindowInteractor[i]->SetInteractorStyle(style[i]);
+		style[i]->SetCurrentRenderer(m_pViewer[i]->GetRenderer());		
+	    renderWindowInteractor[i]->Initialize();
+	}
+}
+
+void KardioPerfusion::slotExit() {
   qApp->exit();
 }
 
-void SimpleView::loadFile(QString fname){
+void KardioPerfusion::loadFile(QString fname){
 
 	// define Pixeltype and set dimension
 	typedef signed short PixelType;
@@ -326,13 +318,13 @@ void SimpleView::loadFile(QString fname){
 	// An interactor and a style
     vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor[4];
 
-	vtkSmartPointer<KeyPressInteractorStyle> style[3]; 
+	vtkSmartPointer<MyTestInteractorStyle> style[3]; 
 
 	//get the output of the itkKWImage in the VTK format
 	for(int i = 0; i < 3; i++)
 	{
 		renderWindowInteractor[i] = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-		style[i] =  vtkSmartPointer<KeyPressInteractorStyle>::New();
+		style[i] =  vtkSmartPointer<MyTestInteractorStyle>::New();
 
 		m_pViewer[i]->SetInput(kwImage->GetVTKImage());
 		m_pViewer[i]->SetupInteractor(renderWindowInteractor[i]);

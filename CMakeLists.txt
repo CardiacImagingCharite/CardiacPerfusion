@@ -8,9 +8,11 @@ PROJECT(KardioPerfusion)
 SET( KardioPerfusionSrcs 
 	main/main.cxx 
 	main/KardioPerfusion.cxx
-#	main/KardioPerfusion.h
+	main/KardioPerfusion.h
 	main/dicomselectordialog.cpp
-#	main/dicomselectordialog.h	
+	main/dicomselectordialog.h	
+	main/MyTestInteractorStyle.cxx
+	main/MyTestInteractorStyle.h
 
 	imagetree/ctimagetreemodel.cpp
 	imagetree/dicomtagtype.cpp

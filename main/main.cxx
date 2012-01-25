@@ -23,8 +23,8 @@ int main( int argc, char** argv )
   
   qInitResources_icons();
   
-  SimpleView mySimpleView;
-  mySimpleView.show();
+  KardioPerfusion myKardioPerfusion;
+  myKardioPerfusion.show();
   
   return app.exec();
 }

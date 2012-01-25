@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SimpleView</class>
- <widget class="QMainWindow" name="SimpleView">
+ <class>KardioPerfusion</class>
+ <widget class="QMainWindow" name="KardioPerfusion">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SimpleView</string>
+   <string>KardioPerfusion</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../Icons/icons.qrc">

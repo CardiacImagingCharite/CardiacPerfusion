@@ -32,6 +32,7 @@
 // Forward Qt class declarations
 class Ui_KardioPerfusion;
 class DicomSelectorDialog;
+class MultiPlanarReformatWidget;
 
 class KardioPerfusion : public QMainWindow
 {
@@ -51,13 +52,15 @@ public slots:
   virtual void slotExit();
   void on_treeView_doubleClicked(const QModelIndex &index);
   void onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+  void on_btn_draw_clicked();
+  void treeViewContextMenu(const QPoint &pos);
 
 protected:
-   
+     void clearPendingAction();
 protected slots:
 
 private:
-
+	BinaryImageTreeItem *focusSegmentFromSelection(void);
 	typedef std::auto_ptr<DicomSelectorDialog> DicomSelectorDialogPtr;
 	vtkSmartPointer<vtkImageViewer2> m_pViewer[4];
 
@@ -66,11 +69,17 @@ private:
 
 	void loadDicomData(DicomSelectorDialogPtr dicomSelector);
 	void setImage(const CTImageTreeItem *imageItem);
+	void segmentShow(const BinaryImageTreeItem *segItem );
+	void segmentHide(const BinaryImageTreeItem *segItem );
+	void removeSelectedImages();
 
 	void setCustomStyle();
 
 	CTImageTreeModel imageModel;
 	CTImageTreeItem::ConnectorHandle displayedCTImage;
+
+	typedef std::set< BinaryImageTreeItem::ConnectorHandle > DisplayedSegmentContainer;
+    DisplayedSegmentContainer displayedSegments;
 
 	static const DicomTagList CTModelHeaderFields;
     int pendingAction;

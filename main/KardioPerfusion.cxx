@@ -10,6 +10,8 @@
 #include "ui_KardioPerfusion.h"
 #include "KardioPerfusion.h"
 #include "dicomselectordialog.h"
+#include "qmessagebox.h"
+#include <QtGui>
 
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
@@ -28,6 +30,10 @@
 #include "vtkVolumeProperty.h"
 #include "vtkImageShiftScale.h"
 #include "vtkVolume16Reader.h"
+#include "vtkPolyLine.h"
+#include "vtkPoints.h"
+#include "vtkCellArray.h"
+#include "vtkPolyDataMapper.h"
 
 #include "itkGDCMSeriesFileNames.h"
 #include "itkOrientedImage.h"
@@ -35,6 +41,7 @@
 #include "itkGDCMImageIO.h"
 #include "itkDicomImageIO2.h"
 #include <boost/assign.hpp>
+#include <boost/foreach.hpp>
 
 #include "QFileDialog.h"
 #include "qstring.h"
@@ -51,7 +58,7 @@ const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
 // Constructor
 KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction(-1) 
 {
-  this->showFullScreen();
+  //this->showFullScreen();
   this->ui = new Ui_KardioPerfusion;
   this->ui->setupUi(this);
   
@@ -73,17 +80,15 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 //	  m_pViewer[i]->GetRenderer()->SetBackground(0,0,0);
 //	  m_pViewer[i]->Render();
   }
-  
-  this->ui->qvtk_axial->SetRenderWindow(m_pViewer[0]->GetRenderWindow());
-  this->ui->qvtk_sagittal->SetRenderWindow(m_pViewer[1]->GetRenderWindow());
-  this->ui->qvtk_coronal->SetRenderWindow(m_pViewer[2]->GetRenderWindow());
-  this->ui->qvtk_3d->SetRenderWindow(m_pViewer[3]->GetRenderWindow());
 
   // Set up action signals and slots
   connect(this->ui->actionOpenFile, SIGNAL(triggered()), this, SLOT(slotOpenFile()));
   connect(this->ui->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
   connect(this->ui->treeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
 	   this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
+  connect( this->ui->treeView, SIGNAL( customContextMenuRequested(const QPoint &) ),
+    this, SLOT( treeViewContextMenu(const QPoint &) ) );
+
 
   
 };
@@ -145,7 +150,7 @@ void KardioPerfusion::on_treeView_doubleClicked(const QModelIndex &index) {
       } else {
 	setImage( dynamic_cast<CTImageTreeItem*>(&item) );
       }
-    }/* else if (item.isA(typeid(BinaryImageTreeItem))) {
+    } else if (item.isA(typeid(BinaryImageTreeItem))) {
       BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item);
       if (displayedSegments.find( SegItem->getVTKConnector() )==displayedSegments.end()) {
 	segmentShow( SegItem );
@@ -153,7 +158,6 @@ void KardioPerfusion::on_treeView_doubleClicked(const QModelIndex &index) {
 	segmentHide( SegItem );
       }
     }
-	*/
   }
 }
 
@@ -165,12 +169,12 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
     vtkImage = connectorPtr->getVTKImageData();
   }
   if (connectorPtr != displayedCTImage) {
-   /* while(!displayedSegments.empty()) {
+    while(!displayedSegments.empty()) {
       segmentHide( dynamic_cast<const BinaryImageTreeItem*>((*displayedSegments.begin())->getBaseItem()) );
-    }*/
-    //mprView->setImage( vtkImage );
+    }
+    this->ui->mprView->setImage( vtkImage );
 
-	  for(int i=0;i<3;i++)
+/*	  for(int i=0;i<3;i++)
 	  {
 		m_pViewer[i]->SetInput(vtkImage);
 		m_pViewer[i]->GetRenderer()->ResetCamera();
@@ -178,6 +182,8 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 		m_pViewer[i]->SetColorWindow(254);
 		m_pViewer[i]->Render();
 	  }
+
+
 
 	  m_pViewer[0]->SetSliceOrientationToXY();
 	  m_pViewer[1]->SetSliceOrientationToXZ();
@@ -189,12 +195,14 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 	  }
 
 	  setCustomStyle();
+	  */
 	//volumeView->setImage( vtkImage );
     if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->clearActiveDown();
     displayedCTImage = connectorPtr;
     if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->setActive();
   }
 }
+
 
 void KardioPerfusion::setCustomStyle()
 {
@@ -213,15 +221,140 @@ void KardioPerfusion::setCustomStyle()
 		style[i]->setImageViewer(m_pViewer[i]);
 
 		renderWindowInteractor[i]->SetInteractorStyle(style[i]);
-		style[i]->SetCurrentRenderer(m_pViewer[i]->GetRenderer());		
+		style[i]->SetCurrentRenderer(m_pViewer[i]->GetRenderer());	
+
 	    renderWindowInteractor[i]->Initialize();
 	}
+}
+
+void KardioPerfusion::on_btn_draw_clicked()
+{
+  BinaryImageTreeItem *seg = focusSegmentFromSelection();
+  if (seg)
+    this->ui->mprView->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
 }
 
 void KardioPerfusion::slotExit() {
   qApp->exit();
 }
 
+BinaryImageTreeItem *KardioPerfusion::focusSegmentFromSelection(void) {
+  clearPendingAction();
+  QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
+  if (selectedIndex.size() != 1) {
+    QMessageBox::warning(this,tr("Segment Error"),tr("Select one volume to edit"));
+    return NULL;
+  }
+  if (selectedIndex[0].isValid()) {
+    TreeItem *item = &imageModel.getItem( selectedIndex[0] );
+    if (item->isA(typeid(CTImageTreeItem))) {
+      CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>(item);
+      if (ctitem != displayedCTImage->getBaseItem())
+	setImage( ctitem );
+      if (ctitem->childCount() == 0) {
+	item = ctitem->generateSegment();
+      } else if (ctitem->childCount()==1) {
+	item = &ctitem->child(0);
+      } else {
+	QMessageBox::warning(this,tr("Segment Error"),tr("Choose the segment to edit"));
+	return  NULL;
+      }
+    }
+    if (item->isA(typeid(BinaryImageTreeItem))) {
+      BinaryImageTreeItem *seg = dynamic_cast<BinaryImageTreeItem*>(item);
+      segmentShow(seg);
+      return seg;
+    }
+  }
+  return NULL;
+}
+
+void KardioPerfusion::clearPendingAction() {
+  if (pendingAction != -1) {
+    this->ui->mprView->removeAction( pendingAction );
+    pendingAction = -1;
+  }
+}
+
+void KardioPerfusion::segmentShow( const BinaryImageTreeItem *segItem ) {
+  if (segItem) {
+    if (displayedCTImage && displayedCTImage->getBaseItem() != segItem->parent()) {
+      setImage(dynamic_cast<const CTImageTreeItem*>(segItem->parent()));
+    }
+    ActionDispatch overlayAction(std::string("draw sphere on ") + segItem->getName().toAscii().data(), 
+      boost::bind(&BinaryImageTreeItem::drawSphere, const_cast<BinaryImageTreeItem*>(segItem), 
+        boost::bind( &QSpinBox::value, this->ui->sb_size ),
+        _3, _4, _5,
+        boost::bind( &QCheckBox::checkState, this->ui->cb_erase )
+      ),
+      ActionDispatch::ClickingAction, ActionDispatch::UnRestricted );
+    BinaryImageTreeItem::ConnectorHandle segmentConnector = segItem->getVTKConnector();
+    this->ui->mprView->addBinaryOverlay( segmentConnector->getVTKImageData(), segItem->getColor(), overlayAction);
+    displayedSegments.insert( segmentConnector );
+    segItem->setActive();
+  }
+}
+
+void KardioPerfusion::treeViewContextMenu(const QPoint &pos) {
+  QModelIndex idx = this->ui->treeView->indexAt(pos);
+  QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
+  if (indexList.count()>0) {
+    QMenu cm;
+    if (indexList.count() == 1) {
+      TreeItem &item = imageModel.getItem(indexList[0]);
+      if (item.isA(typeid(CTImageTreeItem))) {
+	QAction* addSegAction = cm.addAction("&Add Segment");
+	connect( addSegAction, SIGNAL( triggered() ),
+	  this, SLOT( createSegmentForSelectedImage())  );
+      } else if (item.isA(typeid(BinaryImageTreeItem))) {
+	QAction* addSegAction = cm.addAction("&Change Color");
+	connect( addSegAction, SIGNAL( triggered() ),
+	  this, SLOT( changeColorForSelectedSegment())  );
+/*	if (item.isA(typeid(WatershedSegmentTreeItem))) {
+	  QAction* setupAction = cm.addAction("&Setup");
+	  connect( setupAction, SIGNAL( triggered() ),
+	    this, SLOT( setupSelectedWatershedSegment())  );
+	  QAction* updateAction = cm.addAction("&Update");
+	  connect( updateAction, SIGNAL( triggered() ),
+	    this, SLOT( updateSelectedWatershedSegment())  );
+	} */
+      }
+    }
+    QAction* addSegAction = cm.addAction("&Delete");
+    connect( addSegAction, SIGNAL( triggered() ),
+      this, SLOT( removeSelectedImages()  ) );
+    cm.exec(this->ui->treeView->mapToGlobal(pos));
+  }
+}
+
+void KardioPerfusion::removeSelectedImages() {
+  QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
+  BOOST_FOREACH( const QModelIndex &idx, indexList) {
+    TreeItem &remitem = imageModel.getItem( idx );
+    if (remitem.isA(typeid(CTImageTreeItem))) {
+      CTImageTreeItem *remitemPtr = dynamic_cast<CTImageTreeItem*>(&remitem);
+      if (displayedCTImage && displayedCTImage->getBaseItem() == remitemPtr) {
+	setImage(NULL);
+      }
+    } else if (remitem.isA(typeid(BinaryImageTreeItem))) {
+      BinaryImageTreeItem *remitemPtr = dynamic_cast<BinaryImageTreeItem*>(&remitem);
+      segmentHide( remitemPtr );
+    }
+    imageModel.removeItem( idx );
+  }
+}
+
+void KardioPerfusion::segmentHide( const BinaryImageTreeItem *segItem ) {
+  if (segItem) {
+    clearPendingAction();
+    DisplayedSegmentContainer::const_iterator it = displayedSegments.find( segItem->getVTKConnector() );
+    if (it != displayedSegments.end()) {
+      this->ui->mprView->removeBinaryOverlay( (*it)->getVTKImageData() );
+      displayedSegments.erase( it );
+    }
+    segItem->setActive(false);
+  }
+}
 void KardioPerfusion::loadFile(QString fname){
 
 	// define Pixeltype and set dimension
@@ -340,17 +473,17 @@ void KardioPerfusion::loadFile(QString fname){
 	
 	 //set the imageviewers to the specific Widgets
 	m_pViewer[0]->SetSliceOrientationToXY();
-	this->ui->qvtk_axial->SetRenderWindow(m_pViewer[0]->GetRenderWindow());
+//	this->ui->qvtk_axial->SetRenderWindow(m_pViewer[0]->GetRenderWindow());
 	m_pViewer[0]->Render();
 	renderWindowInteractor[0]->Initialize();
 
 	m_pViewer[1]->SetSliceOrientationToXZ();
-	this->ui->qvtk_sagittal->SetRenderWindow(m_pViewer[1]->GetRenderWindow());
+//	this->ui->qvtk_sagittal->SetRenderWindow(m_pViewer[1]->GetRenderWindow());
 	m_pViewer[1]->Render();
 	renderWindowInteractor[1]->Initialize();
 
 	m_pViewer[2]->SetSliceOrientationToYZ();
-	this->ui->qvtk_coronal->SetRenderWindow(m_pViewer[2]->GetRenderWindow());
+//	this->ui->qvtk_coronal->SetRenderWindow(m_pViewer[2]->GetRenderWindow());
 	m_pViewer[2]->Render();
 	renderWindowInteractor[2]->Initialize();
 
@@ -464,7 +597,7 @@ void KardioPerfusion::loadFile(QString fname){
 
   // Increase the size of the render window
   //renWin->SetSize(640, 480);
-  this->ui->qvtk_3d->SetRenderWindow(renWin);
+//  this->ui->qvtk_3d->SetRenderWindow(renWin);
   // Interact with the data.
   iren->Initialize();
 }

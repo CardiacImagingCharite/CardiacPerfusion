@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1273</width>
-    <height>1085</height>
+    <width>1143</width>
+    <height>877</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,52 +24,6 @@
    </size>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QVTKWidget" name="qvtk_axial">
-    <property name="geometry">
-     <rect>
-      <x>775</x>
-      <y>0</y>
-      <width>500</width>
-      <height>500</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QVTKWidget" name="qvtk_sagittal">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>0</y>
-      <width>500</width>
-      <height>500</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QVTKWidget" name="qvtk_coronal">
-    <property name="geometry">
-     <rect>
-      <x>775</x>
-      <y>505</y>
-      <width>500</width>
-      <height>500</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QVTKWidget" name="qvtk_3d">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>505</y>
-      <width>500</width>
-      <height>500</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
@@ -99,13 +53,87 @@
      <set>QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
     </property>
    </widget>
+   <widget class="QPushButton" name="btn_draw">
+    <property name="geometry">
+     <rect>
+      <x>5</x>
+      <y>310</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Draw</string>
+    </property>
+   </widget>
+   <widget class="MultiPlanarReformatWidget" name="mprView" native="true">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>20</y>
+      <width>851</width>
+      <height>751</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <horstretch>5</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="sb_size">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>340</y>
+      <width>42</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>5</number>
+    </property>
+    <property name="maximum">
+     <number>50</number>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="cb_erase">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>310</y>
+      <width>70</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>erase</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>344</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Size:</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1273</width>
+     <width>1143</width>
      <height>21</height>
     </rect>
    </property>
@@ -197,13 +225,33 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QVTKWidget</class>
-   <extends>QWidget</extends>
-   <header>QVTKWidget.h</header>
+   <class>MultiPlanarReformatWidget</class>
+   <extends></extends>
+   <header>multiplanarreformatwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>
   <include location="../Icons/icons.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btn_draw</sender>
+   <signal>clicked()</signal>
+   <receiver>KardioPerfusion</receiver>
+   <slot>on_btn_draw_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>117</x>
+     <y>405</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>120</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>on_btn_draw_clicked()</slot>
+ </slots>
 </ui>

@@ -23,6 +23,12 @@ SET( KardioPerfusionSrcs
 	imagetree/itkvtktreeitem.cpp 
 	imagetree/segmentationvalues.cpp
 
+	vtkwidgets/vtkbinaryimagetocolor.cpp 
+	vtkwidgets/vtkbinaryimageoverlay.cpp 
+#	vtkwidgets/interactorstylevolumeview.cpp 
+	vtkwidgets/multiplanarreformatwidget.cpp 
+	vtkwidgets/vtkinteractorstyleprojectionview.cpp 
+#	vtkwidgets/volumeprojectionwidget.cpp 
 #	serialization/ctimagetreemodel_serializer.cpp 
 )
 
@@ -48,7 +54,7 @@ SET( HeaderDirs
 	imagetree
 #	serialization
 	misc
-#	vtkwidgets
+	vtkwidgets
 )
 
 

@@ -53,7 +53,10 @@ public slots:
   void on_treeView_doubleClicked(const QModelIndex &index);
   void onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
   void on_btn_draw_clicked();
+  void on_btn_regionGrow_clicked();
   void treeViewContextMenu(const QPoint &pos);
+  void createSegmentForSelectedImage();
+  void changeColorForSelectedSegment();
 
 protected:
      void clearPendingAction();

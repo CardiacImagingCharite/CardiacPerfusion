@@ -234,6 +234,24 @@ void KardioPerfusion::on_btn_draw_clicked()
     this->ui->mprView->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
 }
 
+void KardioPerfusion::on_btn_regionGrow_clicked()
+{
+	int threshold = this->ui->sb_regionGrowThreshold->value();
+
+	BinaryImageTreeItem *seg = focusSegmentFromSelection();
+
+    if (seg) {
+      ActionDispatch regionGrowAction(std::string("click to region grow inside ") + seg->getName().toAscii().data(), 
+        boost::bind(&BinaryImageTreeItem::regionGrow, seg, 
+		_3, _4, _5, threshold,
+          boost::function<void()>(boost::bind(&KardioPerfusion::clearPendingAction, this))
+        ),
+        ActionDispatch::ClickingAction, ActionDispatch::UnRestricted );
+      pendingAction = this->ui->mprView->addAction(regionGrowAction);
+      this->ui->mprView->activateAction(pendingAction);
+    }
+}
+
 void KardioPerfusion::slotExit() {
   qApp->exit();
 }
@@ -355,6 +373,31 @@ void KardioPerfusion::segmentHide( const BinaryImageTreeItem *segItem ) {
     segItem->setActive(false);
   }
 }
+
+void KardioPerfusion::createSegmentForSelectedImage() {
+  QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
+  if (indexList.count() == 1) {
+    TreeItem &item = imageModel.getItem(indexList[0]);
+    if (item.isA(typeid(CTImageTreeItem))) {
+      dynamic_cast<CTImageTreeItem&>(item).generateSegment();
+    }
+  }
+}
+
+void KardioPerfusion::changeColorForSelectedSegment() {
+  QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
+  if (indexList.count() == 1) {
+    TreeItem &item = imageModel.getItem(indexList[0]);
+    if (item.isA(typeid(BinaryImageTreeItem))) {
+      BinaryImageTreeItem &binItem = dynamic_cast<BinaryImageTreeItem&>(item);
+      QColor color = binItem.getColor();
+      color = QColorDialog::getColor(color, this, tr("Choose new Segment Color for ") + binItem.getName());
+      if (color.isValid())
+	binItem.setColor(color);
+    }
+  }
+}
+
 void KardioPerfusion::loadFile(QString fname){
 
 	// define Pixeltype and set dimension

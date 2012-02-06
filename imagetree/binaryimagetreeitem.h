@@ -39,7 +39,7 @@ class BinaryImageTreeItem : public ITKVTKTreeItem< BinaryImageType > {
     const QString &getName() const { return name; }
     void setName(const QString &_name) { name = _name; }
     void drawSphere( float radius, float x, float y, float z, bool erase );
-    void regionGrow( float x, float y, float z, boost::function<void()> postGrowingAction);
+    void regionGrow( float x, float y, float z, int threshold, boost::function<void()> postGrowingAction);
     const QColor &getColor() const { return color;}
     void setColor(const QColor &newColor) { color = newColor; }
     void thresholdParent(double lower, double upper);

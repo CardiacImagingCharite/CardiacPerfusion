@@ -127,7 +127,47 @@ void BinaryImageTreeItem::drawSphere( float radius, float x, float y, float z, b
   dynamic_cast<ConnectorData*>(getVTKConnector().get())->getConnector()->Modified();
 }
 
-void BinaryImageTreeItem::regionGrow( float x, float y, float z, boost::function<void()> clearAction) {
+void BinaryImageTreeItem::regionGrow( float x, float y, float z, int threshold, boost::function<void()> clearAction) {
+  
+/*	CTImageTreeItem::ImageType::Pointer parentImagePointer = dynamic_cast<CTImageTreeItem*>(parent())->getITKImage();
+  typedef itk::BinaryThresholdImageFilter< CTImageType, BinaryImageType > ThresholdFilterType;
+  ThresholdFilterType::Pointer filter = ThresholdFilterType::New();
+  filter->SetInput( parentImagePointer );
+  filter->SetLowerThreshold( 500 );
+  filter->SetUpperThreshold( 1000 );
+  filter->SetInsideValue( BinaryPixelOn );
+  filter->SetOutsideValue( BinaryPixelOff );
+  filter->Update();
+  ImageType::Pointer result = filter->GetOutput();
+  setITKImage( result );
+ */
+  ImageType::IndexType idx;
+  ImageType::PointType point;
+  point[0] = x;point[1] = y;point[2] = z;
+  //ImageType::Pointer itkIm = getITKImage();
+  CTImageTreeItem::ImageType::Pointer parentImagePointer = dynamic_cast<CTImageTreeItem*>(parent())->getITKImage();
+  if (parentImagePointer.IsNull()) return;
+  parentImagePointer->TransformPhysicalPointToIndex(point, idx);
+  ImageType::PixelType p = parentImagePointer->GetPixel(idx);
+  //if (p == BinaryPixelOn) {
+    typedef itk::ConnectedThresholdImageFilter< CTImageType, BinaryImageType > RegionGrowFilterType;
+    RegionGrowFilterType::Pointer filter = RegionGrowFilterType::New();
+    filter->SetInput( parentImagePointer );
+    filter->SetLower(p-(threshold/2));
+    filter->SetUpper(p+(threshold/2));
+    filter->SetReplaceValue(BinaryPixelOn);
+    filter->SetSeed(idx);
+    filter->Update();
+    ImageType::Pointer result = filter->GetOutput();
+    setITKImage( result );
+    clearAction();
+  //} else {
+  //  QMessageBox::information(0,QObject::tr("Region Grow Error"),QObject::tr("Click on a part of the segmentation"));
+  //}
+	
+}
+
+/*void BinaryImageTreeItem::regionGrow( float x, float y, float z, boost::function<void()> clearAction) {
   ImageType::IndexType idx;
   ImageType::PointType point;
   point[0] = x;point[1] = y;point[2] = z;
@@ -151,6 +191,8 @@ void BinaryImageTreeItem::regionGrow( float x, float y, float z, boost::function
     QMessageBox::information(0,QObject::tr("Region Grow Error"),QObject::tr("Click on a part of the segmentation"));
   }
 }
+*/
+
 
 
 void BinaryImageTreeItem::thresholdParent(double lower, double upper) {
@@ -219,8 +261,6 @@ double BinaryImageTreeItem::getVolumeInML(void) const {
   }
   return volumeInML;
 }
-
-
 
 
 void BinaryImageTreeItem::createRandomColor() {

@@ -26,40 +26,50 @@
 #include <itkBinaryErodeImageFilter.h>
 #include <itkBinaryBallStructuringElement.h>
 #include <itkConnectedThresholdImageFilter.h>
+#include <itkRecursiveGaussianImageFilter.h>
+#include <itkCannyEdgeDetectionImageFilter.h>
+#include <itkCastImageFilter.h>
+#include <itkSliceBySliceImageFilter.h>
 
 #include <QMessageBox>
 
+// Constructor, which takes its parent, an Image and a name
 BinaryImageTreeItem::BinaryImageTreeItem(TreeItem * parent, ImageType::Pointer itkImage, const QString &name)
   :BaseClass(parent, itkImage), name(name), volumeMtime(0) {
     imageKeeper = getVTKConnector();
     createRandomColor();
 }
 
+//clones an existing TreeItem
 TreeItem *BinaryImageTreeItem::clone(TreeItem *clonesParent) const {
   BinaryImageTreeItem *c = new BinaryImageTreeItem(clonesParent, peekITKImage(), name );
   cloneChildren(c);
   return c;
 }
 
+//returns the number of columns (always 1, cause there is only the name of the Item)
 int BinaryImageTreeItem::columnCount() const {
   return 1;
 }
+
+//returns the name of the TreeItem
 QVariant BinaryImageTreeItem::do_getData_DisplayRole(int c) const {
   if (c==0) return name;
   else return QVariant::Invalid;
 }
 
+//returns the color of the TreeItem
 QVariant BinaryImageTreeItem::do_getData_BackgroundRole(int column) const {
   return QBrush( color );
 }
 
-
+//returns the properties of a TreeItem
 Qt::ItemFlags BinaryImageTreeItem::flags(int column) const {
     if (column != 0) return Qt::NoItemFlags;
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;  
 }
 
-
+//sets the name of the TreeItem for column 0 and return true, if succeed
 bool BinaryImageTreeItem::setData(int c, const QVariant &value) {
   if (c==0 && static_cast<QMetaType::Type>(value.type()) == QMetaType::QString) {
     name = value.toString();
@@ -73,6 +83,7 @@ inline T clip(T min, T val, T max) {
   return std::max<T>( std::min<T>( val, max), min );
 }
 
+//draws a sphere with a given radius at a specific position (or erases it)
 void BinaryImageTreeItem::drawSphere( float radius, float x, float y, float z, bool erase ) {
   itk::ContinuousIndex< double, ImageDimension > idx;
   ImageType::PointType point;
@@ -127,20 +138,9 @@ void BinaryImageTreeItem::drawSphere( float radius, float x, float y, float z, b
   dynamic_cast<ConnectorData*>(getVTKConnector().get())->getConnector()->Modified();
 }
 
+//applies a regionGrow algorithm from a given seed with a specific threshold to the parent image
 void BinaryImageTreeItem::regionGrow( float x, float y, float z, int threshold, boost::function<void()> clearAction) {
   
-/*	CTImageTreeItem::ImageType::Pointer parentImagePointer = dynamic_cast<CTImageTreeItem*>(parent())->getITKImage();
-  typedef itk::BinaryThresholdImageFilter< CTImageType, BinaryImageType > ThresholdFilterType;
-  ThresholdFilterType::Pointer filter = ThresholdFilterType::New();
-  filter->SetInput( parentImagePointer );
-  filter->SetLowerThreshold( 500 );
-  filter->SetUpperThreshold( 1000 );
-  filter->SetInsideValue( BinaryPixelOn );
-  filter->SetOutsideValue( BinaryPixelOff );
-  filter->Update();
-  ImageType::Pointer result = filter->GetOutput();
-  setITKImage( result );
- */
   ImageType::IndexType idx;
   ImageType::PointType point;
   point[0] = x;point[1] = y;point[2] = z;
@@ -150,9 +150,15 @@ void BinaryImageTreeItem::regionGrow( float x, float y, float z, int threshold, 
   parentImagePointer->TransformPhysicalPointToIndex(point, idx);
   ImageType::PixelType p = parentImagePointer->GetPixel(idx);
   //if (p == BinaryPixelOn) {
-    typedef itk::ConnectedThresholdImageFilter< CTImageType, BinaryImageType > RegionGrowFilterType;
+
+  typedef itk::RecursiveGaussianImageFilter< CTImageType, CTImageType > denoiseFilterType;
+  denoiseFilterType::Pointer denoiseFilter = denoiseFilterType::New();
+  denoiseFilter->SetSigma(4.0);
+  denoiseFilter->SetInput(parentImagePointer);
+
+  typedef itk::ConnectedThresholdImageFilter< CTImageType, BinaryImageType > RegionGrowFilterType;
     RegionGrowFilterType::Pointer filter = RegionGrowFilterType::New();
-    filter->SetInput( parentImagePointer );
+	filter->SetInput( denoiseFilter->GetOutput() );
     filter->SetLower(p-(threshold/2));
     filter->SetUpper(p+(threshold/2));
     filter->SetReplaceValue(BinaryPixelOn);
@@ -193,8 +199,41 @@ void BinaryImageTreeItem::regionGrow( float x, float y, float z, int threshold, 
 }
 */
 
+//applies a canny edge filter to the parent image
+void BinaryImageTreeItem::extractEdges()
+{
 
+	CTImageTreeItem::ImageType::Pointer parentImagePointer = dynamic_cast<CTImageTreeItem*>(parent())->getITKImage();
+	typedef itk::CastImageFilter<
+               CTImageType, RealImageType >  CT2Real;
+	typedef itk::CastImageFilter<
+			   RealImageType, LabelImageType>  Real2Labeled;
 
+	CT2Real::Pointer ct2realFilter = CT2Real::New();
+	Real2Labeled::Pointer real2LabeledFilter = Real2Labeled::New();
+	ct2realFilter->SetInput(parentImagePointer);
+
+	typedef itk::SliceBySliceImageFilter<RealImageType, RealImageType> SlicerType;
+	SlicerType::Pointer sliceFilter = SlicerType::New();
+	sliceFilter->SetInput(ct2realFilter->GetOutput());
+
+	typedef itk::CannyEdgeDetectionImageFilter< SlicerType::InternalInputImageType,
+												SlicerType::InternalOutputImageType> EdgeFilterType;
+	EdgeFilterType::Pointer filter = EdgeFilterType::New();
+	//filter->SetInput(ct2realFilter->GetOutput());
+	filter->SetVariance(2.0);
+	filter->SetLowerThreshold(30.0);
+	filter->SetUpperThreshold(50.0);
+
+	sliceFilter->SetFilter(filter);
+
+	real2LabeledFilter->SetInput(sliceFilter->GetOutput());
+	ImageType::Pointer result = real2LabeledFilter->GetOutput();
+	setITKImage(result);
+	
+}
+
+//applies a threshold filter with given borders to the parent image
 void BinaryImageTreeItem::thresholdParent(double lower, double upper) {
   CTImageTreeItem::ImageType::Pointer parentImagePointer = dynamic_cast<CTImageTreeItem*>(parent())->getITKImage();
   typedef itk::BinaryThresholdImageFilter< CTImageType, BinaryImageType > ThresholdFilterType;
@@ -209,6 +248,7 @@ void BinaryImageTreeItem::thresholdParent(double lower, double upper) {
   setITKImage( result );
 }
 
+//dilates the binary overlay image with a given number of iteration
 void BinaryImageTreeItem::binaryDilate(int iterations) {
   ImageType::Pointer itkIm = getITKImage();
   if (itkIm.IsNull()) return;
@@ -227,6 +267,7 @@ void BinaryImageTreeItem::binaryDilate(int iterations) {
   setITKImage( result );
 }
 
+//erodes the binary overlay image with a given number of iteration
 void BinaryImageTreeItem::binaryErode(int iterations) {
   ImageType::Pointer itkIm = getITKImage();
   if (itkIm.IsNull()) return;
@@ -245,6 +286,7 @@ void BinaryImageTreeItem::binaryErode(int iterations) {
   setITKImage( result );
 }
 
+
 double BinaryImageTreeItem::getVolumeInML(void) const {
   ImageType::Pointer itkIm = getITKImage();
   if (itkIm.IsNull()) return -1;
@@ -262,7 +304,7 @@ double BinaryImageTreeItem::getVolumeInML(void) const {
   return volumeInML;
 }
 
-
+//creates a random color for the overlay
 void BinaryImageTreeItem::createRandomColor() {
   static boost::mt19937 rng;
   static boost::uniform_int<> rainbow(0,256*6);

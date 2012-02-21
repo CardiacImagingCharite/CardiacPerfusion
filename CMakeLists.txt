@@ -14,6 +14,32 @@ SET( KardioPerfusionSrcs
 	main/MyTestInteractorStyle.cxx
 	main/MyTestInteractorStyle.h
 
+	analyse/tacdialog.cpp
+	analyse/tacdialog.h
+	analyse/timedensitydata.cpp
+	analyse/timedensitydata.h	
+#	analyse/timedensitydatapicker.cpp
+#	analyse/timedensitydatapicker.h
+#	analyse/segmentselectbutton.cpp
+#	analyse/segmentselectbutton.h
+	analyse/segmentlistmodel.cpp
+	analyse/segmentlistmodel.h
+	analyse/segmentinfo.cpp
+	analyse/segmentinfo.h
+	analyse/linearregressiondata.cpp
+	analyse/linearregressiondata.h
+	analyse/linearregression.h
+	analyse/gammafitdata.cpp
+	analyse/gammafitdata.h
+	analyse/gammaVariate.cpp
+	analyse/gammaVariate.h
+	analyse/patlakdata.cpp
+	analyse/patlakdata.h
+#	analyse/SamplePoint.cxx
+#	analyse/SamplePoint.h
+
+
+
 	imagetree/ctimagetreemodel.cpp
 	imagetree/dicomtagtype.cpp
 	imagetree/vtkconnectordatabase.cpp
@@ -35,13 +61,15 @@ SET( KardioPerfusionSrcs
 SET( KardioPerfusionUI 
 	main/KardioPerfusion.ui
 	main/DicomSelectDialog.ui
+	analyse/TacDialog.ui
 )
 
 SET( KardioPerfusionHeaders
 	main/KardioPerfusion.h
 	main/dicomselectordialog.h
-
+	analyse/tacdialog.h
 	imagetree/ctimagetreemodel.h
+#	analyse/segmentselectbutton.h
 )
 
 SET( KardioPerfusionResources 
@@ -50,12 +78,20 @@ SET( KardioPerfusionResources
 
 SET( HeaderDirs
 	main
-#	analyse
+	analyse
 	imagetree
 #	serialization
 	misc
 	vtkwidgets
 )
+
+FIND_PATH(QWT_INCLUDE_DIR qwt.h)
+FIND_PATH(QWT_LIBRARY_DIR libqwt.so)
+IF(WIN32)
+  SET(QWT_LIBRARIES qwt)
+ELSE(WIN32)
+  SET(QWT_LIBRARIES qwt)
+ENDIF(WIN32)
 
 
 #Find VTK directory
@@ -111,7 +147,7 @@ INCLUDE_DIRECTORIES(
   ${QT_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_QTCORE_INCLUDE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
-  
+  ${QWT_INCLUDE_DIR}
   ${ITK_APPS}/Auxiliary/vtk
   ${HeaderDirs}
 )
@@ -119,6 +155,7 @@ INCLUDE_DIRECTORIES(
 LINK_DIRECTORIES(
  ${Boost_LIBRARY_DIRS}
  ${GDCM_LIBRARY_DIRS}
+ ${QWT_LIBRARY_DIR}
  ${ITK_APPS_LIB}/VolviewPlugIns/bin/Debug
 )
 
@@ -169,6 +206,7 @@ TARGET_LINK_LIBRARIES( KardioPerfusion
   vtkViews
   ${GDCM_LIBRARIES}
   ${Boost_LIBRARIES}
+  ${QWT_LIBRARIES}
   vtkHybrid
   vtkImaging 
   vtkFiltering

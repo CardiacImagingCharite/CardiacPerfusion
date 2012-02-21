@@ -10,43 +10,45 @@
 #include "ui_KardioPerfusion.h"
 #include "KardioPerfusion.h"
 #include "dicomselectordialog.h"
+#include "tacdialog.h"
+
 #include "qmessagebox.h"
 #include <QtGui>
 
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
-#include <vtkVectorText.h>
+//#include <vtkRenderer.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkVectorText.h>
 #include "vtkSmartPointer.h"
-#include "vtkKWImage.h"
-#include "vtkImageData.h"
-#include "vtkCamera.h"
-#include "vtkInteractorStyleTrackballCamera.h"
-#include "vtkObjectFactory.h"
-#include "vtkDICOMImageReader.h"
-#include "vtkVolumeRayCastCompositeFunction.h"
-#include "vtkVolumeRayCastMapper.h"
-#include "vtkColorTransferFunction.h"
-#include "vtkPiecewiseFunction.h"
-#include "vtkVolumeProperty.h"
-#include "vtkImageShiftScale.h"
-#include "vtkVolume16Reader.h"
-#include "vtkPolyLine.h"
-#include "vtkPoints.h"
-#include "vtkCellArray.h"
-#include "vtkPolyDataMapper.h"
+//#include "vtkKWImage.h"
+//#include "vtkImageData.h"
+//#include "vtkCamera.h"
+//#include "vtkInteractorStyleTrackballCamera.h"
+//#include "vtkObjectFactory.h"
+//#include "vtkDICOMImageReader.h"
+//#include "vtkVolumeRayCastCompositeFunction.h"
+//#include "vtkVolumeRayCastMapper.h"
+//#include "vtkColorTransferFunction.h"
+//#include "vtkPiecewiseFunction.h"
+//#include "vtkVolumeProperty.h"
+//#include "vtkImageShiftScale.h"
+//#include "vtkVolume16Reader.h"
+//#include "vtkPolyLine.h"
+//#include "vtkPoints.h"
+//#include "vtkCellArray.h"
+//#include "vtkPolyDataMapper.h"
 
-#include "itkGDCMSeriesFileNames.h"
-#include "itkOrientedImage.h"
-#include "itkImageSeriesReader.h"
-#include "itkGDCMImageIO.h"
-#include "itkDicomImageIO2.h"
+//#include "itkGDCMSeriesFileNames.h"
+//#include "itkOrientedImage.h"
+//#include "itkImageSeriesReader.h"
+//#include "itkGDCMImageIO.h"
+//#include "itkDicomImageIO2.h"
 #include <boost/assign.hpp>
 #include <boost/foreach.hpp>
 
 #include "QFileDialog.h"
 #include "qstring.h"
 
-#include "MyTestInteractorStyle.h"
+//#include "MyTestInteractorStyle.h"
 
 vtkStandardNewMacro(MyTestInteractorStyle);
 
@@ -72,7 +74,7 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
           blank->SetScalarComponentFromDouble(i, j, 0, 0, 0);
   blank->Update();
 
-  for(int i = 0; i < 4; i++)
+/*  for(int i = 0; i < 4; i++)
   {
 	  m_pViewer[i] = vtkSmartPointer<vtkImageViewer2>::New();
 	  m_pViewer[i]->SetInput(blank);
@@ -80,7 +82,7 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 //	  m_pViewer[i]->GetRenderer()->SetBackground(0,0,0);
 //	  m_pViewer[i]->Render();
   }
-
+  */
   // Set up action signals and slots
   connect(this->ui->actionOpenFile, SIGNAL(triggered()), this, SLOT(slotOpenFile()));
   connect(this->ui->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
@@ -204,7 +206,7 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 }
 
 
-void KardioPerfusion::setCustomStyle()
+/*void KardioPerfusion::setCustomStyle()
 {
 	// An interactor and a style
     vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor[4];
@@ -226,6 +228,7 @@ void KardioPerfusion::setCustomStyle()
 	    renderWindowInteractor[i]->Initialize();
 	}
 }
+*/
 
 void KardioPerfusion::on_btn_draw_clicked()
 {
@@ -250,6 +253,69 @@ void KardioPerfusion::on_btn_regionGrow_clicked()
       pendingAction = this->ui->mprView->addAction(regionGrowAction);
       this->ui->mprView->activateAction(pendingAction);
     }
+}
+
+void KardioPerfusion::on_btn_erode_clicked()
+{
+	BinaryImageTreeItem *seg = focusSegmentFromSelection();
+    if (seg) {
+		bool ok;
+		int iterations = QInputDialog::getInt(this,tr("Interations"), tr("Enter number of erosion iterations"),
+		  1, 1, 100, 1, &ok);
+		if (!ok) return;
+		seg->binaryErode(iterations);
+		this->ui->mprView->update();
+	}
+}
+
+void KardioPerfusion::on_btn_dilate_clicked()
+{
+   BinaryImageTreeItem *seg = focusSegmentFromSelection();
+   if (seg) {
+		bool ok;
+		int iterations = QInputDialog::getInt(this,tr("Interations"), tr("Enter number of dilation iterations"),
+		  1, 1, 100, 1, &ok);
+		if (!ok) return;
+		seg->binaryDilate(iterations);
+		this->ui->mprView->update();
+  }
+}
+
+void KardioPerfusion::on_btn_cannyEdges_clicked()
+{
+	BinaryImageTreeItem *seg = focusSegmentFromSelection();
+   if (seg) {
+	   seg->extractEdges();
+	   this->ui->mprView->update();
+   }
+   
+}
+
+void KardioPerfusion::on_btn_analyse_clicked()
+{
+	TacDialog myDia(this);
+  QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
+  for(QModelIndexList::Iterator index = selectedIndex.begin(); index != selectedIndex.end(); ++index) {
+    if (index->isValid()) {
+      TreeItem *item = &imageModel.getItem( *index );
+      if (item->isA(typeid(CTImageTreeItem))) {
+	myDia.addImage( dynamic_cast<CTImageTreeItem*>(item) );
+      }
+    }
+  }
+  std::list<TreeItem *> itemList;
+  itemList.push_back( &imageModel.getItem(QModelIndex()) );
+  while(!itemList.empty()) {
+    TreeItem *currentItem = itemList.back();
+    itemList.pop_back();
+    int cnum = currentItem->childCount();
+    for(int i = 0; i < cnum; i++ ) {
+      itemList.push_back( &currentItem->child(i) );
+    }
+    if (currentItem->isA(typeid(BinaryImageTreeItem)))
+      myDia.addSegment( dynamic_cast<BinaryImageTreeItem*>(currentItem) );
+  }
+  myDia.exec();
 }
 
 void KardioPerfusion::slotExit() {
@@ -398,7 +464,7 @@ void KardioPerfusion::changeColorForSelectedSegment() {
   }
 }
 
-void KardioPerfusion::loadFile(QString fname){
+/*void KardioPerfusion::loadFile(QString fname){
 
 	// define Pixeltype and set dimension
 	typedef signed short PixelType;
@@ -645,4 +711,4 @@ void KardioPerfusion::loadFile(QString fname){
   iren->Initialize();
 }
 
-
+*/

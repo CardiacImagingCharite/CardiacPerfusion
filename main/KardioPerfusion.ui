@@ -55,6 +55,9 @@
     <property name="editTriggers">
      <set>QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
     </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::ExtendedSelection</enum>
+    </property>
    </widget>
    <widget class="QPushButton" name="btn_draw">
     <property name="geometry">
@@ -175,6 +178,58 @@
      <string>Threshold:</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="btn_erode">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>460</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Erode</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_dilate">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>460</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Dilate</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_cannyEdges">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>500</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Canny Edges</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_analyse">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>540</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Analyse</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -281,42 +336,13 @@
  <resources>
   <include location="../Icons/icons.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>btn_draw</sender>
-   <signal>clicked()</signal>
-   <receiver>KardioPerfusion</receiver>
-   <slot>on_btn_draw_clicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>79</x>
-     <y>385</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>120</x>
-     <y>445</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>btn_regionGrow</sender>
-   <signal>clicked()</signal>
-   <receiver>KardioPerfusion</receiver>
-   <slot>on_btn_regionGrow_clicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>50</x>
-     <y>444</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>571</x>
-     <y>438</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>on_btn_draw_clicked()</slot>
   <slot>on_btn_regionGrow_clicked()</slot>
+  <slot>on_btn_erode_clicked()</slot>
+  <slot>on_btn_dilate_clicked()</slot>
+  <slot>on_btn_cannyEdges_clicked()</slot>
+  <slot>on_btn_analyse_clicked()</slot>
  </slots>
 </ui>

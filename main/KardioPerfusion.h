@@ -20,7 +20,7 @@
 #include <QMainWindow>
 #include <QObject>
 #include "vtkSmartPointer.h"    // Required for smart pointer internal ivars.
-#include "vtkImageViewer2.h"
+//#include "vtkImageViewer2.h"
 #include "ctimagetreemodel.h"
 #include "binaryimagetreeitem.h"
 #include "ctimagetreeitem.h"
@@ -43,17 +43,26 @@ public:
   // Constructor/Destructor
   KardioPerfusion(); 
   ~KardioPerfusion();
+
+//
   void loadFile(QString fname);
   void setFiles(const QStringList &names);
 
 public slots:
 
+  // Action to be taken upon file open
   virtual void slotOpenFile();
+  //Action to exit the application
   virtual void slotExit();
+  //Button- and TreeView-Actions for interaction
   void on_treeView_doubleClicked(const QModelIndex &index);
   void onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
   void on_btn_draw_clicked();
   void on_btn_regionGrow_clicked();
+  void on_btn_erode_clicked();
+  void on_btn_dilate_clicked();
+  void on_btn_cannyEdges_clicked();
+  void on_btn_analyse_clicked();
   void treeViewContextMenu(const QPoint &pos);
   void createSegmentForSelectedImage();
   void changeColorForSelectedSegment();
@@ -63,20 +72,25 @@ protected:
 protected slots:
 
 private:
+	//Get selected TreeView-Item 
 	BinaryImageTreeItem *focusSegmentFromSelection(void);
 	typedef std::auto_ptr<DicomSelectorDialog> DicomSelectorDialogPtr;
-	vtkSmartPointer<vtkImageViewer2> m_pViewer[4];
+	//vtkSmartPointer<vtkImageViewer2> m_pViewer[4];
 
     // Designer form
     Ui_KardioPerfusion *ui;
 
+	//load selected Dicom-File
 	void loadDicomData(DicomSelectorDialogPtr dicomSelector);
+	//sets a given Image to the output view
 	void setImage(const CTImageTreeItem *imageItem);
+	//show/hide a given segment
 	void segmentShow(const BinaryImageTreeItem *segItem );
 	void segmentHide(const BinaryImageTreeItem *segItem );
+	//removes a selected Image from the image model
 	void removeSelectedImages();
-
-	void setCustomStyle();
+	//set interaction style
+//	void setCustomStyle();
 
 	CTImageTreeModel imageModel;
 	CTImageTreeItem::ConnectorHandle displayedCTImage;

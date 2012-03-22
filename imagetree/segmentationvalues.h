@@ -24,22 +24,26 @@
 #include "imagedefinitions.h"
 
 
-
+//struct, which contains necessary information of a segment
 struct SegmentationValues {
-  enum Accuracy {
-    SimpleAccuracy,
-    PreventDoubleSamplingAccuracy,
-    InterpolatedAccuray
-  };
-  const ITKVTKTreeItem<BinaryImageType> *segment;
-  long unsigned mtime;
-  double mean;
-  double stddev;
-  int min;
-  int max;
-  int sampleCount;
-  Accuracy accuracy;
-  private:
+	//enum for the accuracy
+	enum Accuracy {
+		SimpleAccuracy,
+		PreventDoubleSamplingAccuracy,
+		InterpolatedAccuracy
+	};
+	//pointer to the segment
+	const ITKVTKTreeItem<BinaryImageType> *segment;
+	//some statistics of the segment and the used accuracy
+	long unsigned mtime;
+	double mean;
+	double stddev;
+	int min;
+	int max;
+	int sampleCount;
+	Accuracy accuracy;
+private:
+	//boost serialization class
     friend class boost::serialization::access;
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version);

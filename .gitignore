@@ -62,3 +62,6 @@ packages/
 _ReSharper.*
 *.resharper
 Ankh.NoLoad
+
+#Time Attenuation Curves
+*.tac

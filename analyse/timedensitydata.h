@@ -27,25 +27,31 @@ public:
     virtual QwtData *copy() const {
         return new TimeDensityData(*this);
     }
+	//getter for size, x, y
     virtual size_t size() const {
         return time.size();
     }
+
     virtual double x(size_t i) const {
         return time[i];
     }
+
     virtual double y(size_t i) const {
         return values[i].mean;
     }
+	// get time and value at index i
     double getTimeAndValues( size_t i, SegmentationValues &v ) const {
-      v = values[i];
-      return time[i];
+		v = values[i];
+		return time[i];
     }
+	//add sample to the data
     void pushPoint( double t, const SegmentationValues &v) {
-      if (time.size() == 0 || t> time[time.size()-1]) {
-	time.push_back(t);
-	values.push_back(v);
-      }
+		if (time.size() == 0 || t> time[time.size()-1]) {
+			time.push_back(t);
+			values.push_back(v);
+		}
     }
+
 private:
   std::vector< double > time;
   std::vector< SegmentationValues > values;

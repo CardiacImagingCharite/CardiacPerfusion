@@ -11,8 +11,8 @@ SET( KardioPerfusionSrcs
 	main/KardioPerfusion.h
 	main/dicomselectordialog.cpp
 	main/dicomselectordialog.h	
-	main/MyTestInteractorStyle.cxx
-	main/MyTestInteractorStyle.h
+#	main/MyTestInteractorStyle.cxx
+#	main/MyTestInteractorStyle.h
 
 	analyse/tacdialog.cpp
 	analyse/tacdialog.h

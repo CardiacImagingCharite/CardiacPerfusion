@@ -50,7 +50,7 @@
 
 //#include "MyTestInteractorStyle.h"
 
-vtkStandardNewMacro(MyTestInteractorStyle);
+//vtkStandardNewMacro(MyTestInteractorStyle);
 
 const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
   (DicomTagType("Patient Name", "0010|0010"))
@@ -122,87 +122,112 @@ void KardioPerfusion::slotOpenFile()
   setFiles( fnames );
 }
 
+//set the selected files to the SelectorDialog
 void KardioPerfusion::setFiles(const QStringList &names) {
   if (!names.empty()) {
+	  // creats new dialog
     DicomSelectorDialogPtr selectDialog( new DicomSelectorDialog( this ) );
-    selectDialog->setFilesOrDirectories( names );
+    //set Filenames
+	selectDialog->setFilesOrDirectories( names );
     loadDicomData( selectDialog );
   }
 }
 
+//loads the Dicom images
 void KardioPerfusion::loadDicomData(DicomSelectorDialogPtr dicomSelector) {
-  dicomSelector->exec();
-  dicomSelector->getSelectedImageDataList(imageModel);
+	//execute the dialog
+	dicomSelector->exec();
+	//set image data to imageModel
+	dicomSelector->getSelectedImageDataList(imageModel);
 }
 
+//callback if the selection at the treeview changed
 void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
-  int numSelected = this->ui->treeView->selectionModel()->selectedRows().size();
-  if (numSelected == 0) 
-    this->ui->statusbar->clearMessage();
-  else
-    this->ui->statusbar->showMessage( QString::number( numSelected ) + tr(" item(s) selected") );
+	// get number of selected items and print it to the statusbar
+	int numSelected = this->ui->treeView->selectionModel()->selectedRows().size();
+	if (numSelected == 0) 
+		this->ui->statusbar->clearMessage();
+	else
+		this->ui->statusbar->showMessage( QString::number( numSelected ) + tr(" item(s) selected") );
 }
 
+//callback if doubleclick on treeview occurs
 void KardioPerfusion::on_treeView_doubleClicked(const QModelIndex &index) {
-  if (index.isValid()) {
-    TreeItem &item = imageModel.getItem( index );
-    if (item.isA(typeid(CTImageTreeItem))) {
-      if (displayedCTImage && &item == displayedCTImage->getBaseItem()) {
-	setImage( NULL );
-      } else {
-	setImage( dynamic_cast<CTImageTreeItem*>(&item) );
-      }
-    } else if (item.isA(typeid(BinaryImageTreeItem))) {
-      BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item);
-      if (displayedSegments.find( SegItem->getVTKConnector() )==displayedSegments.end()) {
-	segmentShow( SegItem );
-      } else {
-	segmentHide( SegItem );
-      }
-    }
-  }
+	if (index.isValid()) {
+		//get doubleclicked item
+		TreeItem &item = imageModel.getItem( index );
+		//check if item is a CT image
+		if (item.isA(typeid(CTImageTreeItem))) {
+			//hide actual image
+			if (displayedCTImage && &item == displayedCTImage->getBaseItem()) {
+				setImage( NULL );
+			} else {
+				//show image
+				setImage( dynamic_cast<CTImageTreeItem*>(&item) );
+			}
+			//check if item is a segement
+		} else if (item.isA(typeid(BinaryImageTreeItem))) {
+			//get selected segment
+			BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item);
+			//if segment is not in the list of displayed segments
+			if (displayedSegments.find( SegItem->getVTKConnector() )==displayedSegments.end()) {
+				//show segement
+				segmentShow( SegItem );
+			} else {
+				//else hide it
+				segmentHide( SegItem );
+			}
+		}
+	}
 }
-
+//set image to the widget
 void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
-  vtkImageData *vtkImage = NULL;
-  CTImageTreeItem::ConnectorHandle connectorPtr;
-  if (imageItem) {
-    connectorPtr = imageItem->getVTKConnector();
-    vtkImage = connectorPtr->getVTKImageData();
-  }
-  if (connectorPtr != displayedCTImage) {
-    while(!displayedSegments.empty()) {
-      segmentHide( dynamic_cast<const BinaryImageTreeItem*>((*displayedSegments.begin())->getBaseItem()) );
-    }
-    this->ui->mprView->setImage( vtkImage );
+	vtkImageData *vtkImage = NULL;
+	//create ITK VTK connector
+	CTImageTreeItem::ConnectorHandle connectorPtr;
+	if (imageItem) {
+		//get the VTK image
+		connectorPtr = imageItem->getVTKConnector();
+		vtkImage = connectorPtr->getVTKImageData();
+	}
+	// if displayed image and new image is different
+	if (connectorPtr != displayedCTImage) {
+		//hide all associated segments
+		while(!displayedSegments.empty()) {
+		segmentHide( dynamic_cast<const BinaryImageTreeItem*>((*displayedSegments.begin())->getBaseItem()) );
+		}
+		//show VTK image
+		this->ui->mprView->setImage( vtkImage );
 
-/*	  for(int i=0;i<3;i++)
-	  {
+     /*	for(int i=0;i<3;i++)
+		{
 		m_pViewer[i]->SetInput(vtkImage);
 		m_pViewer[i]->GetRenderer()->ResetCamera();
 		m_pViewer[i]->SetColorLevel(128);
 		m_pViewer[i]->SetColorWindow(254);
 		m_pViewer[i]->Render();
-	  }
+		}
 
 
 
-	  m_pViewer[0]->SetSliceOrientationToXY();
-	  m_pViewer[1]->SetSliceOrientationToXZ();
-	  m_pViewer[2]->SetSliceOrientationToYZ();
+		m_pViewer[0]->SetSliceOrientationToXY();
+		m_pViewer[1]->SetSliceOrientationToXZ();
+		m_pViewer[2]->SetSliceOrientationToYZ();
 
-	  for(int i = 0; i < 3; i++)
-	  {
+		for(int i = 0; i < 3; i++)
+		{
 		m_pViewer[i]->Render();
-	  }
+		}
 
-	  setCustomStyle();
-	  */
-	//volumeView->setImage( vtkImage );
-    if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->clearActiveDown();
-    displayedCTImage = connectorPtr;
-    if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->setActive();
-  }
+		setCustomStyle();
+		*/
+		//volumeView->setImage( vtkImage );
+
+
+		if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->clearActiveDown();
+		displayedCTImage = connectorPtr;
+		if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->setActive();
+	}
 }
 
 
@@ -230,129 +255,175 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 }
 */
 
+//callback for draw button
 void KardioPerfusion::on_btn_draw_clicked()
 {
-  BinaryImageTreeItem *seg = focusSegmentFromSelection();
-  if (seg)
-    this->ui->mprView->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
+	//get selected segment
+	BinaryImageTreeItem *seg = focusSegmentFromSelection();
+	if (seg)
+		//activate drawing action on VTK image data
+		this->ui->mprView->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
 }
 
+//callback for regionGrow button
 void KardioPerfusion::on_btn_regionGrow_clicked()
 {
+	//get threshold value
 	int threshold = this->ui->sb_regionGrowThreshold->value();
-
+	//get selected segment
 	BinaryImageTreeItem *seg = focusSegmentFromSelection();
 
     if (seg) {
-      ActionDispatch regionGrowAction(std::string("click to region grow inside ") + seg->getName().toAscii().data(), 
-        boost::bind(&BinaryImageTreeItem::regionGrow, seg, 
-		_3, _4, _5, threshold,
-          boost::function<void()>(boost::bind(&KardioPerfusion::clearPendingAction, this))
-        ),
-        ActionDispatch::ClickingAction, ActionDispatch::UnRestricted );
-      pendingAction = this->ui->mprView->addAction(regionGrowAction);
-      this->ui->mprView->activateAction(pendingAction);
+		//create action for region growing
+		ActionDispatch regionGrowAction(std::string("click to region grow inside ") + seg->getName().toAscii().data(), 
+			boost::bind(&BinaryImageTreeItem::regionGrow, seg, 
+			_3, _4, _5, threshold,
+			  boost::function<void()>(boost::bind(&KardioPerfusion::clearPendingAction, this))
+			),
+			ActionDispatch::ClickingAction, ActionDispatch::UnRestricted );
+		//add action to mprView
+		pendingAction = this->ui->mprView->addAction(regionGrowAction);
+		//activate the pending action
+		this->ui->mprView->activateAction(pendingAction);
     }
 }
 
+//callback for erode button
 void KardioPerfusion::on_btn_erode_clicked()
 {
+	//get selected segement
 	BinaryImageTreeItem *seg = focusSegmentFromSelection();
     if (seg) {
 		bool ok;
+		//open dialog and ask for number of iterations
 		int iterations = QInputDialog::getInt(this,tr("Interations"), tr("Enter number of erosion iterations"),
 		  1, 1, 100, 1, &ok);
 		if (!ok) return;
+		//erode selected segment and update mprVied
 		seg->binaryErode(iterations);
 		this->ui->mprView->update();
 	}
 }
 
+//action for dilate button
 void KardioPerfusion::on_btn_dilate_clicked()
 {
-   BinaryImageTreeItem *seg = focusSegmentFromSelection();
-   if (seg) {
+	//get selected segment
+	BinaryImageTreeItem *seg = focusSegmentFromSelection();
+	if (seg) {
 		bool ok;
+		//open dialog and ask for number of iterations
 		int iterations = QInputDialog::getInt(this,tr("Interations"), tr("Enter number of dilation iterations"),
 		  1, 1, 100, 1, &ok);
 		if (!ok) return;
+		//dilate selected segment and update mprView
 		seg->binaryDilate(iterations);
 		this->ui->mprView->update();
-  }
+	}
 }
 
+//callback for cannyEdge button
 void KardioPerfusion::on_btn_cannyEdges_clicked()
 {
+	//get selected segment
 	BinaryImageTreeItem *seg = focusSegmentFromSelection();
-   if (seg) {
-	   seg->extractEdges();
-	   this->ui->mprView->update();
-   }
-   
+	if (seg) {
+		//extract canny edges and update mprView
+		seg->extractEdges();
+	    this->ui->mprView->update();
+	}
 }
 
+//callback for analyse button
 void KardioPerfusion::on_btn_analyse_clicked()
 {
+	//create plot dialog 
 	TacDialog myDia(this);
-  QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
-  for(QModelIndexList::Iterator index = selectedIndex.begin(); index != selectedIndex.end(); ++index) {
-    if (index->isValid()) {
-      TreeItem *item = &imageModel.getItem( *index );
-      if (item->isA(typeid(CTImageTreeItem))) {
-	myDia.addImage( dynamic_cast<CTImageTreeItem*>(item) );
-      }
-    }
-  }
-  std::list<TreeItem *> itemList;
-  itemList.push_back( &imageModel.getItem(QModelIndex()) );
-  while(!itemList.empty()) {
-    TreeItem *currentItem = itemList.back();
-    itemList.pop_back();
-    int cnum = currentItem->childCount();
-    for(int i = 0; i < cnum; i++ ) {
-      itemList.push_back( &currentItem->child(i) );
-    }
-    if (currentItem->isA(typeid(BinaryImageTreeItem)))
-      myDia.addSegment( dynamic_cast<BinaryImageTreeItem*>(currentItem) );
-  }
-  myDia.exec();
+	//get list of selected items
+	QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
+	//iterate over selected items
+	for(QModelIndexList::Iterator index = selectedIndex.begin(); index != selectedIndex.end(); ++index) {
+		if (index->isValid()) {
+			//get item at specific index
+			TreeItem *item = &imageModel.getItem( *index );
+			//add image to the dialog if it is a CT image
+			if (item->isA(typeid(CTImageTreeItem))) {
+				myDia.addImage( dynamic_cast<CTImageTreeItem*>(item) );
+			}
+		}
+	}
+	std::list<TreeItem *> itemList;
+	//add root item to the item list
+	itemList.push_back( &imageModel.getItem(QModelIndex()) );
+	while(!itemList.empty()) {
+		//get the last item of the list
+		TreeItem *currentItem = itemList.back();
+		//delete last element
+		itemList.pop_back();
+		//get number of child nodes
+		int cnum = currentItem->childCount();
+		//add childnodes to the item list
+		for(int i = 0; i < cnum; i++ ) {
+			itemList.push_back( &currentItem->child(i) );
+		}
+		//if actual item is a segment add it to the dialog
+		if (currentItem->isA(typeid(BinaryImageTreeItem)))
+			myDia.addSegment( dynamic_cast<BinaryImageTreeItem*>(currentItem) );
+	}
+	//execute the dialog
+	myDia.exec();
 }
 
+//callback for exit
 void KardioPerfusion::slotExit() {
-  qApp->exit();
+	qApp->exit();
 }
 
+//get selected segment
 BinaryImageTreeItem *KardioPerfusion::focusSegmentFromSelection(void) {
-  clearPendingAction();
-  QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
-  if (selectedIndex.size() != 1) {
-    QMessageBox::warning(this,tr("Segment Error"),tr("Select one volume to edit"));
-    return NULL;
-  }
-  if (selectedIndex[0].isValid()) {
-    TreeItem *item = &imageModel.getItem( selectedIndex[0] );
-    if (item->isA(typeid(CTImageTreeItem))) {
-      CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>(item);
-      if (ctitem != displayedCTImage->getBaseItem())
-	setImage( ctitem );
-      if (ctitem->childCount() == 0) {
-	item = ctitem->generateSegment();
-      } else if (ctitem->childCount()==1) {
-	item = &ctitem->child(0);
-      } else {
-	QMessageBox::warning(this,tr("Segment Error"),tr("Choose the segment to edit"));
-	return  NULL;
-      }
-    }
-    if (item->isA(typeid(BinaryImageTreeItem))) {
-      BinaryImageTreeItem *seg = dynamic_cast<BinaryImageTreeItem*>(item);
-      segmentShow(seg);
-      return seg;
-    }
-  }
-  return NULL;
+	clearPendingAction();
+	//get list of selected items
+	QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
+	//if more or less then one segment is selected return an error
+	if (selectedIndex.size() != 1) {
+		QMessageBox::warning(this,tr("Segment Error"),tr("Select one volume to edit"));
+		return NULL;
+	}
+	//if index is valid
+	if (selectedIndex[0].isValid()) {
+		//get selected item
+		TreeItem *item = &imageModel.getItem( selectedIndex[0] );
+		//if item is a CT image
+		if (item->isA(typeid(CTImageTreeItem))) {
+			// get CT item
+			CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>(item);
+			//if item is not shown, set the image
+			if (ctitem != displayedCTImage->getBaseItem())
+				setImage( ctitem );
+			//if CT image has no segment, create a new one
+			if (ctitem->childCount() == 0) {
+				item = ctitem->generateSegment();
+			//if CT image has one segment, take it
+			} else if (ctitem->childCount()==1) {
+				item = &ctitem->child(0);
+			//if CT image has more segments, show warning and return
+			} else {
+				QMessageBox::warning(this,tr("Segment Error"),tr("Choose the segment to edit"));
+				return  NULL;
+			}
+		}
+		//if child item of the CT image is a segment
+		if (item->isA(typeid(BinaryImageTreeItem))) {
+			//get the segment, show it and return the segment
+ 			BinaryImageTreeItem *seg = dynamic_cast<BinaryImageTreeItem*>(item);
+			segmentShow(seg);
+			return seg;
+		}
+	}
+	return NULL;
 }
 
+//clear pending actions
 void KardioPerfusion::clearPendingAction() {
   if (pendingAction != -1) {
     this->ui->mprView->removeAction( pendingAction );
@@ -360,108 +431,158 @@ void KardioPerfusion::clearPendingAction() {
   }
 }
 
+//show a segment at the mpr widget
 void KardioPerfusion::segmentShow( const BinaryImageTreeItem *segItem ) {
-  if (segItem) {
-    if (displayedCTImage && displayedCTImage->getBaseItem() != segItem->parent()) {
-      setImage(dynamic_cast<const CTImageTreeItem*>(segItem->parent()));
-    }
-    ActionDispatch overlayAction(std::string("draw sphere on ") + segItem->getName().toAscii().data(), 
-      boost::bind(&BinaryImageTreeItem::drawSphere, const_cast<BinaryImageTreeItem*>(segItem), 
-        boost::bind( &QSpinBox::value, this->ui->sb_size ),
-        _3, _4, _5,
-        boost::bind( &QCheckBox::checkState, this->ui->cb_erase )
-      ),
-      ActionDispatch::ClickingAction, ActionDispatch::UnRestricted );
-    BinaryImageTreeItem::ConnectorHandle segmentConnector = segItem->getVTKConnector();
-    this->ui->mprView->addBinaryOverlay( segmentConnector->getVTKImageData(), segItem->getColor(), overlayAction);
-    displayedSegments.insert( segmentConnector );
-    segItem->setActive();
+	if (segItem) {
+		if (displayedCTImage && displayedCTImage->getBaseItem() != segItem->parent()) {
+			setImage(dynamic_cast<const CTImageTreeItem*>(segItem->parent()));
+		}
+		//create overlay action
+		ActionDispatch overlayAction(std::string("draw sphere on ") + segItem->getName().toAscii().data(), 
+			boost::bind(&BinaryImageTreeItem::drawSphere, const_cast<BinaryImageTreeItem*>(segItem), 
+				boost::bind( &QSpinBox::value, this->ui->sb_size ),
+				_3, _4, _5,
+				boost::bind( &QCheckBox::checkState, this->ui->cb_erase )
+				),
+			ActionDispatch::ClickingAction, ActionDispatch::UnRestricted );
+		//create ITK VTK connector
+		BinaryImageTreeItem::ConnectorHandle segmentConnector = segItem->getVTKConnector();
+		//add overlay at the widget
+		this->ui->mprView->addBinaryOverlay( segmentConnector->getVTKImageData(), segItem->getColor(), overlayAction);
+		//add segment to the list of displayed semgents and set actual segment as active
+		displayedSegments.insert( segmentConnector );
+		segItem->setActive();
   }
 }
 
+//callback for context menu at specific position
 void KardioPerfusion::treeViewContextMenu(const QPoint &pos) {
-  QModelIndex idx = this->ui->treeView->indexAt(pos);
-  QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
-  if (indexList.count()>0) {
-    QMenu cm;
-    if (indexList.count() == 1) {
-      TreeItem &item = imageModel.getItem(indexList[0]);
-      if (item.isA(typeid(CTImageTreeItem))) {
-	QAction* addSegAction = cm.addAction("&Add Segment");
-	connect( addSegAction, SIGNAL( triggered() ),
-	  this, SLOT( createSegmentForSelectedImage())  );
-      } else if (item.isA(typeid(BinaryImageTreeItem))) {
-	QAction* addSegAction = cm.addAction("&Change Color");
-	connect( addSegAction, SIGNAL( triggered() ),
-	  this, SLOT( changeColorForSelectedSegment())  );
-/*	if (item.isA(typeid(WatershedSegmentTreeItem))) {
-	  QAction* setupAction = cm.addAction("&Setup");
-	  connect( setupAction, SIGNAL( triggered() ),
-	    this, SLOT( setupSelectedWatershedSegment())  );
-	  QAction* updateAction = cm.addAction("&Update");
-	  connect( updateAction, SIGNAL( triggered() ),
-	    this, SLOT( updateSelectedWatershedSegment())  );
-	} */
-      }
-    }
-    QAction* addSegAction = cm.addAction("&Delete");
-    connect( addSegAction, SIGNAL( triggered() ),
-      this, SLOT( removeSelectedImages()  ) );
-    cm.exec(this->ui->treeView->mapToGlobal(pos));
-  }
+	//get index for position
+	QModelIndex idx = this->ui->treeView->indexAt(pos);
+	//get selected rows
+	QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
+	//if index list is not empty
+	if (indexList.count()>0) {
+		//create menu
+		QMenu cm;
+		//if one item is selected
+		if (indexList.count() == 1) {
+			//get tree item
+			TreeItem &item = imageModel.getItem(indexList[0]);
+			//if item is a CT image
+			if (item.isA(typeid(CTImageTreeItem))) {
+				//create action for adding a segment and connect is to the callback
+				QAction* addSegAction = cm.addAction("&Add Segment");
+				connect( addSegAction, SIGNAL( triggered() ),
+					this, SLOT( createSegmentForSelectedImage())  );
+			//if item is a segment
+			} else if (item.isA(typeid(BinaryImageTreeItem))) {
+				//create action for changing the color and connect it to the callback
+				QAction* addSegAction = cm.addAction("&Change Color");
+				connect( addSegAction, SIGNAL( triggered() ),
+					this, SLOT( changeColorForSelectedSegment())  );
+		/*	if (item.isA(typeid(WatershedSegmentTreeItem))) {
+			  QAction* setupAction = cm.addAction("&Setup");
+			  connect( setupAction, SIGNAL( triggered() ),
+				this, SLOT( setupSelectedWatershedSegment())  );
+			  QAction* updateAction = cm.addAction("&Update");
+			  connect( updateAction, SIGNAL( triggered() ),
+				this, SLOT( updateSelectedWatershedSegment())  );
+			} */
+			}
+		}
+		//create action for deleting the selected images
+		QAction* addSegAction = cm.addAction("&Delete");
+		connect( addSegAction, SIGNAL( triggered() ),
+			this, SLOT( removeSelectedImages()  ) );
+		//execute the context menu at the specific position
+		cm.exec(this->ui->treeView->mapToGlobal(pos));
+	}
 }
 
+//callback for removing selected tree items
 void KardioPerfusion::removeSelectedImages() {
-  QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
-  BOOST_FOREACH( const QModelIndex &idx, indexList) {
-    TreeItem &remitem = imageModel.getItem( idx );
-    if (remitem.isA(typeid(CTImageTreeItem))) {
-      CTImageTreeItem *remitemPtr = dynamic_cast<CTImageTreeItem*>(&remitem);
-      if (displayedCTImage && displayedCTImage->getBaseItem() == remitemPtr) {
-	setImage(NULL);
-      }
-    } else if (remitem.isA(typeid(BinaryImageTreeItem))) {
-      BinaryImageTreeItem *remitemPtr = dynamic_cast<BinaryImageTreeItem*>(&remitem);
-      segmentHide( remitemPtr );
-    }
-    imageModel.removeItem( idx );
-  }
+	//get list of selected items
+	QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
+	//iterate over index list
+	BOOST_FOREACH( const QModelIndex &idx, indexList) {
+		//get tree item
+		TreeItem &remitem = imageModel.getItem( idx );
+		//if item type is a CT image
+		if (remitem.isA(typeid(CTImageTreeItem))) {
+			//get CT image
+			CTImageTreeItem *remitemPtr = dynamic_cast<CTImageTreeItem*>(&remitem);
+			//if CT image is visible, remove it from the widget
+			if (displayedCTImage && displayedCTImage->getBaseItem() == remitemPtr) {
+				setImage(NULL);
+			}
+		//if item is a segment
+		} else if (remitem.isA(typeid(BinaryImageTreeItem))) {
+			//get segment
+			BinaryImageTreeItem *remitemPtr = dynamic_cast<BinaryImageTreeItem*>(&remitem);
+			//hide select segment
+			segmentHide( remitemPtr );
+		}
+		//remove the index from the image model
+		imageModel.removeItem( idx );
+	}
 }
 
+//hide segment from widget
 void KardioPerfusion::segmentHide( const BinaryImageTreeItem *segItem ) {
-  if (segItem) {
-    clearPendingAction();
-    DisplayedSegmentContainer::const_iterator it = displayedSegments.find( segItem->getVTKConnector() );
-    if (it != displayedSegments.end()) {
-      this->ui->mprView->removeBinaryOverlay( (*it)->getVTKImageData() );
-      displayedSegments.erase( it );
-    }
-    segItem->setActive(false);
-  }
+	if (segItem) {
+		// clear pending action
+		clearPendingAction();
+		//find segment in the list of displayed segments
+		DisplayedSegmentContainer::const_iterator it = displayedSegments.find( segItem->getVTKConnector() );
+		//if segment was found
+		if (it != displayedSegments.end()) {
+			//remove overlay from widget and erase it from the list of displayed segments
+			this->ui->mprView->removeBinaryOverlay( (*it)->getVTKImageData() );
+			displayedSegments.erase( it );
+		}
+		//set segment to inactive
+		segItem->setActive(false);
+	}
 }
 
+//create a segment for selected image
 void KardioPerfusion::createSegmentForSelectedImage() {
-  QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
-  if (indexList.count() == 1) {
-    TreeItem &item = imageModel.getItem(indexList[0]);
-    if (item.isA(typeid(CTImageTreeItem))) {
-      dynamic_cast<CTImageTreeItem&>(item).generateSegment();
-    }
-  }
+	//get list of selected items
+	QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
+	//if one item is selected
+	if (indexList.count() == 1) {
+		//get selected item 
+		TreeItem &item = imageModel.getItem(indexList[0]);
+		//if item is a CT image
+		if (item.isA(typeid(CTImageTreeItem))) {
+			//generate segment
+			dynamic_cast<CTImageTreeItem&>(item).generateSegment();
+		}
+	}
 }
 
+//change the color for the selected item
 void KardioPerfusion::changeColorForSelectedSegment() {
-  QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
-  if (indexList.count() == 1) {
-    TreeItem &item = imageModel.getItem(indexList[0]);
-    if (item.isA(typeid(BinaryImageTreeItem))) {
-      BinaryImageTreeItem &binItem = dynamic_cast<BinaryImageTreeItem&>(item);
-      QColor color = binItem.getColor();
-      color = QColorDialog::getColor(color, this, tr("Choose new Segment Color for ") + binItem.getName());
-      if (color.isValid())
-	binItem.setColor(color);
-    }
-  }
+	//get list of selected items
+	QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
+	//if one item is selected
+	if (indexList.count() == 1) {
+		//get selected item
+		TreeItem &item = imageModel.getItem(indexList[0]);
+		//if item is a segment
+		if (item.isA(typeid(BinaryImageTreeItem))) {
+			//get segment
+			BinaryImageTreeItem &binItem = dynamic_cast<BinaryImageTreeItem&>(item);
+			//get color of selected item
+			QColor color = binItem.getColor();
+			//create color dialog
+			color = QColorDialog::getColor(color, this, tr("Choose new Segment Color for ") + binItem.getName());
+			//if valid color returns, set color of the segment
+			if (color.isValid())
+				binItem.setColor(color);
+		}
+	}
 }
 
 /*void KardioPerfusion::loadFile(QString fname){
@@ -553,7 +674,7 @@ void KardioPerfusion::changeColorForSelectedSegment() {
 		  return;
 		}
 */	
-	//create a new vtkKWImage, that can be used as an interface between ITK and VTK
+/*	//create a new vtkKWImage, that can be used as an interface between ITK and VTK
 	vtkKWImage* kwImage = vtkKWImage::New();
 	kwImage->SetITKImageBase(reader->GetOutput());
 

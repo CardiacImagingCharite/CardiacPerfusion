@@ -45,7 +45,8 @@ public:
   ~KardioPerfusion();
 
 //
-  void loadFile(QString fname);
+//  void loadFile(QString fname);
+  //set the selected files to the SelectorDialog
   void setFiles(const QStringList &names);
 
 public slots:
@@ -64,10 +65,13 @@ public slots:
   void on_btn_cannyEdges_clicked();
   void on_btn_analyse_clicked();
   void treeViewContextMenu(const QPoint &pos);
+  //create a segment for selected image
   void createSegmentForSelectedImage();
+  //change the color for the selected item
   void changeColorForSelectedSegment();
 
 protected:
+	//clear pending actions
      void clearPendingAction();
 protected slots:
 

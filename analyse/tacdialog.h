@@ -29,26 +29,34 @@ class CTImageTreeItem;
 
 class TacDialog : public QDialog, private Ui_TacDialog
 {
-  Q_OBJECT
-  public:
-  TacDialog(QWidget * parent = 0, Qt::WindowFlags f = 0);
-  ~TacDialog();
-  void addImage(CTImageTreeItem *image);
-  void addSegment(BinaryImageTreeItem *segment);
-  int exec(void);
+	Q_OBJECT
+	
+public:
+	//Constructor/Destructor
+	TacDialog(QWidget * parent = 0, Qt::WindowFlags f = 0);
+	~TacDialog();
+	//add images to the dialog
+	void addImage(CTImageTreeItem *image);
+	//add segments to the dialog
+	void addSegment(BinaryImageTreeItem *segment);
+	//execution method
+	int exec(void);
 
- public slots:
+public slots:
       
 
-  private:
+private:
 
+	//functor for comparing two times
 	struct CTImageTimeCompareFunctor {
 		typedef CTImageTreeItem * argT;
 		bool operator()(const argT &x, const argT &y) const;
 	};
+	//definitions for an imageSet and a double vector
 	typedef std::set<CTImageTreeItem *, CTImageTimeCompareFunctor> ImageSet;
 	typedef std::vector< double > DoubleVector;
   
+
 	DoubleVector times;
 	ImageSet images;
 

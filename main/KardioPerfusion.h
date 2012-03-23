@@ -25,6 +25,7 @@
 #include "binaryimagetreeitem.h"
 #include "ctimagetreeitem.h"
 #include <qitemselectionmodel.h>
+#include "tacdialog.h"
 
 #define VTK_CREATE(type, name) \
   vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
@@ -51,28 +52,31 @@ public:
 
 public slots:
 
-  // Action to be taken upon file open
-  virtual void slotOpenFile();
-  //Action to exit the application
-  virtual void slotExit();
-  //Button- and TreeView-Actions for interaction
-  void on_treeView_doubleClicked(const QModelIndex &index);
-  void onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-  void on_btn_draw_clicked();
-  void on_btn_regionGrow_clicked();
-  void on_btn_erode_clicked();
-  void on_btn_dilate_clicked();
-  void on_btn_cannyEdges_clicked();
-  void on_btn_analyse_clicked();
-  void treeViewContextMenu(const QPoint &pos);
-  //create a segment for selected image
-  void createSegmentForSelectedImage();
-  //change the color for the selected item
-  void changeColorForSelectedSegment();
+	// Action to be taken upon file open
+	virtual void slotOpenFile();
+	//Action to exit the application
+	virtual void slotExit();
+	//Button- and TreeView-Actions for interaction
+	//void on_treeView_doubleClicked(const QModelIndex &index);
+	void on_treeView_clicked(const QModelIndex &index);
+	void onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+	void on_btn_draw_clicked();
+	void on_btn_regionGrow_clicked();
+	void on_btn_erode_clicked();
+	void on_btn_dilate_clicked();
+//	void on_btn_cannyEdges_clicked();
+	void on_btn_analyse_clicked();
+	void treeViewContextMenu(const QPoint &pos);
+	//create a segment for selected image
+	void createSegmentForSelectedImage();
+	//change the color for the selected item
+	void changeColorForSelectedSegment();
+	//removes a selected Image from the image model
+	void removeSelectedImages();
 
 protected:
 	//clear pending actions
-     void clearPendingAction();
+    void clearPendingAction();
 protected slots:
 
 private:
@@ -91,8 +95,7 @@ private:
 	//show/hide a given segment
 	void segmentShow(const BinaryImageTreeItem *segItem );
 	void segmentHide(const BinaryImageTreeItem *segItem );
-	//removes a selected Image from the image model
-	void removeSelectedImages();
+
 	//set interaction style
 //	void setCustomStyle();
 
@@ -104,6 +107,8 @@ private:
 
 	static const DicomTagList CTModelHeaderFields;
     int pendingAction;
+
+	TacDialog* m_tacDialog;
 };
 
 #endif // KardioPerfusion_H

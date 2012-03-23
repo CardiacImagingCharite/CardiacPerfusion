@@ -117,6 +117,12 @@ void DicomSelectorDialog::exec() {
     }
   }
   if (ctImageModel.rowCount(QModelIndex())==0) return;
+  //TODO: sort ctimagemodel
+  int r = ctImageModel.columnCount();
+  ctImageModel.sort(2);
+  //std::vector<DicomTagType>::const_iterator result = std::find(HeaderFields.begin(), HeaderFields.end(), "AcquisitionDatetime");
+  
+  // ctImageModel.sort(
   treeView->setModel( &ctImageModel );
   treeView->selectAll();
   for(unsigned int t=0; t < HeaderFields.size(); t++) treeView->resizeColumnToContents(t);

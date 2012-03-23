@@ -41,6 +41,8 @@ public:
 	void addSegment(BinaryImageTreeItem *segment);
 	//execution method
 	int exec(void);
+	//show the dialog
+	void show();
 
 public slots:
       

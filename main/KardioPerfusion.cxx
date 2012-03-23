@@ -10,7 +10,6 @@
 #include "ui_KardioPerfusion.h"
 #include "KardioPerfusion.h"
 #include "dicomselectordialog.h"
-#include "tacdialog.h"
 
 #include "qmessagebox.h"
 #include <QtGui>
@@ -74,6 +73,7 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
           blank->SetScalarComponentFromDouble(i, j, 0, 0, 0);
   blank->Update();
 
+  m_tacDialog = NULL;
 /*  for(int i = 0; i < 4; i++)
   {
 	  m_pViewer[i] = vtkSmartPointer<vtkImageViewer2>::New();
@@ -151,10 +151,10 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 		this->ui->statusbar->showMessage( QString::number( numSelected ) + tr(" item(s) selected") );
 }
 
-//callback if doubleclick on treeview occurs
-void KardioPerfusion::on_treeView_doubleClicked(const QModelIndex &index) {
+//callback if click on treeview occurs
+void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 	if (index.isValid()) {
-		//get doubleclicked item
+		//get clicked item
 		TreeItem &item = imageModel.getItem( index );
 		//check if item is a CT image
 		if (item.isA(typeid(CTImageTreeItem))) {
@@ -323,7 +323,7 @@ void KardioPerfusion::on_btn_dilate_clicked()
 }
 
 //callback for cannyEdge button
-void KardioPerfusion::on_btn_cannyEdges_clicked()
+/*void KardioPerfusion::on_btn_cannyEdges_clicked()
 {
 	//get selected segment
 	BinaryImageTreeItem *seg = focusSegmentFromSelection();
@@ -333,12 +333,27 @@ void KardioPerfusion::on_btn_cannyEdges_clicked()
 	    this->ui->mprView->update();
 	}
 }
+*/
 
 //callback for analyse button
 void KardioPerfusion::on_btn_analyse_clicked()
 {
 	//create plot dialog 
-	TacDialog myDia(this);
+	if(m_tacDialog == NULL)
+	{
+		m_tacDialog = new TacDialog(this);
+	}
+	else
+	{
+		QSize size = m_tacDialog->size();
+		QPoint pos = m_tacDialog->pos();
+		m_tacDialog->close();
+		m_tacDialog = new TacDialog(this);
+
+		m_tacDialog->resize(size);
+		m_tacDialog->move(pos);
+	}
+
 	//get list of selected items
 	QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
 	//iterate over selected items
@@ -348,7 +363,7 @@ void KardioPerfusion::on_btn_analyse_clicked()
 			TreeItem *item = &imageModel.getItem( *index );
 			//add image to the dialog if it is a CT image
 			if (item->isA(typeid(CTImageTreeItem))) {
-				myDia.addImage( dynamic_cast<CTImageTreeItem*>(item) );
+				m_tacDialog->addImage( dynamic_cast<CTImageTreeItem*>(item) );
 			}
 		}
 	}
@@ -368,10 +383,11 @@ void KardioPerfusion::on_btn_analyse_clicked()
 		}
 		//if actual item is a segment add it to the dialog
 		if (currentItem->isA(typeid(BinaryImageTreeItem)))
-			myDia.addSegment( dynamic_cast<BinaryImageTreeItem*>(currentItem) );
+			m_tacDialog->addSegment( dynamic_cast<BinaryImageTreeItem*>(currentItem) );
 	}
+
 	//execute the dialog
-	myDia.exec();
+	m_tacDialog->show();
 }
 
 //callback for exit

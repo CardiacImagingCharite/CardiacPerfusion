@@ -239,7 +239,8 @@ void vtkInteractorStyleProjectionView::processAction() {
       dx = x - m_initialState.mousePosition[0];
     }
     
-    double coord[4];
+	double coord[4] = {0};
+	
     if (restrictAction()) {
       int odx = x - m_initialState.mousePosition[0];
       int ody = y - m_initialState.mousePosition[1];
@@ -261,8 +262,9 @@ void vtkInteractorStyleProjectionView::processAction() {
 	m_orientation->MultiplyPoint(coord, coord);
       }
     }
-    (*m_actionList[m_interAction].sig)( dx, dy, coord[0], coord[1], coord[2]);
-    updateDisplay();
+
+	(*m_actionList[m_interAction].sig)( dx, dy, coord[0], coord[1], coord[2]);
+	updateDisplay();
   }
 }
 

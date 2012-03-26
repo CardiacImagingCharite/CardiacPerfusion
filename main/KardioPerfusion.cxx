@@ -67,9 +67,9 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 
   m_tacDialog = NULL;
 
-	this->ui->mprView->setOrientation(0);
-	this->ui->mprView->setOrientation(1);
-	this->ui->mprView->setOrientation(2);
+	this->ui->mprView_ul->setOrientation(0);
+	this->ui->mprView_ur->setOrientation(1);
+	this->ui->mprView_lr->setOrientation(2);
 
 
 /*  vtkImageData* blank = vtkImageData::New();
@@ -204,7 +204,7 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 		segmentHide( dynamic_cast<const BinaryImageTreeItem*>((*displayedSegments.begin())->getBaseItem()) );
 		}
 		//show VTK image
-		this->ui->mprView->setImage( vtkImage );
+		this->ui->mprView_ul->setImage( vtkImage );
 		//this->ui->mprView->setOrientation(0);
 
 		this->ui->mprView_ur->setImage(vtkImage);
@@ -275,8 +275,12 @@ void KardioPerfusion::on_btn_draw_clicked()
 	//get selected segment
 	BinaryImageTreeItem *seg = focusSegmentFromSelection();
 	if (seg)
+	{
 		//activate drawing action on VTK image data
-		this->ui->mprView->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
+		this->ui->mprView_ul->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
+		this->ui->mprView_ur->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
+		this->ui->mprView_lr->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
+	}
 }
 
 //callback for regionGrow button
@@ -296,9 +300,14 @@ void KardioPerfusion::on_btn_regionGrow_clicked()
 			),
 			ActionDispatch::ClickingAction, ActionDispatch::UnRestricted );
 		//add action to mprView
-		pendingAction = this->ui->mprView->addAction(regionGrowAction);
+		pendingAction = this->ui->mprView_ul->addAction(regionGrowAction);
+		pendingAction = this->ui->mprView_ur->addAction(regionGrowAction);
+		pendingAction = this->ui->mprView_lr->addAction(regionGrowAction);
 		//activate the pending action
-		this->ui->mprView->activateAction(pendingAction);
+		this->ui->mprView_ul->activateAction(pendingAction);
+		this->ui->mprView_ur->activateAction(pendingAction);
+		this->ui->mprView_lr->activateAction(pendingAction);
+
     }
 }
 
@@ -315,7 +324,9 @@ void KardioPerfusion::on_btn_erode_clicked()
 		if (!ok) return;
 		//erode selected segment and update mprVied
 		seg->binaryErode(iterations);
-		this->ui->mprView->update();
+		this->ui->mprView_ul->update();
+		this->ui->mprView_ur->update();
+		this->ui->mprView_lr->update();
 	}
 }
 
@@ -332,7 +343,9 @@ void KardioPerfusion::on_btn_dilate_clicked()
 		if (!ok) return;
 		//dilate selected segment and update mprView
 		seg->binaryDilate(iterations);
-		this->ui->mprView->update();
+		this->ui->mprView_ul->update();
+		this->ui->mprView_ur->update();
+		this->ui->mprView_lr->update();
 	}
 }
 
@@ -456,7 +469,10 @@ BinaryImageTreeItem *KardioPerfusion::focusSegmentFromSelection(void) {
 //clear pending actions
 void KardioPerfusion::clearPendingAction() {
   if (pendingAction != -1) {
-    this->ui->mprView->removeAction( pendingAction );
+    this->ui->mprView_ul->removeAction( pendingAction );
+	this->ui->mprView_ur->removeAction( pendingAction );
+	this->ui->mprView_lr->removeAction( pendingAction );
+
     pendingAction = -1;
   }
 }
@@ -478,7 +494,10 @@ void KardioPerfusion::segmentShow( const BinaryImageTreeItem *segItem ) {
 		//create ITK VTK connector
 		BinaryImageTreeItem::ConnectorHandle segmentConnector = segItem->getVTKConnector();
 		//add overlay at the widget
-		this->ui->mprView->addBinaryOverlay( segmentConnector->getVTKImageData(), segItem->getColor(), overlayAction);
+		this->ui->mprView_ul->addBinaryOverlay( segmentConnector->getVTKImageData(), segItem->getColor(), overlayAction);
+		this->ui->mprView_ur->addBinaryOverlay( segmentConnector->getVTKImageData(), segItem->getColor(), overlayAction);
+		this->ui->mprView_lr->addBinaryOverlay( segmentConnector->getVTKImageData(), segItem->getColor(), overlayAction);
+		
 		//add segment to the list of displayed semgents and set actual segment as active
 		displayedSegments.insert( segmentConnector );
 		segItem->setActive();
@@ -568,7 +587,9 @@ void KardioPerfusion::segmentHide( const BinaryImageTreeItem *segItem ) {
 		//if segment was found
 		if (it != displayedSegments.end()) {
 			//remove overlay from widget and erase it from the list of displayed segments
-			this->ui->mprView->removeBinaryOverlay( (*it)->getVTKImageData() );
+			this->ui->mprView_ul->removeBinaryOverlay( (*it)->getVTKImageData() );
+			this->ui->mprView_ur->removeBinaryOverlay( (*it)->getVTKImageData() );
+			this->ui->mprView_lr->removeBinaryOverlay( (*it)->getVTKImageData() );
 			displayedSegments.erase( it );
 		}
 		//set segment to inactive

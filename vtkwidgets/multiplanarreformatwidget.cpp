@@ -29,6 +29,7 @@
 #include <vtkImageData.h>
 #include <vtkRenderWindow.h>
 #include <vtkTransform.h>
+
 #include <algorithm>
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
@@ -42,47 +43,61 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
   QVTKWidget(parent, f),
   m_reslice(vtkImageReslice::New()),
   m_colormap(vtkImageMapToWindowLevelColors::New()),
-  m_actor(vtkImageActor::New()),
-  m_renderer(vtkRenderer::New()),
+  m_imageViewer(vtkSmartPointer<vtkImageViewer2>::New()),
   m_reslicePlaneTransform(vtkMatrix4x4::New()),
-  m_interactorStyle(vtkInteractorStyleProjectionView::New())
+  m_interactorStyle(vtkSmartPointer<vtkInteractorStyleProjectionView>::New())
 {
-  m_reslice->SetOutputDimensionality(2);
-  m_reslice->SetBackgroundLevel(-1000);
-  m_reslice->SetInterpolationModeToCubic();
+	m_reslice->SetOutputDimensionality(2);
+	m_reslice->SetBackgroundLevel(-1000);
+	m_reslice->SetInterpolationModeToCubic();
   
-  m_colormap->SetOutputFormatToRGB();
+	m_colormap->SetOutputFormatToRGB();
 
-  m_colormap->SetInputConnection(m_reslice->GetOutputPort());
+	m_colormap->SetInputConnection(m_reslice->GetOutputPort());
+	m_imageViewer->GetRenderer()->ResetCamera();
+	vtkSmartPointer<vtkImageActor> actor = vtkSmartPointer<vtkImageActor>::New();
+	actor->SetInput(m_colormap->GetOutput());
+	m_imageViewer->GetRenderer()->AddActor(actor);
+	//m_imageViewer->GetImageActor()->SetInput(m_colormap->GetOutput());
 
-  m_actor->SetInput(m_colormap->GetOutput());
-  m_renderer->AddActor(m_actor);
+	//m_actor->SetInput(m_colormap->GetOutput());
+	//m_renderer->AddActor(m_actor);
+	m_imageViewer->GetRenderer()->ResetCamera();
+	this->SetRenderWindow(m_imageViewer->GetRenderWindow());
 
-  // Set up the interaction
-  vtkTransform *transform = vtkTransform::New();
-  transform->SetMatrix( m_reslicePlaneTransform );
-  transform->RotateX(180);
-  m_reslicePlaneTransform->DeepCopy( transform->GetMatrix() );
-  transform->Delete();
+	// Set up the interaction
+	vtkTransform *transform = vtkTransform::New();
+	transform->SetMatrix( m_reslicePlaneTransform );
+	transform->RotateX(180);
+	m_reslicePlaneTransform->DeepCopy( transform->GetMatrix() );
+	transform->Delete();
   
-  m_interactorStyle->SetImageMapToWindowLevelColors( m_colormap );
-  m_interactorStyle->SetOrientationMatrix( m_reslicePlaneTransform );
+	m_interactorStyle->SetImageMapToWindowLevelColors( m_colormap );
+	m_interactorStyle->SetOrientationMatrix( m_reslicePlaneTransform );
 
-  vtkRenderWindowInteractor *interactor = this->GetInteractor();
-  interactor->SetInteractorStyle(m_interactorStyle);
-  m_reslice->SetResliceAxes(m_reslicePlaneTransform);
-  m_reslice->SetOutputDimensionality(2);
+	vtkSmartPointer<vtkRenderWindowInteractor> interactor = vtkSmartPointer<vtkRenderWindowInteractor>::New();//this->GetRenderWindow()->GetInteractor();
+  
+	//m_imageViewer->SetupInteractor(interactor);
+	//m_imageViewer->GetRenderer()->ResetCamera();
+  
+	m_imageViewer->SetupInteractor(interactor);
+  
+	interactor->SetInteractorStyle(m_interactorStyle);
+	m_interactorStyle->SetCurrentRenderer(m_imageViewer->GetRenderer());
+	m_reslice->SetResliceAxes(m_reslicePlaneTransform);
+	m_reslice->SetOutputDimensionality(2);
 }
 
 /** Destructor*/
 MultiPlanarReformatWidget::~MultiPlanarReformatWidget() {
   this->hide();
-  if (m_renderer) m_renderer->Delete();
+  //if (m_renderer) m_renderer->Delete();
+  //if(m_imageViewer) m_imageViewer->Delete();
   m_overlays.clear();
   if (m_colormap) m_colormap->Delete();
   if (m_reslice) m_reslice->Delete();
-  if (m_actor) m_actor->Delete();
-  if (m_interactorStyle) m_interactorStyle->Delete();
+  //if (m_actor) m_actor->Delete();
+  //if (m_interactorStyle) m_interactorStyle->Delete();
   if (m_reslicePlaneTransform) m_reslicePlaneTransform->Delete();
 }
 
@@ -107,11 +122,12 @@ void MultiPlanarReformatWidget::setCubicInterpolation(bool cubic) {
 void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D) Image with one component*/) {
   if (image==NULL) {
     m_image = NULL;
-    vtkRenderWindow *window = this->GetRenderWindow();
-    window->RemoveRenderer( m_renderer );
+    //vtkRenderWindow *window = this->GetRenderWindow();
+    //window->RemoveRenderer( m_imageViewer->GetRenderer() );
+	//this->GetRenderWindow()->RemoveRenderer(
   } else {
-    vtkRenderWindow *window = this->GetRenderWindow();
-    window->RemoveRenderer( m_renderer );
+    //vtkRenderWindow *window = this->GetRenderWindow();
+    //window->RemoveRenderer( m_imageViewer->GetRenderer() );
     m_image = image;
     m_image->UpdateInformation();
     int extent[6];
@@ -127,7 +143,37 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
     center[0] = origin[0] + spacing[0] * 0.5 * (extent[0] + extent[1]); 
     center[1] = origin[1] + spacing[1] * 0.5 * (extent[2] + extent[3]); 
     center[2] = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5]); 
-    
+	
+	// Matrices for axial, coronal, sagittal, oblique view orientations
+	static double axialElements[16] = {
+	         1, 0, 0, 0,
+	         0, 1, 0, 0,
+	         0, 0, 1, 0,
+	         0, 0, 0, 1 };
+
+	static double coronalElements[16] = {
+	         1, 0, 0, 0,
+	         0, 0, 1, 0,
+	         0,-1, 0, 0,
+	         0, 0, 0, 1 };
+
+	static double sagittalElements[16] = {
+			0, 0,-1, 0,
+			1, 0, 0, 0,
+			0,-1, 0, 0,
+			0, 0, 0, 1 };
+
+	// Set the slice orientation
+	switch(m_orientation)
+	{
+	case 0: m_reslicePlaneTransform->DeepCopy(axialElements);
+		break;
+	case 1: m_reslicePlaneTransform->DeepCopy(coronalElements);
+		break;
+	case 2: m_reslicePlaneTransform->DeepCopy(sagittalElements);
+		break;
+	}
+	
     // Set the point through which to slice
     m_reslicePlaneTransform->SetElement(0, 3, center[0]);
     m_reslicePlaneTransform->SetElement(1, 3, center[1]);
@@ -135,11 +181,23 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
 
     m_reslice->SetInput( m_image );
     m_reslice->SetOutputSpacing(1,1,1);
-    window->AddRenderer(m_renderer);
+	m_imageViewer->SetInput(m_reslice->GetOutput());
+	
+	m_imageViewer->GetRenderWindow()->GetInteractor()->Initialize();
+	m_imageViewer->Render();
+
+    //window->AddRenderer(m_imageViewer->GetRenderer());
+
+
   }
   this->update();
 }
 
+void MultiPlanarReformatWidget::setOrientation(int orientation)
+{
+	m_orientation = orientation;
+	//m_imageViewer->SetSliceOrientation(orientation);
+}
 
 int MultiPlanarReformatWidget::addBinaryOverlay(vtkImageData *image, const QColor &color, const ActionDispatch &dispatch) {
   if (m_overlays.find( image ) == m_overlays.end() ) {
@@ -149,7 +207,7 @@ int MultiPlanarReformatWidget::addBinaryOverlay(vtkImageData *image, const QColo
     rgbColor[1] = color.green();
     rgbColor[2] = color.blue();
     boost::shared_ptr< vtkBinaryImageOverlay > overlay(
-     new vtkBinaryImageOverlay( m_renderer, m_interactorStyle, dispatch, image, m_reslicePlaneTransform, rgbColor, actionHandle ) );
+		new vtkBinaryImageOverlay( m_imageViewer->GetRenderer(), m_interactorStyle, dispatch, image, m_reslicePlaneTransform, rgbColor, actionHandle ) );
     m_overlays.insert( OverlayMapType::value_type( image, overlay ) );
     overlay->resize( this->size().width(), this->size().height() );
     this->update();

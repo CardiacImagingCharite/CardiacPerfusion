@@ -24,16 +24,19 @@
 #include "vtkbinaryimageoverlay.h"
 #include "vtkinteractorstyleprojectionview.h"
 #include "vtkinteractoractiondispatch.h"
+#include <vtkSmartPointer.h>
 #include <boost/shared_ptr.hpp>
 #include "imagedefinitions.h"
+#include "vtkImageViewer2.h"
+
 
 class vtkImageData;
 class vtkImageReslice;
 class vtkImageMapToWindowLevelColors;
 class vtkImageMapToColors;
 class vtkBinaryImageToColor;
-class vtkImageActor;
-class vtkRenderer;
+//class vtkImageActor;
+//class vtkRenderer;
 class vtkMatrix4x4;
 
 
@@ -52,6 +55,7 @@ class MultiPlanarReformatWidget : public QVTKWidget
   void removeBinaryOverlay(vtkImageData *image);
   virtual void resizeEvent( QResizeEvent * event );
   void setCubicInterpolation(bool cubic=true);
+  void setOrientation(int orientation);
   
   protected:
   typedef std::map< vtkImageData *, boost::shared_ptr< vtkBinaryImageOverlay > > OverlayMapType;
@@ -59,10 +63,12 @@ class MultiPlanarReformatWidget : public QVTKWidget
   vtkImageData *m_image; ///< volume image data to be displayed - set by setImage()
   vtkImageReslice *m_reslice; ///< vtkImageAlgorithm to reslice the image
   vtkImageMapToWindowLevelColors *m_colormap; ///< used to apply Window and Level
-  vtkImageActor *m_actor; ///< vtkActor which actually displays the resliced volume
-  vtkRenderer *m_renderer; ///< the used renderer
+  //vtkImageActor *m_actor; ///< vtkActor which actually displays the resliced volume
+  //vtkRenderer *m_renderer; ///< the used renderer
+  vtkSmartPointer<vtkImageViewer2> m_imageViewer; ///< the uses image viewer
   vtkMatrix4x4 *m_reslicePlaneTransform; ///< Tranformation Matrix for the Reslicing Plane
-  vtkInteractorStyleProjectionView *m_interactorStyle; ///< special InteractorStyle for Projected Volumes
+  vtkSmartPointer<vtkInteractorStyleProjectionView> m_interactorStyle; ///< special InteractorStyle for Projected Volumes
+	int m_orientation;
 };
 
 #endif // MULTIPLANARREFORMATWIDGET_H

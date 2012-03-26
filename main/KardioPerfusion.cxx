@@ -64,8 +64,15 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
   this->ui->setupUi(this);
   
   this->ui->treeView->setModel( &imageModel );
-   
-  vtkImageData* blank = vtkImageData::New();
+
+  m_tacDialog = NULL;
+
+	this->ui->mprView->setOrientation(0);
+	this->ui->mprView->setOrientation(1);
+	this->ui->mprView->setOrientation(2);
+
+
+/*  vtkImageData* blank = vtkImageData::New();
   blank->SetDimensions(10, 10, 1);
   blank->AllocateScalars();
   for (int i = 0; i < 10; i++)
@@ -73,7 +80,10 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
           blank->SetScalarComponentFromDouble(i, j, 0, 0, 0);
   blank->Update();
 
-  m_tacDialog = NULL;
+  this->ui->mprView->setImage(blank);
+  this->ui->mprView_lr->setImage(blank);
+  this->ui->mprView_ur->setImage(blank);
+  */
 /*  for(int i = 0; i < 4; i++)
   {
 	  m_pViewer[i] = vtkSmartPointer<vtkImageViewer2>::New();
@@ -90,9 +100,6 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 	   this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
   connect( this->ui->treeView, SIGNAL( customContextMenuRequested(const QPoint &) ),
     this, SLOT( treeViewContextMenu(const QPoint &) ) );
-
-
-  
 };
 
 KardioPerfusion::~KardioPerfusion()
@@ -198,6 +205,13 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 		}
 		//show VTK image
 		this->ui->mprView->setImage( vtkImage );
+		//this->ui->mprView->setOrientation(0);
+
+		this->ui->mprView_ur->setImage(vtkImage);
+	//	this->ui->mprView_ur->setOrientation(1);
+
+		this->ui->mprView_lr->setImage(vtkImage);
+		//this->ui->mprView_lr->setOrientation(2);
 
      /*	for(int i=0;i<3;i++)
 		{

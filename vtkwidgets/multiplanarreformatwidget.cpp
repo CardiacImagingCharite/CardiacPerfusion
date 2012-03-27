@@ -145,22 +145,28 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
     center[2] = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5]); 
 	
 	// Matrices for axial, coronal, sagittal, oblique view orientations
-	static double axialElements[16] = {
+	/*static double axialElements[16] = {
 	         1, 0, 0, 0,
 	         0, 1, 0, 0,
+	         0, 0, 1, 0,
+	         0, 0, 0, 1 };
+	*/
+	static double axialElements[16] = {
+	         1, 0, 0, 0,
+	         0,-1, 0, 0,
 	         0, 0, 1, 0,
 	         0, 0, 0, 1 };
 
 	static double coronalElements[16] = {
 	         1, 0, 0, 0,
-	         0, 0, 1, 0,
-	         0,-1, 0, 0,
+	         0, 0,-1, 0,
+	         0, 1, 0, 0,	//-1
 	         0, 0, 0, 1 };
 
 	static double sagittalElements[16] = {
 			0, 0,-1, 0,
 			1, 0, 0, 0,
-			0,-1, 0, 0,
+			0, 1, 0, 0,
 			0, 0, 0, 1 };
 
 	// Set the slice orientation
@@ -240,3 +246,6 @@ void MultiPlanarReformatWidget::removeAction(int actionHandle) {
   m_interactorStyle->removeAction(actionHandle);
 }
 
+void MultiPlanarReformatWidget::resetActions(){
+	m_interactorStyle->resetActions();
+}

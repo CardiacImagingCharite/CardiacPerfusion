@@ -67,9 +67,9 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 
   m_tacDialog = NULL;
 
-	this->ui->mprView_ul->setOrientation(0);
-	this->ui->mprView_ur->setOrientation(1);
-	this->ui->mprView_lr->setOrientation(2);
+	this->ui->mprView_ul->setOrientation(0);	//axial
+	this->ui->mprView_ur->setOrientation(1);	//coronal
+	this->ui->mprView_lr->setOrientation(2);	//sagittal
 
 
 /*  vtkImageData* blank = vtkImageData::New();
@@ -203,15 +203,10 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 		while(!displayedSegments.empty()) {
 		segmentHide( dynamic_cast<const BinaryImageTreeItem*>((*displayedSegments.begin())->getBaseItem()) );
 		}
-		//show VTK image
+		//show VTK image at the different windows
 		this->ui->mprView_ul->setImage( vtkImage );
-		//this->ui->mprView->setOrientation(0);
-
 		this->ui->mprView_ur->setImage(vtkImage);
-	//	this->ui->mprView_ur->setOrientation(1);
-
 		this->ui->mprView_lr->setImage(vtkImage);
-		//this->ui->mprView_lr->setOrientation(2);
 
      /*	for(int i=0;i<3;i++)
 		{
@@ -272,14 +267,29 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 //callback for draw button
 void KardioPerfusion::on_btn_draw_clicked()
 {
-	//get selected segment
-	BinaryImageTreeItem *seg = focusSegmentFromSelection();
-	if (seg)
+	bool checked = this->ui->btn_draw->isChecked();
+	if(checked)
 	{
-		//activate drawing action on VTK image data
-		this->ui->mprView_ul->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
-		this->ui->mprView_ur->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
-		this->ui->mprView_lr->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
+		//this->ui->btn_draw->setChecked(true);
+		//get selected segment
+		BinaryImageTreeItem *seg = focusSegmentFromSelection();
+		if (seg)
+		{
+			//activate drawing action on VTK image data
+			this->ui->mprView_ul->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
+			this->ui->mprView_ur->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
+			this->ui->mprView_lr->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
+		}
+		else 
+			this->ui->btn_draw->setChecked(false);
+	}
+	else
+	{
+		//this->ui->btn_draw->setChecked(false);
+
+		this->ui->mprView_ul->resetActions();
+		this->ui->mprView_ur->resetActions();
+		this->ui->mprView_lr->resetActions();
 	}
 }
 
@@ -381,6 +391,7 @@ void KardioPerfusion::on_btn_analyse_clicked()
 		m_tacDialog->move(pos);
 	}
 
+	this->ui->treeView->selectAll();
 	//get list of selected items
 	QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
 	//iterate over selected items
@@ -394,6 +405,9 @@ void KardioPerfusion::on_btn_analyse_clicked()
 			}
 		}
 	}
+	this->ui->treeView->selectionModel()->clearSelection();
+	
+
 	std::list<TreeItem *> itemList;
 	//add root item to the item list
 	itemList.push_back( &imageModel.getItem(QModelIndex()) );
@@ -491,6 +505,7 @@ void KardioPerfusion::segmentShow( const BinaryImageTreeItem *segItem ) {
 				boost::bind( &QCheckBox::checkState, this->ui->cb_erase )
 				),
 			ActionDispatch::ClickingAction, ActionDispatch::UnRestricted );
+		
 		//create ITK VTK connector
 		BinaryImageTreeItem::ConnectorHandle segmentConnector = segItem->getVTKConnector();
 		//add overlay at the widget

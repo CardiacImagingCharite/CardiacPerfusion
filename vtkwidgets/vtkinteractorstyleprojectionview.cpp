@@ -75,7 +75,8 @@ void vtkInteractorStyleProjectionView::resetActions() {
   ActionZoom = addAction("Zoom", boost::bind(&vtkInteractorStyleProjectionView::Zoom, this, _2 ), ActionDispatch::MovingAction, ActionDispatch::UnRestricted );
   ActionPan = addAction("Pan", boost::bind(&vtkInteractorStyleProjectionView::Pan, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   ActionWindowLevel = addAction("Window/Level", boost::bind(&vtkInteractorStyleProjectionView::WindowLevelDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
-  m_leftButtonAction = ActionSlice;
+  //m_leftButtonAction = ActionSlice;
+  m_leftButtonAction = ActionWindowLevel;
   m_interAction = ActionNone;
 }
 
@@ -370,6 +371,7 @@ void vtkInteractorStyleProjectionView::WindowLevelDelta( int dw/**<[in] delta wi
       dl += m_imageMapToWindowLevelColors->GetLevel();
     if (dw) m_imageMapToWindowLevelColors->SetWindow(dw);
     if (dl) m_imageMapToWindowLevelColors->SetLevel(dl);
+	std::cout << dw << "\t" << dl << std::endl;
     updateDisplay();
   }
 }

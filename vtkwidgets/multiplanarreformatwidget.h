@@ -50,6 +50,7 @@ class MultiPlanarReformatWidget : public QVTKWidget
   int addBinaryOverlay(vtkImageData *image, const QColor &color, const ActionDispatch &dispatch = ActionDispatch() );
   int addAction(const ActionDispatch &dispatch);
   void removeAction(int actionHandle);
+  void resetActions();
   void activateAction(int actionHandle);
   void activateOverlayAction(vtkImageData *image);
   void removeBinaryOverlay(vtkImageData *image);

@@ -55,6 +55,7 @@ SET( KardioPerfusionSrcs
 	vtkwidgets/multiplanarreformatwidget.cpp 
 	vtkwidgets/vtkinteractorstyleprojectionview.cpp 
 #	vtkwidgets/volumeprojectionwidget.cpp 
+	vtkwidgets/vtkinteractoractiondispatch.h
 #	serialization/ctimagetreemodel_serializer.cpp 
 )
 

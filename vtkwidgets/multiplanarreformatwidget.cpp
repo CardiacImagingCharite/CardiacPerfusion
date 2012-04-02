@@ -91,18 +91,19 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	m_reslice->SetResliceAxes(m_reslicePlaneTransform);
 	m_reslice->SetOutputDimensionality(2);
 
+
 	//init widget with a black image to supress error messages (input is 0)
-/*	vtkImageData* blank = vtkImageData::New();
+	vtkImageData* blank = vtkImageData::New();
 	blank->SetDimensions(100, 100, 1);
 	blank->AllocateScalars();
 	for (int i = 0; i < 100; i++)
       for (int j = 0; j < 100; j++)
-          blank->SetScalarComponentFromDouble(i, j, 0, 0, 0);
+          blank->SetScalarComponentFromDouble(i, j, 0, 0, 255);
 	blank->Update();
-	//setImage(blank)	//works but has effects on visualization 
-	m_reslice->SetInput(blank);
+	setImage(blank);	//works but has effects on visualization 
+	//m_reslice->SetInput(blank);
 	m_imageViewer->Render();
-	*/
+	
 }
 
 /** Destructor*/

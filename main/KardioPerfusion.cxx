@@ -59,35 +59,35 @@ const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
 // Constructor
 KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction(-1) 
 {
-  //this->showFullScreen();
-  this->ui = new Ui_KardioPerfusion;
-  this->ui->setupUi(this);
+	//this->showFullScreen();
+	this->ui = new Ui_KardioPerfusion;
+	this->ui->setupUi(this);
   
-  this->ui->treeView->setModel( &imageModel );
+	this->ui->treeView->setModel( &imageModel );
 
-  m_tacDialog = NULL;
+	m_tacDialog = NULL;
 
 	this->ui->mprView_ul->setOrientation(0);	//axial
 	this->ui->mprView_ur->setOrientation(1);	//coronal
 	this->ui->mprView_lr->setOrientation(2);	//sagittal
 
 
-/*  for(int i = 0; i < 4; i++)
-  {
-	  m_pViewer[i] = vtkSmartPointer<vtkImageViewer2>::New();
-	  m_pViewer[i]->SetInput(blank);
-	  m_pViewer[i]->GetRenderer()->ResetCamera();
-//	  m_pViewer[i]->GetRenderer()->SetBackground(0,0,0);
-//	  m_pViewer[i]->Render();
-  }
-  */
-  // Set up action signals and slots
-  connect(this->ui->actionOpenFile, SIGNAL(triggered()), this, SLOT(slotOpenFile()));
-  connect(this->ui->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
-  connect(this->ui->treeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-	   this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
-  connect( this->ui->treeView, SIGNAL( customContextMenuRequested(const QPoint &) ),
-    this, SLOT( treeViewContextMenu(const QPoint &) ) );
+	/*  for(int i = 0; i < 4; i++)
+	{
+		m_pViewer[i] = vtkSmartPointer<vtkImageViewer2>::New();
+		m_pViewer[i]->SetInput(blank);
+		m_pViewer[i]->GetRenderer()->ResetCamera();
+	//	  m_pViewer[i]->GetRenderer()->SetBackground(0,0,0);
+	//	  m_pViewer[i]->Render();
+	}
+	*/
+	// Set up action signals and slots
+	connect(this->ui->actionOpenFile, SIGNAL(triggered()), this, SLOT(slotOpenFile()));
+	connect(this->ui->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
+	connect(this->ui->treeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+		this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
+	connect( this->ui->treeView, SIGNAL( customContextMenuRequested(const QPoint &) ),
+	this, SLOT( treeViewContextMenu(const QPoint &) ) );
 };
 
 KardioPerfusion::~KardioPerfusion()

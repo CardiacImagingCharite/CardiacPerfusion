@@ -50,6 +50,19 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
   m_reslicePlaneTransform(vtkMatrix4x4::New()),
   m_interactorStyle(vtkSmartPointer<vtkInteractorStyleProjectionView>::New())
 {
+	//create button and add menu to it
+	m_menuButton = new QPushButton(this);
+
+	m_menuButton->resize(20,20);
+	m_menuButton->move(this->size().width()-20,this->size().height()-20);
+
+	QMenu *menu = new QMenu(this);
+	menu->addAction("Reset View");
+	menu->addAction("action 2");
+	menu->addAction("action 3");
+
+	m_menuButton->setMenu(menu);
+
 	m_reslice->SetOutputDimensionality(2);
 	m_reslice->SetBackgroundLevel(-1000);
 	m_reslice->SetInterpolationModeToCubic();
@@ -98,7 +111,7 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	blank->AllocateScalars();
 	for (int i = 0; i < 100; i++)
       for (int j = 0; j < 100; j++)
-          blank->SetScalarComponentFromDouble(i, j, 0, 0, 255);
+          blank->SetScalarComponentFromDouble(i, j, 0, 0, 0);
 	blank->Update();
 	setImage(blank);	//works but has effects on visualization 
 	//m_reslice->SetInput(blank);
@@ -123,6 +136,7 @@ void MultiPlanarReformatWidget::resizeEvent( QResizeEvent * event ) {
   QVTKWidget::resizeEvent(event);
   int xres = this->size().width();
   int yres = this->size().height();
+  this->m_menuButton->move(xres-20,yres-20);
   m_reslice->SetOutputExtent(0,xres,0,yres,0,0);
   m_reslice->SetOutputOrigin(-xres/2.0,-yres/2.0,0);
   BOOST_FOREACH(OverlayMapType::value_type it, m_overlays) {

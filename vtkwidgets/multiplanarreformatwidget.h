@@ -57,6 +57,7 @@ class MultiPlanarReformatWidget : public QVTKWidget
   virtual void resizeEvent( QResizeEvent * event );
   void setCubicInterpolation(bool cubic=true);
   void setOrientation(int orientation);
+  void showCircle(int radius);
   
   protected:
   typedef std::map< vtkImageData *, boost::shared_ptr< vtkBinaryImageOverlay > > OverlayMapType;

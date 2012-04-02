@@ -28,6 +28,7 @@
 #include <vtkImageData.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
+#include <vtkImageViewer2.h>
 
 #include <string>
 #include <iostream>
@@ -67,6 +68,7 @@ vtkInteractorStyleProjectionView::vtkInteractorStyleProjectionView():
   resetActions();
   tempTransform->PreMultiply();
 }
+
 
 void vtkInteractorStyleProjectionView::resetActions() {
   ActionFirst = ActionSlice = addAction("Slice", boost::bind(&vtkInteractorStyleProjectionView::Slice, this, _2), ActionDispatch::MovingAction, ActionDispatch::UnRestricted );
@@ -366,14 +368,23 @@ void vtkInteractorStyleProjectionView::Slice(int dpos/**<[in] delta in position 
 
 /** change Window and Level */
 void vtkInteractorStyleProjectionView::WindowLevelDelta( int dw/**<[in] delta window*/, int dl/**<[in] delta level*/) {
-  if (m_imageMapToWindowLevelColors  && (dw || dl)) {
-      dw += m_imageMapToWindowLevelColors->GetWindow();
-      dl += m_imageMapToWindowLevelColors->GetLevel();
-    if (dw) m_imageMapToWindowLevelColors->SetWindow(dw);
-    if (dl) m_imageMapToWindowLevelColors->SetLevel(dl);
-	std::cout << dw << "\t" << dl << std::endl;
-    updateDisplay();
-  }
+	if (m_imageMapToWindowLevelColors && m_imageViewer && (dw || dl)) 
+	{
+		dw += m_imageMapToWindowLevelColors->GetWindow();
+		dl += m_imageMapToWindowLevelColors->GetLevel();
+		if (dw) 
+		{
+			m_imageMapToWindowLevelColors->SetWindow(dw);
+			m_imageViewer->SetColorWindow(dw);
+		}
+		if (dl) 
+		{
+			m_imageMapToWindowLevelColors->SetLevel(dl);
+			m_imageViewer->SetColorLevel(dl);
+		}
+		std::cout << dw << "\t" << dl << std::endl;
+		updateDisplay();
+	}
 }
 
 

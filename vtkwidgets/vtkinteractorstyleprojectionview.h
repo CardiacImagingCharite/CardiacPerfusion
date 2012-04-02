@@ -27,6 +27,7 @@ class vtkImageMapToWindowLevelColors;
 class vtkMatrix4x4;
 class vtkTextActor;
 class vtkTransform;
+class vtkImageViewer2;
 
 
 /// Interactor Style specific for Projection Views.
@@ -43,6 +44,7 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   static vtkInteractorStyleProjectionView *New();
 
   vtkInteractorStyleProjectionView();
+
   ~vtkInteractorStyleProjectionView();
   
   /** @name Overidden Event Handlers
@@ -67,6 +69,7 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   ///@{
   void SetImageMapToWindowLevelColors(vtkImageMapToWindowLevelColors *map/**<[in]*/) { m_imageMapToWindowLevelColors = map; }
   void SetOrientationMatrix(vtkMatrix4x4 *orientation/**<[in]*/) { m_orientation = orientation; }
+  void SetImageViewer(vtkImageViewer2 * viewer) { m_imageViewer = viewer; }
   ///@}
   void CycleLeftButtonAction();
   void WindowLevelDelta( int dw, int dl );
@@ -122,6 +125,7 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   vtkTextActor *m_leftMBHint; ///< Hint actor for showing the Action associated with the Left Mouse Button
   float m_leftMBHintAlpha; ///< alpha value for #m_leftMBHint
   vtkImageMapToWindowLevelColors *m_imageMapToWindowLevelColors; ///< Mapper (set external via SetImageMapToWindowLevelColors()) for Window and Level (changed via vtkInteractorStyleProjectionView::ActionWindowLevel)
+  vtkImageViewer2 *m_imageViewer;
   vtkMatrix4x4 *m_orientation; ///< the Transformation Matrix of the displayed Data
   DisplayState m_initialState; ///< Display state at the beginning of an action
   private:

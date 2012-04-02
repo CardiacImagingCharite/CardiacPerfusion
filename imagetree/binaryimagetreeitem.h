@@ -52,7 +52,7 @@ class BinaryImageTreeItem : public ITKVTKTreeItem< BinaryImageType > {
     void drawSphere( float radius, float x, float y, float z, bool erase );
 	//applies a regionGrow algorithm from a given seed with a specific threshold to the parent image
     void regionGrow( float x, float y, float z, int threshold, boost::function<void()> postGrowingAction);
-	
+
 	//Getter and Setter for the item color
     const QColor &getColor() const { return color;}
     void setColor(const QColor &newColor) { color = newColor; }

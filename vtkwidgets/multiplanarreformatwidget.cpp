@@ -29,6 +29,9 @@
 #include <vtkImageData.h>
 #include <vtkRenderWindow.h>
 #include <vtkTransform.h>
+#include <vtkCursor2D.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
 
 #include <algorithm>
 #include <boost/bind.hpp>
@@ -54,15 +57,15 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	m_colormap->SetOutputFormatToRGB();
 
 	m_colormap->SetInputConnection(m_reslice->GetOutputPort());
-	m_imageViewer->GetRenderer()->ResetCamera();
+	//m_imageViewer->GetRenderer()->ResetCamera();
 	vtkSmartPointer<vtkImageActor> actor = vtkSmartPointer<vtkImageActor>::New();
 	actor->SetInput(m_colormap->GetOutput());
 	m_imageViewer->GetRenderer()->AddActor(actor);
 	//m_imageViewer->GetImageActor()->SetInput(m_colormap->GetOutput());
-
+	
 	//m_actor->SetInput(m_colormap->GetOutput());
 	//m_renderer->AddActor(m_actor);
-	m_imageViewer->GetRenderer()->ResetCamera();
+	//m_imageViewer->GetRenderer()->ResetCamera();
 	this->SetRenderWindow(m_imageViewer->GetRenderWindow());
 
 	// Set up the interaction
@@ -74,18 +77,32 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
   
 	m_interactorStyle->SetImageMapToWindowLevelColors( m_colormap );
 	m_interactorStyle->SetOrientationMatrix( m_reslicePlaneTransform );
+	m_interactorStyle->SetImageViewer(m_imageViewer);
 
-	vtkSmartPointer<vtkRenderWindowInteractor> interactor = vtkSmartPointer<vtkRenderWindowInteractor>::New();//this->GetRenderWindow()->GetInteractor();
+	//vtkSmartPointer<vtkRenderWindowInteractor> interactor = vtkSmartPointer<vtkRenderWindowInteractor>::New();//this->GetRenderWindow()->GetInteractor();
+	vtkSmartPointer<vtkRenderWindowInteractor> interactor = this->GetRenderWindow()->GetInteractor();
   
-	//m_imageViewer->SetupInteractor(interactor);
-	//m_imageViewer->GetRenderer()->ResetCamera();
-  
+
 	m_imageViewer->SetupInteractor(interactor);
   
 	interactor->SetInteractorStyle(m_interactorStyle);
 	m_interactorStyle->SetCurrentRenderer(m_imageViewer->GetRenderer());
+
 	m_reslice->SetResliceAxes(m_reslicePlaneTransform);
 	m_reslice->SetOutputDimensionality(2);
+
+	//init widget with a black image to supress error messages (input is 0)
+/*	vtkImageData* blank = vtkImageData::New();
+	blank->SetDimensions(100, 100, 1);
+	blank->AllocateScalars();
+	for (int i = 0; i < 100; i++)
+      for (int j = 0; j < 100; j++)
+          blank->SetScalarComponentFromDouble(i, j, 0, 0, 0);
+	blank->Update();
+	//setImage(blank)	//works but has effects on visualization 
+	m_reslice->SetInput(blank);
+	m_imageViewer->Render();
+	*/
 }
 
 /** Destructor*/
@@ -189,7 +206,7 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
     m_reslice->SetOutputSpacing(1,1,1);
 	m_imageViewer->SetInput(m_reslice->GetOutput());
 	
-	m_imageViewer->GetRenderWindow()->GetInteractor()->Initialize();
+	//m_imageViewer->GetRenderWindow()->GetInteractor()->Initialize();
 	m_imageViewer->Render();
 
     //window->AddRenderer(m_imageViewer->GetRenderer());
@@ -248,4 +265,27 @@ void MultiPlanarReformatWidget::removeAction(int actionHandle) {
 
 void MultiPlanarReformatWidget::resetActions(){
 	m_interactorStyle->resetActions();
+}
+
+void MultiPlanarReformatWidget::showCircle(int radius){
+
+  vtkSmartPointer<vtkCursor2D> cursor = 
+    vtkSmartPointer<vtkCursor2D>::New();
+
+  cursor->SetModelBounds(-10,10,-10,10,0,0);
+  cursor->AllOn();
+  //cursor->OutlineOff();
+
+  cursor->Update();
+ 
+
+  vtkSmartPointer<vtkPolyDataMapper> cursorMapper = 
+    vtkSmartPointer<vtkPolyDataMapper>::New();
+  cursorMapper->SetInputConnection(cursor->GetOutputPort());
+  vtkSmartPointer<vtkActor> cursorActor = 
+    vtkSmartPointer<vtkActor>::New();
+  cursorActor->GetProperty()->SetColor(1,0,0);
+  cursorActor->SetMapper(cursorMapper);
+  m_imageViewer->GetRenderer()->AddActor(cursorActor);
+
 }

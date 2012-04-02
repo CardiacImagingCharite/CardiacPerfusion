@@ -72,18 +72,6 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 	this->ui->mprView_lr->setOrientation(2);	//sagittal
 
 
-/*  vtkImageData* blank = vtkImageData::New();
-  blank->SetDimensions(10, 10, 1);
-  blank->AllocateScalars();
-  for (int i = 0; i < 10; i++)
-      for (int j = 0; j < 10; j++)
-          blank->SetScalarComponentFromDouble(i, j, 0, 0, 0);
-  blank->Update();
-
-  this->ui->mprView->setImage(blank);
-  this->ui->mprView_lr->setImage(blank);
-  this->ui->mprView_ur->setImage(blank);
-  */
 /*  for(int i = 0; i < 4; i++)
   {
 	  m_pViewer[i] = vtkSmartPointer<vtkImageViewer2>::New();
@@ -270,7 +258,6 @@ void KardioPerfusion::on_btn_draw_clicked()
 	bool checked = this->ui->btn_draw->isChecked();
 	if(checked)
 	{
-		//this->ui->btn_draw->setChecked(true);
 		//get selected segment
 		BinaryImageTreeItem *seg = focusSegmentFromSelection();
 		if (seg)
@@ -285,8 +272,6 @@ void KardioPerfusion::on_btn_draw_clicked()
 	}
 	else
 	{
-		//this->ui->btn_draw->setChecked(false);
-
 		this->ui->mprView_ul->resetActions();
 		this->ui->mprView_ur->resetActions();
 		this->ui->mprView_lr->resetActions();

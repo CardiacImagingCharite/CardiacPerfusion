@@ -31,40 +31,100 @@
 
 class BinaryImageTreeItem;
 
+/*! \class CTImageTreeItem CTImageTreeItem.h "CTImageTreeItem.h"
+ *  \brief This is the representation of a CT image that can be placed in a TreeView.
+ */
 class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
 {
   public:
     typedef ITKVTKTreeItem< CTImageType > BaseClass;
+	///Constructor of the class.
     CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict=itk::MetaDataDictionary());
+	///Clones this item. 
+	/*!
+	\param clonesParent The parent of the item. Default is NULL.
 
+	\return Returns the cloned treeItem.
+	*/
     virtual TreeItem *clone(TreeItem *clonesParent=NULL) const;
+	///Sets data to the item. (Not implemented)
+	/*!
+	\param column Contains the desired column.
+	\param value Contains the value that is to be set.
+
+	\return FALSE if something went wrong. (Actually returns always FALSE)
+	*/
     virtual bool setData(int column, const QVariant& value);
     virtual QVariant do_getData_DisplayRole(int column) const;
     virtual QVariant do_getData_UserRole(int column) const;
     virtual QVariant do_getData_ForegroundRole(int column) const;
     virtual Qt::ItemFlags flags(int column) const;
+	///Getter for the column count.
+	/*!
+	\return Column count. 
+	*/
     virtual int columnCount() const;
+	///Getter for the unique ID.
+	/*!
+	\return String that contains the UID.
+	*/
     virtual const std::string &getUID() const { return itemUID; }
+	///Getter for the time.
+	/*!
+	\return Time.
+	*/
     double getTime() const;
+	///Getter for the posix time.
+	/*!
+	\return Posix time.
+	*/
     boost::posix_time::ptime getPTime() const;
+	///Getter for the segmentation values
+	/*!
+	\param values Placeholder for the segmentation values
 
+	\return FALSE if something went wrong.
+	*/
     bool getSegmentationValues( SegmentationValues &values) const;
     
-    
+    ///Append a filename to the list.
+	/*!
+	\param fn The filename.
+	*/
     void appendFileName( const std::string &fn ) { fnList.insert( fn ); }
-    
+    ///Generates an overlay segemnt for the actual image.
+	/*!
+	\return A pointer to the generated Binary tree item.
+	*/
     BinaryImageTreeItem *generateSegment(void);
-    
+    ///Getter for the dicom tag.
     static const std::string &getNumberOfFramesTag();
-    static const std::string &getSeriesInstanceUIDTag();
-    static const std::string &getSOPInstanceUIDTag();
-    static const std::string &getAcquisitionDatetimeTag();
-    void retrieveITKImage(QProgressDialog *progress = NULL, int progressScale=0, int progressBase=0);
-    static void getUIDFromDict(const itk::MetaDataDictionary &dict, std::string &iUID);
-    static inline bool isRealHUvalue(CTPixelType value) { return (value!=-2048)?true:false; }
+    ///Getter for the dicom tag.
+	static const std::string &getSeriesInstanceUIDTag();
+    ///Getter for the dicom tag.
+	static const std::string &getSOPInstanceUIDTag();
+    ///Getter for the dicom tag.
+	static const std::string &getAcquisitionDatetimeTag();
+    ///Get the associated ITK image.
+	void retrieveITKImage(QProgressDialog *progress = NULL, int progressScale=0, int progressBase=0);
+    ///Get the UID from the dicom meta data.
+	static void getUIDFromDict(const itk::MetaDataDictionary &dict, std::string &iUID);
+    ///Checks if a given value is a real HU value.
+	/*!
+	\param value The pixel value that is to be checked.
+
+	\return TRUE or FALSE.
+	*/
+	static inline bool isRealHUvalue(CTPixelType value) { return (value!=-2048)?true:false; }
     
     typedef std::map< const ITKVTKTreeItem<BinaryImageType> *, SegmentationValues > SegmentationValueMap;
-    virtual bool isA(const std::type_info &other) const { 
+    ///Identifies the type of a TreeItem.
+	/*!
+	\param other Contains the compare type.
+
+	\return Returns TRUE if the type matches otherwise FALSE.
+	*/
+	virtual bool isA(const std::type_info &other) const { 
       if (typeid(CTImageTreeItem)==other) return true;
       if (typeid(BaseClass)==other) return true;
       if (typeid(BaseClass::BaseClass)==other) return true;
@@ -74,9 +134,19 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
     
   protected:
     SegmentationValueMap segmentationValueCache;
+	///Calculate the segmentation values.
+	/*!
+	\param values Placeholder for the calculated values.
+
+	\return FALSE if there are no values.
+	*/
     bool internalGetSegmentationValues( SegmentationValues &values) const;
     class ReaderProgress;
     typedef std::set< std::string > FileNameList;
+	///Getter for the number of slices.
+	/*!
+	\return Number of slices.
+	*/
     int getNumberOfSlices() const;
     std::string itemUID;
     FileNameList fnList;

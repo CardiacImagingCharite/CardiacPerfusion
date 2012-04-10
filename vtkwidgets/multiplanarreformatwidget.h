@@ -44,22 +44,73 @@ class vtkMatrix4x4;
 /// QT-Widget displaying a Volume Slice
 class MultiPlanarReformatWidget : public QVTKWidget
 {
+	Q_OBJECT
+
 	public:
+	///Constructor of the widget.
 	MultiPlanarReformatWidget(QWidget* parent = NULL, Qt::WFlags f = 0);
+	///Deconstructor of the widget.
 	~MultiPlanarReformatWidget();  
+	///Sets the image that is to be shown
+	/*!
+	\param image Contains a pointer to the image.
+	*/
 	void setImage(vtkImageData *image);
+	///Adds a binary overlay to the actual image
+	/*!
+	\param image Contains a pointer to the image.
+	\param color Contains the color of the overlay.
+	\param dispatch (optional) Contains the associated action. Default creates new action.
+	*/
 	int addBinaryOverlay(vtkImageData *image, const QColor &color, const ActionDispatch &dispatch = ActionDispatch() );
+	///Adds an action to the action list.
+	/*!
+	\param dispatch The action that is to be added.
+	*/
 	int addAction(const ActionDispatch &dispatch);
+	///Removes an action of the actoin list.
+	/*!
+	\param actionHandle An action handle of the action that is to be removed.
+	*/
 	void removeAction(int actionHandle);
+	///Resets all actions.
 	void resetActions();
+	///Activates a specific action.
+	/*!
+	\param actionHandle An action handle of the action that is to be removed.
+	*/
 	void activateAction(int actionHandle);
+	///Activates an overlay to a specific image.
+	/*!
+	\param image A pointer to the image.
+	*/
 	void activateOverlayAction(vtkImageData *image);
+	///Removes an overlay from a specific image.
+	/*!
+	\param image A pointer to the image.
+	*/
 	void removeBinaryOverlay(vtkImageData *image);
+	///Resizes the form.
+	/*!
+	\param event The resize event.
+	*/
 	virtual void resizeEvent( QResizeEvent * event );
+	///Sets interpolation to cubic or linear
+	/*!
+	\param cubic (optional) Default is TRUE, if FALSE the interpolation is set to linear.
+	*/
 	void setCubicInterpolation(bool cubic=true);
+	///Sets the orientation of the slices
+	/*!
+	\param orientation A number that appoints the desired orientation
+	*/
 	void setOrientation(int orientation);
-	void showCircle(int radius);
+	void showCircle(float x, float y, float z, int radius);
   
+	public slots:
+	///Resets the view.
+	void resetView();
+
 	protected:
 	typedef std::map< vtkImageData *, boost::shared_ptr< vtkBinaryImageOverlay > > OverlayMapType;
 	OverlayMapType m_overlays;
@@ -73,6 +124,9 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	vtkSmartPointer<vtkInteractorStyleProjectionView> m_interactorStyle; ///< special InteractorStyle for Projected Volumes
 	int m_orientation;
 	QPushButton *m_menuButton;
+
+	private:
+	static void mouseMoveCallback(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);
 };
 
 #endif // MULTIPLANARREFORMATWIDGET_H

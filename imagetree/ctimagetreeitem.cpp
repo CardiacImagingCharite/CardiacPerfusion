@@ -70,7 +70,7 @@ struct IndexCompareFunctor {
 bool CTImageTreeItem::getSegmentationValues( SegmentationValues &values) const {
 	//a map that contains the binary images and the segmentation values
 	SegmentationValueMap::const_iterator it = segmentationValueCache.find( values.segment );
-	// if values exist, no need to calculate again?
+	// if values exist, no need to calculate again
 	if (it != segmentationValueCache.end() //if segment was found
 	&& it->second.mtime == values.segment->getITKMTime()
     && it->second.accuracy == values.accuracy) { //has the same accuracy

@@ -383,3 +383,8 @@ void BinaryImageTreeItem::createRandomColor() {
       color.setBlue(descend);
   }
 }
+
+void BinaryImageTreeItem::test(float x, float y, float z, int r)
+{
+	std::cout << x << "\t" << y << "\t" << z << "\t" << r << std::endl;
+}

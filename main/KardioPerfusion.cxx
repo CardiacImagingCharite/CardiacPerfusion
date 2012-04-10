@@ -72,15 +72,6 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 	this->ui->mprView_lr->setOrientation(2);	//sagittal
 
 
-	/*  for(int i = 0; i < 4; i++)
-	{
-		m_pViewer[i] = vtkSmartPointer<vtkImageViewer2>::New();
-		m_pViewer[i]->SetInput(blank);
-		m_pViewer[i]->GetRenderer()->ResetCamera();
-	//	  m_pViewer[i]->GetRenderer()->SetBackground(0,0,0);
-	//	  m_pViewer[i]->Render();
-	}
-	*/
 	// Set up action signals and slots
 	connect(this->ui->actionOpenFile, SIGNAL(triggered()), this, SLOT(slotOpenFile()));
 	connect(this->ui->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
@@ -262,10 +253,17 @@ void KardioPerfusion::on_btn_draw_clicked()
 		BinaryImageTreeItem *seg = focusSegmentFromSelection();
 		if (seg)
 		{
+			ActionDispatch cirlceAction(std::string("test circle"), 
+			boost::bind(&BinaryImageTreeItem::test, seg, 
+			_3, _4, _5, this->ui->sb_size->value()),
+			ActionDispatch::MovingAction, ActionDispatch::Restricted );
+
 			//activate drawing action on VTK image data
 			this->ui->mprView_ul->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
 			this->ui->mprView_ur->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
 			this->ui->mprView_lr->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
+
+			this->ui->mprView_ul->addAction(cirlceAction);
 		}
 		else 
 			this->ui->btn_draw->setChecked(false);
@@ -294,6 +292,7 @@ void KardioPerfusion::on_btn_regionGrow_clicked()
 			  boost::function<void()>(boost::bind(&KardioPerfusion::clearPendingAction, this))
 			),
 			ActionDispatch::ClickingAction, ActionDispatch::UnRestricted );
+		
 		//add action to mprView
 		pendingAction = this->ui->mprView_ul->addAction(regionGrowAction);
 		pendingAction = this->ui->mprView_ur->addAction(regionGrowAction);

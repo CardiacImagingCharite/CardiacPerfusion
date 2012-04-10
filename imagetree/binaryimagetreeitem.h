@@ -26,51 +26,125 @@
 #include <boost/function.hpp>
 #include <boost/serialization/access.hpp>
 
+/*! \class BinaryImageTreeItem BinaryImageTreeItem.h "BinaryImageTreeItem.h"
+ *  \brief This is the representation of an image overlay which can be placed in a TreeView.
+ */
 class BinaryImageTreeItem : public ITKVTKTreeItem< BinaryImageType > {
   public:
     typedef ITKVTKTreeItem< BinaryImageType > BaseClass;
-	// Constructor, which takes its parent, an Image and a name
+	/// Constructor of the class.
+	/*!
+	\param parent A pointer to the parent element of the segment.
+	\param itkImage A pointer to the associated itkImage,
+	\param name The name of the segment.
+	*/
     BinaryImageTreeItem(TreeItem * parent, ImageType::Pointer itkImage, const QString &name);
-	//clones an existing TreeItem
+	///Clones an existing TreeItem.
+	/*!
+	\return Pointer to a TreeItem.
+	*/
     virtual TreeItem *clone(TreeItem *clonesParent=NULL) const;
-	//returns the number of columns (always 1, cause there is only the name of the Item)
-    virtual int columnCount() const;
-	//returns the name of the TreeItem
+	///Get the column count (always 1, because there is only the name of the Item).
+    /*!
+	\return Number of columns.
+	*/
+	virtual int columnCount() const;
+	///Get Name of the TreeItem.
+	/*!
+	\return Name of the TreeItem.
+	*/
     virtual QVariant do_getData_DisplayRole(int c) const;
-	//returns the color of the TreeItem
+	///Getter for the color.
+	/*!
+	\return The color of the TreeItem.
+	*/
     virtual QVariant do_getData_BackgroundRole(int column) const;
-	//returns the properties of a TreeItem
+	///Getter for the properties.
+	/*!
+	\return The properties of the TreeItem.
+	*/
     virtual Qt::ItemFlags flags(int column) const;
-	//sets the name of the TreeItem for column 0 and return true, if succeed
+	///Setter for the properties of the TreeItem.
+	/*!
+	\param c Defines the column
+	\param value Contains the value, that is to be set.
+
+	\return True if succeed.
+	*/
     virtual bool setData(int c, const QVariant &value);
 
-	//Getter and Setter for the item name
+	///Getter for the item name
+	/*!
+	\return Name of the TreeItem.
+	*/
     const QString &getName() const { return name; }
+	///Setter for the item name
+	/*!
+	\param _name Contains the new name of the TreeItem.
+	*/
     void setName(const QString &_name) { name = _name; }
 
-	//draws a sphere with a given radius at a specific position (or erases it)
+	///Draws or erases a sphere at the overlay 
+	/*!
+	\param radius The radius of the sphere.
+	\param x The point on the x-axis.
+	\param y The point on the y-axis.
+	\param z The point on the z-axis.
+	\param erase Indicates if the sphere is to be erased.
+	*/
     void drawSphere( float radius, float x, float y, float z, bool erase );
-	//applies a regionGrow algorithm from a given seed with a specific threshold to the parent image
+	///Applies a regionGrow algorithm from a given seed with a specific threshold to the parent image.
+	/*!
+	\param x The point of the seed on the x-axis.
+	\param y The point of the seed on the y-axis.
+	\param z The point of the seed on the z-axis.
+	\param threshold Contains the threshold for the surrounding of the seed.
+	\param postGrowingAction This function is called after the regionGrow algorithm.
+	*/
     void regionGrow( float x, float y, float z, int threshold, boost::function<void()> postGrowingAction);
 
-	//Getter and Setter for the item color
-    const QColor &getColor() const { return color;}
+	///Getter for the item color.
+    /*!
+	\return The color of the segment.
+	*/
+	const QColor &getColor() const { return color;}
+	///Setter for the item color.
+	/*!
+	\param newColot Contains the new item color.
+	*/
     void setColor(const QColor &newColor) { color = newColor; }
-    //applies a threshold filter with given borders to the parent image
+    ///Applies a threshold filter with given borders to the parent image.
+	/*!
+	\param lower The lower gray value.
+	\param upper The upper gray value.
+	*/
 	void thresholdParent(double lower, double upper);
 
 //    bool watershedParent(const BinaryImageTreeItem *includedSegment, const BinaryImageTreeItem *excludedSegment);
     
-	//dilates the binary overlay image with a given number of iteration
+	///Dilates the binary overlay image with a given number of iterations.
+	/*!
+	\param iterations The number of iterations.
+	*/
 	void binaryDilate(int iterations);
-    //erodes the binary overlay image with a given number of iteration
+    ///Erodes the binary overlay image with a given number of iteration
+	/*!
+	\param iterations The number of iterations.
+	*/
 	void binaryErode(int iterations);
-	//applies a canny edge filter to the parent image
-	void extractEdges();
-	// ???
+
+	/// Get the volume in ml.
+	/*!
+	\return The volume in ml.
+	*/
     double getVolumeInML(void) const;
 
-	//identifies the type of an TreeItem
+	///Identifies the type of a TreeItem.
+	/*!
+	\param other Contains the compare type.
+
+	\return Returns TRUE if the type matches otherwise FALSE.
+	*/
     virtual bool isA(const std::type_info &other) const { 
       if (typeid(BinaryImageTreeItem)==other) return true;
       if (typeid(BaseClass)==other) return true;
@@ -79,12 +153,13 @@ class BinaryImageTreeItem : public ITKVTKTreeItem< BinaryImageType > {
     }
     
   private:
-    void createRandomColor();//creates and sets the color of the overlay
+	///Creates a random color and sets it to the overlay.
+    void createRandomColor();
     QString name; // name of the TreeItem
     QColor color;// color of the TreeItem
     
   protected:    
-	// ???
+	
     BinaryImageTreeItem():volumeMtime(0) {};
 
   private:

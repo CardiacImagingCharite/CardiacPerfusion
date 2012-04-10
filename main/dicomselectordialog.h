@@ -26,21 +26,39 @@
 #include "ctimagetreemodel.h"
 #include "dicomtagtype.h"
 
+/*! \class DicomSelectorDialog DicomSelectorDialog.h "DicomSelectorDialog.h"
+ *  \brief This is the associated class to the GUI form of the DicomSelector.
+ *
+ */
 class DicomSelectorDialog : public QDialog, private Ui_DicomSelectDialog
 {
-  public:
-  DicomSelectorDialog(QWidget * parent = 0, Qt::WindowFlags f = 0);
-  void setFileOrDirectory( const QString &name ) { fileNames.clear(); fileNames.push_back( name ); }
-  void setFilesOrDirectories( const QStringList &names ) { fileNames = names; }
-  void getSelectedImageDataList(CTImageTreeModel &other) const;
+	public:
+	/// Constructor of the dialog
+	DicomSelectorDialog(QWidget * parent = 0, Qt::WindowFlags f = 0);
+	///Sets a path to a file or a directory.
+	/*!
+	\param name Contains the filename to the file or directory.
+	*/
+	void setFileOrDirectory( const QString &name ) { fileNames.clear(); fileNames.push_back( name ); }
+	///Sets a list of filenames.
+	/*!
+	\param names Contains the names to the files.
+	*/
+	void setFilesOrDirectories( const QStringList &names ) { fileNames = names; }
+	/// Gets a list of the selected image data.
+	/*!
+	\param other Contains the image model.
+	*/
+	void getSelectedImageDataList(CTImageTreeModel &other) const;
+	/// Executes the dialog.
+	virtual void exec();
+	///Hides the dialog and sets the result code to Rejected.
+	virtual void reject();
   
-  virtual void exec();
-  virtual void reject();
-  
-  private:
-  CTImageTreeModel ctImageModel;
-  QStringList fileNames;
-  static const DicomTagList HeaderFields;
+	private:
+	CTImageTreeModel ctImageModel;
+	QStringList fileNames;
+	static const DicomTagList HeaderFields;
 };
 
 

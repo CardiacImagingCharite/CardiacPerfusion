@@ -29,9 +29,10 @@
 #include <vtkImageData.h>
 #include <vtkRenderWindow.h>
 #include <vtkTransform.h>
-#include <vtkCursor2D.h>
+#include <vtkRegularPolygonSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
+#include <vtkCallbackCommand.h>
 
 #include <algorithm>
 #include <boost/bind.hpp>
@@ -56,13 +57,25 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	m_menuButton->resize(20,20);
 	m_menuButton->move(this->size().width()-20,this->size().height()-20);
 
+	QAction *resetViewAction = new QAction("Reset View", m_menuButton);
+	connect(resetViewAction, SIGNAL(triggered()), this, SLOT(resetView()));
+
 	QMenu *menu = new QMenu(this);
-	menu->addAction("Reset View");
+	menu->addAction(resetViewAction);
 	menu->addAction("action 2");
 	menu->addAction("action 3");
 
 	m_menuButton->setMenu(menu);
 
+	//create Callback and add Observer for the MouseMove Event
+
+/*	vtkSmartPointer<vtkCallbackCommand> mouseMoveCB = 
+      vtkSmartPointer<vtkCallbackCommand>::New();
+	mouseMoveCB->SetCallback ( &MultiPlanarReformatWidget::mouseMoveCallback );
+	mouseMoveCB->SetClientData(m_imageViewer);
+
+	m_interactorStyle->AddObserver(vtkCommand::MouseMoveEvent, mouseMoveCB);
+	*/
 	m_reslice->SetOutputDimensionality(2);
 	m_reslice->SetBackgroundLevel(-1000);
 	m_reslice->SetInterpolationModeToCubic();
@@ -282,15 +295,14 @@ void MultiPlanarReformatWidget::resetActions(){
 	m_interactorStyle->resetActions();
 }
 
-void MultiPlanarReformatWidget::showCircle(int radius){
+void MultiPlanarReformatWidget::showCircle(float x, float y, float z, int radius){
 
-  vtkSmartPointer<vtkCursor2D> cursor = 
+/*  vtkSmartPointer<vtkCursor2D> cursor = 
     vtkSmartPointer<vtkCursor2D>::New();
 
   cursor->SetModelBounds(-10,10,-10,10,0,0);
   cursor->AllOn();
   //cursor->OutlineOff();
-
   cursor->Update();
  
 
@@ -302,5 +314,46 @@ void MultiPlanarReformatWidget::showCircle(int radius){
   cursorActor->GetProperty()->SetColor(1,0,0);
   cursorActor->SetMapper(cursorMapper);
   m_imageViewer->GetRenderer()->AddActor(cursorActor);
+  */
+}
+
+void MultiPlanarReformatWidget::resetView()
+{
+	std::cout << "Reset View" << std::endl;
+}
+
+/*void MultiPlanarReformatWidget::mouseMoveCallback(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)
+{
+
+	vtkSmartPointer<vtkInteractorStyleProjectionView> interactorStyle = 
+		static_cast<vtkInteractorStyleProjectionView*>(caller);
+
+	vtkSmartPointer<vtkImageViewer2> viewer = 
+      static_cast<vtkImageViewer2*>(clientdata);
+
+	const int *pos;
+	pos = interactorStyle->GetInteractor()->GetEventPosition();
+
+	std::cout << pos[0] << "\t" << pos[1] << std::endl;
+
+	vtkSmartPointer<vtkRegularPolygonSource> circle =
+	vtkSmartPointer<vtkRegularPolygonSource>::New();
+ 
+	//polygonSource->GeneratePolygonOff();
+	circle->SetNumberOfSides(50);
+	circle->SetRadius(10);
+	circle->SetCenter(pos[0],pos[1],0);
+	circle->Update();
+ 
+
+  vtkSmartPointer<vtkPolyDataMapper> cursorMapper = 
+    vtkSmartPointer<vtkPolyDataMapper>::New();
+  cursorMapper->SetInputConnection(circle->GetOutputPort());
+  vtkSmartPointer<vtkActor> cursorActor = 
+    vtkSmartPointer<vtkActor>::New();
+  cursorActor->GetProperty()->SetColor(1,0,0);
+  cursorActor->SetMapper(cursorMapper);
+  viewer->GetRenderer()->AddActor(cursorActor);
 
 }
+*/

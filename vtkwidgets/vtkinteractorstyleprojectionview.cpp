@@ -382,7 +382,6 @@ void vtkInteractorStyleProjectionView::WindowLevelDelta( int dw/**<[in] delta wi
 			m_imageMapToWindowLevelColors->SetLevel(dl);
 			m_imageViewer->SetColorLevel(dl);
 		}
-		std::cout << dw << "\t" << dl << std::endl;
 		updateDisplay();
 	}
 }

@@ -26,22 +26,31 @@
 
 
 class CTImageTreeItem;
-
+/*! \class TacDialog TacDialog.h "TacDialog.h"
+ *  \brief The GUI class for the dialog, which can show the time attenuation curves.
+ */
 class TacDialog : public QDialog, private Ui_TacDialog
 {
 	Q_OBJECT
 	
 public:
-	//Constructor/Destructor
+	///Constructor
 	TacDialog(QWidget * parent = 0, Qt::WindowFlags f = 0);
+	///Destructor
 	~TacDialog();
-	//add images to the dialog
+	///Add an image to the dialog.
+	/*!
+	\param image The image, that is to be added.
+	*/
 	void addImage(CTImageTreeItem *image);
-	//add segments to the dialog
+	///Add a segment to the dialog.
+	/*!
+	\param segment The segment, that is to be added. 
+	*/
 	void addSegment(BinaryImageTreeItem *segment);
-	//execution method
+	///Executes/shows the dialog.
 	int exec(void);
-	//show the dialog
+	///Shows the dialog.
 	void show();
 
 public slots:
@@ -49,7 +58,7 @@ public slots:
 
 private:
 
-	//functor for comparing two times
+	///A structure that represents a functor for comparing two times
 	struct CTImageTimeCompareFunctor {
 		typedef CTImageTreeItem * argT;
 		bool operator()(const argT &x, const argT &y) const;

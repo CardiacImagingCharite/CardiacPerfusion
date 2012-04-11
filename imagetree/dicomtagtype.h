@@ -24,6 +24,9 @@
 #include <boost/serialization/access.hpp>
 #include <boost/shared_ptr.hpp>
 
+/*!
+	A structure to represent the dicom tags.
+*/
 struct DicomTagType {
   std::string name;
   std::string tag;

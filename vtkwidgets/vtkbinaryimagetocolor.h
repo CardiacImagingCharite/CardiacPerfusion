@@ -23,7 +23,9 @@
 #include <boost/array.hpp>
 
 
-
+/*! \class vtkBinaryImageToColor vtkBinaryImageToColor.h "vtkBinaryImageToColor.h"
+ *  \brief 
+ */
 class vtkBinaryImageToColor: public vtkScalarsToColors {
   public:
   vtkTypeRevisionMacro(vtkBinaryImageToColor,vtkScalarsToColors);

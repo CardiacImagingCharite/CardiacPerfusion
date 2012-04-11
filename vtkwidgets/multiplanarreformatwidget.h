@@ -41,7 +41,9 @@ class vtkBinaryImageToColor;
 class vtkMatrix4x4;
 
 
-/// QT-Widget displaying a Volume Slice
+/*! \class MultiPlanarReformatWidget MultiPlanarReformatWidget.h "MultiPlanarReformatWidget.h"
+ *  \brief This is a widget that can display VTK images on a GUI.
+ */
 class MultiPlanarReformatWidget : public QVTKWidget
 {
 	Q_OBJECT

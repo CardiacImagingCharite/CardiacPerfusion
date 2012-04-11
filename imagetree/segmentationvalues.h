@@ -24,13 +24,17 @@
 #include "imagedefinitions.h"
 
 
-//struct, which contains necessary information of a segment
+/*!
+	A Structure, which contains necessary information of a segment.
+*/
 struct SegmentationValues {
-	//enum for the accuracy
+	/*!
+		An enumeration for the accuracy.
+	*/
 	enum Accuracy {
-		SimpleAccuracy,
-		PreventDoubleSamplingAccuracy,
-		InterpolatedAccuracy
+		SimpleAccuracy,					/**<Simple accuracy*/
+		PreventDoubleSamplingAccuracy,	/**<Accuracy, which prevents double sampling*/
+		InterpolatedAccuracy			/**<Interpolated accuracy*/
 	};
 	//pointer to the segment
 	const ITKVTKTreeItem<BinaryImageType> *segment;

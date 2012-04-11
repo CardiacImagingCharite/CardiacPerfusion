@@ -253,17 +253,17 @@ void KardioPerfusion::on_btn_draw_clicked()
 		BinaryImageTreeItem *seg = focusSegmentFromSelection();
 		if (seg)
 		{
-			ActionDispatch cirlceAction(std::string("test circle"), 
+/*			ActionDispatch cirlceAction(std::string("test circle"), 
 			boost::bind(&BinaryImageTreeItem::test, seg, 
 			_3, _4, _5, this->ui->sb_size->value()),
 			ActionDispatch::MovingAction, ActionDispatch::Restricted );
-
+*/
 			//activate drawing action on VTK image data
 			this->ui->mprView_ul->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
 			this->ui->mprView_ur->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
 			this->ui->mprView_lr->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
 
-			this->ui->mprView_ul->addAction(cirlceAction);
+//			this->ui->mprView_ul->addAction(cirlceAction);
 		}
 		else 
 			this->ui->btn_draw->setChecked(false);

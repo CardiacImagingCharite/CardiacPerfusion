@@ -31,41 +31,126 @@
 
 class CTImageTreeModel;
 class BinaryImageTreeItem;
-
+/*! \class TreeItem TreeItem.h "TreeItem.h"
+ *  \brief This class represents a tree item.
+ */
 class TreeItem : boost::noncopyable {
   public:
+	///A structure which contains exceptions.
     struct TreeTrouble : public std::exception { };
+	///Constructor
     TreeItem(TreeItem *parent);
     explicit TreeItem(CTImageTreeModel *model);
-    ~TreeItem();
+    ///Destructor
+	~TreeItem();
+	///Gets the child item at a specific number.
+	/*!
+	\param number Desired number of the child.
+
+	\return Child tree item.
+	*/
     TreeItem &child(unsigned int number);
     const TreeItem &child(unsigned int number) const;
-    unsigned int childCount() const;
+    ///Gets the child count.
+	/*!
+	\return Child count.
+	*/
+	unsigned int childCount() const;
+	///Clones the actual child elements to a specific tree item
+	/*!
+	\param dest Destination tree item.
+	*/
     void cloneChildren(TreeItem *dest) const;
+	///Gets the data at a specific column.
+	/*!
+	\param column The desired column.
+	\param role (optional) The role of the data. Default is DisplayRole.
+
+	\return The data at that column.
+	*/
     QVariant data(int column, int role = Qt::DisplayRole) const;
-    
+	///Clones the actual object.
+	/*!
+	\param clonesParent The parent element of the clone.
+
+	\return The cloned tree item. 
+	*/
     virtual TreeItem *clone(TreeItem *clonesParent) const;
-    virtual int columnCount() const;
+    ///Gets the number of columns.
+	/*!
+	\return The column count. 
+	*/
+	virtual int columnCount() const;
     
     virtual QVariant do_getData_DisplayRole(int column) const { return QVariant::Invalid; }
     virtual QVariant do_getData_UserRole(int column) const { return do_getData_DisplayRole(column); }
     virtual QVariant do_getData_ForegroundRole(int column) const { return QVariant::Invalid; }
     virtual QVariant do_getData_BackgroundRole(int column) const { return QVariant::Invalid; }
     virtual QVariant do_getData_FontRole(int column) const;
-    
+    ///Gets the flags of the tree item
+	/*!
+	\param column The desired column.
+
+	\return The flags of the element. 
+	*/
     virtual Qt::ItemFlags flags(int column) const;
+	///Gets the UID of the tree item.
+	/*!
+	\return The UID.
+	*/
     virtual const std::string &getUID(void) const { static std::string t; return t; }
     
     unsigned int depth(void) const;
+	///Sorts the children of the actual element.
+	/*!
+	\param column The reference column.
+	\param ascending (optional) The sorting order. Default is TRUE.
+	*/
     void sortChildren( int column, bool ascending=true );
+	///Inserts a child at a specific position.
+	/*!
+	\param child The child which is to be added.
+	\param position The target position
+	*/
     bool insertChild(TreeItem *child, unsigned int position);
+	///Insert child at the end of the list.
+	/*!
+	\param child The child which is to be added.
+	*/
     bool insertChild(TreeItem *child);
+
     bool claimChild(TreeItem *child);
+	///Gets the parent of the actual element.
+	/*!
+	\return Parent of tree item.
+	*/
     TreeItem *parent();
     const TreeItem *parent() const;
+	///Removes a given number of children beginning at a defined position
+	/*!
+	\param position The starting postion
+	\param count (optional) The numbers of children to be removed. Default is 1.
+
+	\return FALSE if position and cound exeeds the size.
+	*/
     bool removeChildren(unsigned int position, unsigned int count=1);
+	///Gets the actual child number.
+	/*!
+	\return The child number.
+	*/
     int childNumber() const;
+	///Sets data at a given column. Not implemented.
+	/*!
+	\param column The destination column
+	\param value The data to be added.
+
+	\return Returns FALSE.
+	*/
     virtual bool setData(int column, const QVariant &value);
+	///Gets the model.
+	/*!
+	\return Returns the actual model.
+	*/
     CTImageTreeModel *getModel(void) { return model; }
     void clearActiveDown(void) const;
     bool isActive(void) const { return active; }

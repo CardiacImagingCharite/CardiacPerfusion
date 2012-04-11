@@ -236,7 +236,7 @@ void BinaryImageTreeItem::regionGrow( float x, float y, float z, int threshold, 
 */
 
 //applies a canny edge filter to the parent image
-void BinaryImageTreeItem::extractEdges()
+/*void BinaryImageTreeItem::extractEdges()
 {
 	//get ITK CT image
 	CTImageTreeItem::ImageType::Pointer parentImagePointer = dynamic_cast<CTImageTreeItem*>(parent())->getITKImage();
@@ -265,7 +265,7 @@ void BinaryImageTreeItem::extractEdges()
 	//set the result as actual segment
 	setITKImage(result);
 }
-
+*/
 //applies a threshold filter with given borders to the parent image
 void BinaryImageTreeItem::thresholdParent(double lower, double upper) {
 	//get ITK CT image
@@ -384,7 +384,8 @@ void BinaryImageTreeItem::createRandomColor() {
   }
 }
 
-void BinaryImageTreeItem::test(float x, float y, float z, int r)
+/*void BinaryImageTreeItem::test(float x, float y, float z, int r)
 {
 	std::cout << x << "\t" << y << "\t" << z << "\t" << r << std::endl;
 }
+*/

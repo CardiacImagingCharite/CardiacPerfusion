@@ -23,7 +23,9 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include "segmentinfo.h"
 
-
+/*! \class SegmentListModel SegmentListModel.h "SegmentListModel.h"
+ *  \brief This class represents a list model with segements.
+ */
 class SegmentListModel : public QAbstractListModel
 {
   public:

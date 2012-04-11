@@ -36,8 +36,11 @@
 #include "vtkconnectordatabase.h"
 
 template< class TImage >
+/*! \class ITKVTKTreeItem ITKVTKTreeItem.h "ITKVTKTreeItem.h"
+ *  \brief This class represents a tree item for ITK and VTK items.
+ */
 class ITKVTKTreeItem : public TreeItem {
-  public:
+	public:
     typedef TreeItem BaseClass;
     typedef ITKVTKTreeItem< TImage > Self;
     typedef TImage ImageType;

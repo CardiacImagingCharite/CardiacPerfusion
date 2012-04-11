@@ -33,18 +33,36 @@ class vtkInteractorStyleProjectionView;
 class vtkRenderer;
 
 
-
+/*! \class vtkBinaryImageOverlay vtkBinaryImageOverlay.h "vtkBinaryImageOverlay.h"
+ *  \brief That class contains a binary overlay image.
+ */
 class vtkBinaryImageOverlay {
   public:
+	///Constructor
     vtkBinaryImageOverlay( vtkRenderer *renderer,
 			   vtkInteractorStyleProjectionView *interactorStyle,
 			  const ActionDispatch &action, vtkImageData *image, vtkMatrix4x4 *reslicePlaneTransform,
 			  const RGBType &color, int &actionHandle, double opacity = 0.3);
-    ~vtkBinaryImageOverlay();
+    ///Destructor
+	~vtkBinaryImageOverlay();
+	///Gets the image data,
+	/*!
+	\return Returns the overlay image.
+	*/
     vtkImageData *getImage() const { return m_image; }
+	///Activates the overlay image.
     void activateAction();
+	///Gets the actual actor.
+	/*!
+	\return Return the image actor.
+	*/
     vtkImageActor *getActor() { return m_actor; }
     bool operator<(const vtkBinaryImageOverlay &other) const;
+	///Resizes the image.
+	/*!
+	\param x New target size in x direction.
+	\param y New target size in y direction.
+	*/
     void resize( unsigned int x, unsigned int y );
   protected:
   vtkImageData *m_image; ///< volume image data to be displayed

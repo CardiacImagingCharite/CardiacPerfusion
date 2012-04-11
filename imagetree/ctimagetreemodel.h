@@ -27,42 +27,145 @@
 #include "vtkconnectordatabase.h"
 #include "dicomtagtype.h"
 
-
+/*! \class CTImageTreeModel CTImageTreeModel.h "CTImageTreeModel.h"
+ *  \brief This is the tree model which is the basis of the treeView.
+ */
 class CTImageTreeModel : public QAbstractItemModel {
+
   Q_OBJECT
-  public:
+  
+	public:
+	///Constructor
     CTImageTreeModel(const DicomTagList &header, QObject *parent = 0);
-    ~CTImageTreeModel();
+    ///Destructor
+	~CTImageTreeModel();
 
+	///Returns the data at a given index.
+	/*!
+	\param index Defines the position, that is to returned.
+	\param role Defines the role of the data.
+
+	\return The data of the tree model.
+	*/
     QVariant data(const QModelIndex &index, int role) const;
+	///Returns the name of the header.
+	/*!
+	\param section Defines the needed header field.
+	\param role (optional) The role of the data. Default value is DisplayRole.
+
+	\return The name of the headerfield.
+	*/
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    void sort ( int column, Qt::SortOrder order = Qt::AscendingOrder );
+    ///Sorts the model.
+	/*!
+	\param column The reference column.
+	\param order (optional) The order to sort. Default is ascending order.
+	*/
+	void sort ( int column, Qt::SortOrder order = Qt::AscendingOrder );
+	///Gets the index of the model.
+	/*!
+	\param row The row of the model.
+	\param column The column of the model.
+	\param parent (optional) The parent of the model element. Default is a new QModelIndex.
 
+	\return An index of the model.
+	*/
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
+	///Gets the parent of an model index.
+	/*!
+	\param index The index of the element.
+
+	\return The index of the parent element.
+	*/
     QModelIndex parent(const QModelIndex &index) const;
+	///Checks if an element has children.
+	/*!
+	\param parent (optional) The parent element which is to be checked. Default is a new QModelIndex.
+
+	\return TRUE if it has children, else FALSE.
+	*/
     bool hasChildren ( const QModelIndex & parent = QModelIndex() ) const;
-
+	///Gets the number of rows of the model.
+	/*!
+	\param parent (optional) The parent element which is to be checked. Default is a new QModelIndex.
+	
+	\return The number of rows.
+	*/
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	///Gets the number of columns of the model.
+	/*!
+	\param parent (optional) The parent element which is to be checked. Default is a new QModelIndex.
+	
+	\return The number of columns.
+	*/
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
+	///Gets the flags of an model element.
+	/*!
+	\param index The index of the element.
 
+	\return The flags of the element.
+	*/
     Qt::ItemFlags flags(const QModelIndex &index) const;
+	///Sets data to a specific element.
+	/*!
+	\param index The index of the element. 
+	\param value The data which is to be set.
+	\param role (optional) The role of the data. Default is EditRole.
+	*/
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
-    
+    ///Append a Filename to the model.
+	/*!
+	\param dict The metadata dictionary of the dicom file.
+	\param fname The filename of the dicom file.
+	*/
     void appendFilename( const itk::MetaDataDictionary &dict, const std::string &fname);
+	///Inserts a copy of a tree item.
+	/*!
+	\param item The item to insert.
+	*/
     void insertItemCopy(const TreeItem& item);
+	///Loads all Images.
     void loadAllImages(void);
+	///Get a tree item at a specific index.
+	/*!
+	\param index The desired index.
+
+	\return The tree item at the index.
+	*/
     const TreeItem &getItem(const QModelIndex &index) const;
     TreeItem &getItem(const QModelIndex &index);
-    
+    ///Loads an existing model from a file.
+	/*!
+	\param fname The filename of the model file. 
+	*/
     void openModelFromFile(const std::string &fname);
+	///Saves the model to a file.
+	/*!
+	\param fname The filename where the model is to be saved.
+	*/
     void saveModelToFile(const std::string &fname);
-    
+    ///Gets the size of the maximum memory to be used.
+	/*!
+	\return Size of the maximum memory.
+	*/
     size_t getMaxImageMemoryUsage() const { return maxImageMemoryUsage; }
+	///Sets the maximum memory.
+	/*!
+	\param Size of the memory.
+	*/
     void setMaxImageMemoryUsage(size_t s);
+	///Initialize the memory usage.
     void initMaxMemoryUsage();
     void registerConnectorData(VTKConnectorDataBasePtr p);
-    
+    ///Sets the serialization path.
+	/*!
+	\param p Contains the path name.
+	*/
     void setSerializationPath( const std::string p ) { serializationPath = p; }
+	///Gets the serialization path.
+	/*!
+	\return Serialization path.
+	*/
     const std::string &getSerializationPath() const { return serializationPath; }
   
     friend class TreeItem;
@@ -70,6 +173,10 @@ class CTImageTreeModel : public QAbstractItemModel {
     
     
   public slots:
+	///Removes an item at a specific index.
+	/*!
+	\param idx The index of the element.
+	*/
     bool removeItem(const QModelIndex &idx);
     
   private:

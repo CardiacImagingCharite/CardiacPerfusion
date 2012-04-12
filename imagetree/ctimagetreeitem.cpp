@@ -243,6 +243,14 @@ QVariant CTImageTreeItem::do_getData_ForegroundRole(int column) const {
 boost::posix_time::ptime CTImageTreeItem::getPTime() const {
 	std::string dicomTimeString;
 	itk::ExposeMetaData( dict, getAcquisitionDatetimeTag(), dicomTimeString );
+	if(dicomTimeString.empty())
+	{
+		std::string dicomContentDateString;
+		std::string dicomAquistionTimeString;
+		itk::ExposeMetaData( dict, getContentDateTag(), dicomContentDateString );
+		itk::ExposeMetaData( dict, getAquisitionTimeTag(), dicomAquistionTimeString );
+		dicomTimeString = dicomContentDateString + dicomAquistionTimeString;
+	}
 	using namespace boost::posix_time;
 	time_input_facet *dicomTimeFacet = new time_input_facet("%Y%m%d%H%M%S%F");
 	std::stringstream dicomTimeStream;
@@ -377,9 +385,9 @@ void CTImageTreeItem::retrieveITKImage(QProgressDialog *progress, int progressSc
 void CTImageTreeItem::getUIDFromDict(const itk::MetaDataDictionary &dict, std::string &iUID) {
 	std::string nFrames;
 	itk::ExposeMetaData( dict, getNumberOfFramesTag(), nFrames );
-	if (nFrames.empty() || nFrames == "0") 
-		itk::ExposeMetaData( dict, getSeriesInstanceUIDTag(), iUID );
-	else  
+//	if (nFrames.empty() || nFrames == "0") 
+//		itk::ExposeMetaData( dict, getSeriesInstanceUIDTag(), iUID );
+//	else  
 		itk::ExposeMetaData( dict, getSOPInstanceUIDTag(), iUID );
 }
 
@@ -398,6 +406,14 @@ const std::string &CTImageTreeItem::getSeriesInstanceUIDTag() {
 }
 const std::string &CTImageTreeItem::getAcquisitionDatetimeTag() {
 	const static std::string SOPInstanceUIDTag("0008|002a");
+	return SOPInstanceUIDTag;
+}
+const std::string &CTImageTreeItem::getContentDateTag() {
+	const static std::string SOPInstanceUIDTag("0008|0023");
+	return SOPInstanceUIDTag;
+}
+const std::string &CTImageTreeItem::getAquisitionTimeTag() {
+	const static std::string SOPInstanceUIDTag("0008|0032");
 	return SOPInstanceUIDTag;
 }
 

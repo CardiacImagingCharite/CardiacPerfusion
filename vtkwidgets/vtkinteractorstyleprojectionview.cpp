@@ -168,7 +168,8 @@ void vtkInteractorStyleProjectionView::CycleLeftButtonAction() {
   ActionListType::iterator it = m_actionList.find( m_leftButtonAction );
   it++;
   if (it == m_actionList.end())
-    it = m_actionList.begin();
+    //it = m_actionList.begin();
+	it = m_actionList.find(ActionWindowLevel);
   m_leftButtonAction = it->first;
   updateLMBHint();
 }

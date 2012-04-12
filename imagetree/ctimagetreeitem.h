@@ -97,14 +97,16 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
 	\return A pointer to the generated Binary tree item.
 	*/
     BinaryImageTreeItem *generateSegment(void);
-    ///Getter for the dicom tag.
+	/** @name Getter for Dicom tags */
+    ///@{
     static const std::string &getNumberOfFramesTag();
-    ///Getter for the dicom tag.
 	static const std::string &getSeriesInstanceUIDTag();
-    ///Getter for the dicom tag.
 	static const std::string &getSOPInstanceUIDTag();
-    ///Getter for the dicom tag.
 	static const std::string &getAcquisitionDatetimeTag();
+	static const std::string &getContentDateTag();
+	static const std::string &getAquisitionTimeTag();
+	///@}
+
     ///Get the associated ITK image.
 	void retrieveITKImage(QProgressDialog *progress = NULL, int progressScale=0, int progressBase=0);
     ///Get the UID from the dicom meta data.

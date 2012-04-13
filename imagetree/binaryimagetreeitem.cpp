@@ -141,7 +141,8 @@ void BinaryImageTreeItem::drawSphere( float radius, float x, float y, float z, b
 	if (erase) 
 		pixelVal = BinaryPixelOff;
 
-	for(int lz = start[2]; lz < end[2]; ++lz) {
+//	for(int lz = start[2]; lz < end[2]; ++lz) {
+	for(int lz = start[2]; lz <= end[2]; lz++) {
 		float sumz = (lz - idx[2]) * spacing[2]; sumz *= sumz;
 		for(int ly = start[1]; ly < end[1]; ++ly) {
 			float sumy = (ly - idx[1]) * spacing[1]; sumy *= sumy; sumy += sumz;
@@ -163,6 +164,7 @@ void BinaryImageTreeItem::regionGrow( float x, float y, float z, int threshold, 
 	
 	//create index and point at position (x,y,z)
 	ImageType::IndexType idx;
+
 	ImageType::PointType point;
 	point[0] = x;point[1] = y;point[2] = z;
 	//ImageType::Pointer itkIm = getITKImage();
@@ -170,8 +172,13 @@ void BinaryImageTreeItem::regionGrow( float x, float y, float z, int threshold, 
 	CTImageTreeItem::ImageType::Pointer parentImagePointer = dynamic_cast<CTImageTreeItem*>(parent())->getITKImage();
 	if (parentImagePointer.IsNull()) 
 		return;
+
+	ImageType::SizeType size = parentImagePointer->GetBufferedRegion().GetSize();
+
 	//transform point to index
-	parentImagePointer->TransformPhysicalPointToIndex(point, idx);
+	bool outOfImage = parentImagePointer->TransformPhysicalPointToIndex(point, idx);
+	int test = clip<long>(0, idx[2], size[2]);
+	idx[2] = test;
 	//get pixel at index
 	ImageType::PixelType p = parentImagePointer->GetPixel(idx);
 	//if (p == BinaryPixelOn) {

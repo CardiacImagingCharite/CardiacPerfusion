@@ -146,23 +146,39 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 		if (item.isA(typeid(CTImageTreeItem))) {
 			//hide actual image
 			if (displayedCTImage && &item == displayedCTImage->getBaseItem()) {
-				setImage( NULL );
+				for(int i = 0; i < item.childCount(); i++)
+				{
+					if(item.child(i).isA(typeid(BinaryImageTreeItem)))
+					{
+						BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item.child(i));
+						segmentShow(SegItem);
+					}
+				}
+		//		setImage( NULL );
 			} else {
 				//show image
 				setImage( dynamic_cast<CTImageTreeItem*>(&item) );
+				for(int i = 0; i < item.childCount(); i++)
+				{
+					if(item.child(i).isA(typeid(BinaryImageTreeItem)))
+					{
+						BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item.child(i));
+						segmentShow(SegItem);
+					}
+				}
 			}
 			//check if item is a segement
 		} else if (item.isA(typeid(BinaryImageTreeItem))) {
 			//get selected segment
-			BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item);
+		//	BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item);
 			//if segment is not in the list of displayed segments
-			if (displayedSegments.find( SegItem->getVTKConnector() )==displayedSegments.end()) {
+		//	if (displayedSegments.find( SegItem->getVTKConnector() )==displayedSegments.end()) {
 				//show segement
-				segmentShow( SegItem );
-			} else {
+		//		segmentShow( SegItem );
+		//	} else {
 				//else hide it
-				segmentHide( SegItem );
-			}
+		//		segmentHide( SegItem );
+		//	}
 		}
 	}
 }

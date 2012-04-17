@@ -413,7 +413,7 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Analyse</string>
+             <string>Analyze</string>
             </property>
             <property name="checkable">
              <bool>false</bool>
@@ -526,22 +526,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QTextBrowser" name="tb_results">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>400</width>
-          <height>400</height>
-         </size>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="1">
        <widget class="MultiPlanarReformatWidget" name="mprView_lr" native="true">
         <property name="enabled">
@@ -553,6 +537,43 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QTabWidget" name="tw_results">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tab_tac">
+         <attribute name="title">
+          <string>TAC Curves</string>
+         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QwtPlot" name="qwtPlot_tac"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_perfResults">
+         <attribute name="title">
+          <string>Perfusion Results</string>
+         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
+           <widget class="QTextEdit" name="textEdit"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_log">
+         <attribute name="title">
+          <string>Log</string>
+         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <widget class="QTextEdit" name="textEdit_2"/>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -618,8 +639,7 @@
   <action name="actionExit">
    <property name="icon">
     <iconset>
-     <normaloff/>
-    </iconset>
+     <normaloff>C:/Users/freyec/.designer/backup</normaloff>C:/Users/freyec/.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Exit</string>
@@ -655,9 +675,17 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+  </customwidget>
+  <customwidget>
    <class>MultiPlanarReformatWidget</class>
    <extends></extends>
    <header>multiplanarreformatwidget.h</header>
+   <slots>
+    <signal>doubleClicked()</signal>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources>
@@ -671,5 +699,6 @@
   <slot>on_btn_dilate_clicked()</slot>
   <slot>on_btn_cannyEdges_clicked()</slot>
   <slot>on_btn_analyse_clicked()</slot>
+  <slot>on_mprWidget_doubleClicked()</slot>
  </slots>
 </ui>

@@ -66,6 +66,7 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 	this->ui->treeView->setModel( &imageModel );
 
 	m_tacDialog = NULL;
+	oneWindowIsMax = false;
 
 	this->ui->mprView_ul->setOrientation(0);	//axial
 	this->ui->mprView_ur->setOrientation(1);	//coronal
@@ -79,6 +80,9 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 		this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
 	connect( this->ui->treeView, SIGNAL( customContextMenuRequested(const QPoint &) ),
 	this, SLOT( treeViewContextMenu(const QPoint &) ) );
+	connect(this->ui->mprView_lr, SIGNAL(doubleClicked(MultiPlanarReformatWidget &)), this, SLOT(mprWidget_doubleClicked(MultiPlanarReformatWidget &)));
+	connect(this->ui->mprView_ul, SIGNAL(doubleClicked(MultiPlanarReformatWidget &)), this, SLOT(mprWidget_doubleClicked(MultiPlanarReformatWidget &)));
+	connect(this->ui->mprView_ur, SIGNAL(doubleClicked(MultiPlanarReformatWidget &)), this, SLOT(mprWidget_doubleClicked(MultiPlanarReformatWidget &)));
 };
 
 KardioPerfusion::~KardioPerfusion()
@@ -648,6 +652,30 @@ void KardioPerfusion::changeColorForSelectedSegment() {
 			if (color.isValid())
 				binItem.setColor(color);
 		}
+	}
+}
+
+
+void KardioPerfusion::mprWidget_doubleClicked(MultiPlanarReformatWidget &w)
+{
+	if(!oneWindowIsMax)
+	{
+		this->ui->mprView_ul->setVisible(false);
+		this->ui->mprView_ur->setVisible(false);
+		this->ui->mprView_lr->setVisible(false);
+		this->ui->tw_results->setVisible(false);
+
+		w.setVisible(true);
+		oneWindowIsMax = true;
+	}
+	else
+	{
+		this->ui->mprView_ul->setVisible(true);
+		this->ui->mprView_ur->setVisible(true);
+		this->ui->mprView_lr->setVisible(true);
+		this->ui->tw_results->setVisible(true);
+
+		oneWindowIsMax = false;
 	}
 }
 

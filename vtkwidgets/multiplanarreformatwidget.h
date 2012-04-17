@@ -29,6 +29,7 @@
 #include <boost/shared_ptr.hpp>
 #include "imagedefinitions.h"
 #include "vtkImageViewer2.h"
+#include <QMouseEvent>
 
 
 class vtkImageData;
@@ -107,13 +108,19 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	\param orientation A number that appoints the desired orientation
 	*/
 	void setOrientation(int orientation);
+
 	void showCircle(float x, float y, float z, int radius);
   
 	public slots:
 	///Resets the view.
 	void resetView();
 
+	signals:
+	void doubleClicked(MultiPlanarReformatWidget &); ///< double click with LMB
+
 	protected:
+	///double click event
+	void mouseDoubleClickEvent ( QMouseEvent * e );
 	typedef std::map< vtkImageData *, boost::shared_ptr< vtkBinaryImageOverlay > > OverlayMapType;
 	OverlayMapType m_overlays;
 	vtkImageData *m_image; ///< volume image data to be displayed - set by setImage()

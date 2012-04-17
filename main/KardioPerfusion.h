@@ -11,6 +11,8 @@
 #include "ctimagetreeitem.h"
 #include <qitemselectionmodel.h>
 #include "tacdialog.h"
+#include <QMouseEvent>
+
 
 #define VTK_CREATE(type, name) \
   vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
@@ -74,6 +76,8 @@ class KardioPerfusion : public QMainWindow
 //	void on_btn_cannyEdges_clicked();
 	///Action for clicking on Analyse-Button
 	void on_btn_analyse_clicked();
+	///Action for double clicking on a mprWidget
+	void mprWidget_doubleClicked(MultiPlanarReformatWidget &w);
 	///Slot for the contextmenu of the treeView
 	/*! 
 	\param pos contains the position of the contextmenu
@@ -89,6 +93,7 @@ class KardioPerfusion : public QMainWindow
 protected:
 	///clears pending actions
     void clearPendingAction();
+
 protected slots:
 
 private:
@@ -132,7 +137,7 @@ private:
 
 	static const DicomTagList CTModelHeaderFields;
     int pendingAction;
-
+	bool oneWindowIsMax;
 	TacDialog* m_tacDialog;
 };
 

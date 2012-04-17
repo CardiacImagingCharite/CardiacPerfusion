@@ -317,6 +317,12 @@ void MultiPlanarReformatWidget::showCircle(float x, float y, float z, int radius
   */
 }
 
+void MultiPlanarReformatWidget::mouseDoubleClickEvent( QMouseEvent * e ) {
+	if(e->button() == Qt::LeftButton)
+		emit doubleClicked(*this);
+	QVTKWidget::mouseDoubleClickEvent(e);
+}
+
 void MultiPlanarReformatWidget::resetView()
 {
 	std::cout << "Reset View" << std::endl;

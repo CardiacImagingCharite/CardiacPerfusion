@@ -65,7 +65,8 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
   
 	this->ui->treeView->setModel( &imageModel );
 
-	m_tacDialog = NULL;
+	//m_tacDialog = NULL;
+	mmid4Analyzer = NULL;
 
 	this->ui->mprView_ul->setOrientation(0);	//axial
 	this->ui->mprView_ur->setOrientation(1);	//coronal
@@ -376,7 +377,7 @@ void KardioPerfusion::on_btn_dilate_clicked()
 void KardioPerfusion::on_btn_analyse_clicked()
 {
 	//create plot dialog 
-	if(m_tacDialog == NULL)
+/*	if(m_tacDialog == NULL)
 	{
 		m_tacDialog = new TacDialog(this);
 	}
@@ -390,6 +391,9 @@ void KardioPerfusion::on_btn_analyse_clicked()
 		m_tacDialog->resize(size);
 		m_tacDialog->move(pos);
 	}
+	*/
+	
+	mmid4Analyzer = new MMID4Analyzer(this);
 
 	this->ui->treeView->selectAll();
 	//get list of selected items
@@ -401,7 +405,7 @@ void KardioPerfusion::on_btn_analyse_clicked()
 			TreeItem *item = &imageModel.getItem( *index );
 			//add image to the dialog if it is a CT image
 			if (item->isA(typeid(CTImageTreeItem))) {
-				m_tacDialog->addImage( dynamic_cast<CTImageTreeItem*>(item) );
+				mmid4Analyzer->addImage( dynamic_cast<CTImageTreeItem*>(item) );
 			}
 		}
 	}
@@ -424,11 +428,11 @@ void KardioPerfusion::on_btn_analyse_clicked()
 		}
 		//if actual item is a segment add it to the dialog
 		if (currentItem->isA(typeid(BinaryImageTreeItem)))
-			m_tacDialog->addSegment( dynamic_cast<BinaryImageTreeItem*>(currentItem) );
+			mmid4Analyzer->addSegment( dynamic_cast<BinaryImageTreeItem*>(currentItem) );
 	}
 
 	//execute the dialog
-	m_tacDialog->show();
+	//m_tacDialog->show();
 }
 
 //callback for exit

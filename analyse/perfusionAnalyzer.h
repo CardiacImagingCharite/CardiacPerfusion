@@ -5,7 +5,7 @@
 #include <set>
 #include "segmentlistmodel.h"
 #include "qwt_plot.h"
-#include <QObject>
+#include <QWidget>
 
 class CTImageTreeItem;
 

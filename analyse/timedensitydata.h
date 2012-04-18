@@ -61,7 +61,7 @@ public:
 	///Gets time and value at a specific positon
 	/*!
 	\param i Defines the desired position.
-	\param v Placeholde for the segmentation values
+	\param v Placeholder for the segmentation values
 
 	\return Time of the index position.
 	*/

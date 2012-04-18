@@ -14,6 +14,10 @@ SET( KardioPerfusionSrcs
 #	main/MyTestInteractorStyle.cxx
 #	main/MyTestInteractorStyle.h
 
+	analyse/perfusionAnalyzer.cxx
+	analyse/perfusionAnalyzer.h
+	analyse/mmid4Analyzer.cxx
+	analyse/mmid4Analyzer.h
 	analyse/tacdialog.cpp
 	analyse/tacdialog.h
 	analyse/timedensitydata.cpp

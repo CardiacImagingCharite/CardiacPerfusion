@@ -10,9 +10,10 @@
 #include "binaryimagetreeitem.h"
 #include "ctimagetreeitem.h"
 #include <qitemselectionmodel.h>
-#include "tacdialog.h"
+//#include "tacdialog.h"
 #include <QMouseEvent>
 #include "mytabwidget.h"
+#include "mmid4Analyzer.h"
 
 
 #define VTK_CREATE(type, name) \
@@ -140,8 +141,11 @@ private:
 
 	static const DicomTagList CTModelHeaderFields;
     int pendingAction;
+
 	bool oneWindowIsMax;
-	TacDialog* m_tacDialog;
+	//TacDialog* m_tacDialog;
+	MMID4Analyzer* mmid4Analyzer;
+
 };
 
 #endif // KardioPerfusion_H

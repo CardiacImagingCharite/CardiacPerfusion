@@ -74,6 +74,8 @@ SET( KardioPerfusionHeaders
 	vtkwidgets/multiplanarreformatwidget.h
 	analyse/tacdialog.h
 	imagetree/ctimagetreemodel.h
+	qtwidgets/mytabwidget.h
+	
 #	analyse/segmentselectbutton.h
 )
 
@@ -88,6 +90,7 @@ SET( HeaderDirs
 #	serialization
 	misc
 	vtkwidgets
+	qtwidgets
 )
 
 FIND_PATH(QWT_INCLUDE_DIR qwt.h)

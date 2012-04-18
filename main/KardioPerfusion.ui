@@ -540,7 +540,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QTabWidget" name="tw_results">
+       <widget class="MyTabWidget" name="tw_results">
         <property name="currentIndex">
          <number>0</number>
         </property>
@@ -686,6 +686,12 @@
    <slots>
     <signal>doubleClicked()</signal>
    </slots>
+  </customwidget>
+  <customwidget>
+   <class>MyTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header>mytabwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

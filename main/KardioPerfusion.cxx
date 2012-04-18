@@ -80,9 +80,15 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 		this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
 	connect( this->ui->treeView, SIGNAL( customContextMenuRequested(const QPoint &) ),
 	this, SLOT( treeViewContextMenu(const QPoint &) ) );
-	connect(this->ui->mprView_lr, SIGNAL(doubleClicked(MultiPlanarReformatWidget &)), this, SLOT(mprWidget_doubleClicked(MultiPlanarReformatWidget &)));
-	connect(this->ui->mprView_ul, SIGNAL(doubleClicked(MultiPlanarReformatWidget &)), this, SLOT(mprWidget_doubleClicked(MultiPlanarReformatWidget &)));
-	connect(this->ui->mprView_ur, SIGNAL(doubleClicked(MultiPlanarReformatWidget &)), this, SLOT(mprWidget_doubleClicked(MultiPlanarReformatWidget &)));
+
+	connect(this->ui->mprView_lr, SIGNAL(doubleClicked(MultiPlanarReformatWidget &)), 
+		this, SLOT(mprWidget_doubleClicked(MultiPlanarReformatWidget &)));
+	connect(this->ui->mprView_ul, SIGNAL(doubleClicked(MultiPlanarReformatWidget &)), 
+		this, SLOT(mprWidget_doubleClicked(MultiPlanarReformatWidget &)));
+	connect(this->ui->mprView_ur, SIGNAL(doubleClicked(MultiPlanarReformatWidget &)), 
+		this, SLOT(mprWidget_doubleClicked(MultiPlanarReformatWidget &)));
+	connect(this->ui->tw_results, SIGNAL(doubleClicked(MyTabWidget &)),
+		this, SLOT(tabWidget_doubleClicked(MyTabWidget &)));
 };
 
 KardioPerfusion::~KardioPerfusion()
@@ -657,6 +663,31 @@ void KardioPerfusion::changeColorForSelectedSegment() {
 
 
 void KardioPerfusion::mprWidget_doubleClicked(MultiPlanarReformatWidget &w)
+{
+	if(!oneWindowIsMax)
+	{
+		this->ui->mprView_ul->setVisible(false);
+		this->ui->mprView_ur->setVisible(false);
+		this->ui->mprView_lr->setVisible(false);
+		this->ui->tw_results->setVisible(false);
+
+		w.setVisible(true);
+		oneWindowIsMax = true;
+
+		w.resetActions();
+	}
+	else
+	{
+		this->ui->mprView_ul->setVisible(true);
+		this->ui->mprView_ur->setVisible(true);
+		this->ui->mprView_lr->setVisible(true);
+		this->ui->tw_results->setVisible(true);
+
+		oneWindowIsMax = false;
+	}
+}
+
+void KardioPerfusion::tabWidget_doubleClicked(MyTabWidget &w)
 {
 	if(!oneWindowIsMax)
 	{

@@ -12,6 +12,7 @@
 #include <qitemselectionmodel.h>
 #include "tacdialog.h"
 #include <QMouseEvent>
+#include "mytabwidget.h"
 
 
 #define VTK_CREATE(type, name) \
@@ -54,33 +55,35 @@ class KardioPerfusion : public QMainWindow
 	
 	//void on_treeView_doubleClicked(const QModelIndex &index);
 
-	///Action for clicking on treeView
+	///Action for clicking on treeView.
 	/*! 
-	\param index contains the clicked index
+	\param index contains the clicked index.
 	*/
 	void on_treeView_clicked(const QModelIndex &index);
-	///Action for changing the selection of the treeView
+	///Action for changing the selection of the treeView.
 	/*! 
-	\param selected contains the selected elements
-	\param deselected contains the deselected elements
+	\param selected contains the selected elements.
+	\param deselected contains the deselected elements.
 	*/
 	void onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-	///Action for clicking on Draw-Button
+	///Action for clicking on Draw-Button.
 	void on_btn_draw_clicked();
-	///Action for clicking on RegionGrow-Button
+	///Action for clicking on RegionGrow-Button.
 	void on_btn_regionGrow_clicked();
-	///Action for clicking on Erode-Button
+	///Action for clicking on Erode-Button.
 	void on_btn_erode_clicked();
-	///Action for clicking on Erode-Button
+	///Action for clicking on Erode-Button.
 	void on_btn_dilate_clicked();
 //	void on_btn_cannyEdges_clicked();
-	///Action for clicking on Analyse-Button
+	///Action for clicking on Analyse-Button.
 	void on_btn_analyse_clicked();
-	///Action for double clicking on a mprWidget
+	///Action for double clicking on a mprWidget.
 	void mprWidget_doubleClicked(MultiPlanarReformatWidget &w);
-	///Slot for the contextmenu of the treeView
+	///Action for double clicking on a mytabwidget.
+	void tabWidget_doubleClicked(MyTabWidget &w);
+	///Slot for the contextmenu of the treeView.
 	/*! 
-	\param pos contains the position of the contextmenu
+	\param pos contains the position of the contextmenu.
 	*/
 	void treeViewContextMenu(const QPoint &pos);
 	///creates a segment for selected image

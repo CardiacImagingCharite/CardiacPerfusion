@@ -3,6 +3,7 @@
 #define MYTABWIDGET_H
 
 #include <QTabWidget>
+#include <QMouseEvent>
 
 class MyTabWidget : public QTabWidget
 {
@@ -13,7 +14,12 @@ class MyTabWidget : public QTabWidget
 	MyTabWidget(QWidget* parent);
 	~MyTabWidget();
 
+	signals:
+	void doubleClicked(MyTabWidget &); ///< double click with LMB
 
+	protected:
+	///double click event
+	void mouseDoubleClickEvent ( QMouseEvent * e );
 };
 
 #endif

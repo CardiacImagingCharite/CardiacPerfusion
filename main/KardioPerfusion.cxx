@@ -674,7 +674,7 @@ void KardioPerfusion::mprWidget_doubleClicked(MultiPlanarReformatWidget &w)
 		w.setVisible(true);
 		oneWindowIsMax = true;
 
-		w.resetActions();
+//		w.resetActions();
 	}
 	else
 	{

@@ -57,6 +57,9 @@ SET( KardioPerfusionSrcs
 #	vtkwidgets/volumeprojectionwidget.cpp 
 	vtkwidgets/vtkinteractoractiondispatch.h
 #	serialization/ctimagetreemodel_serializer.cpp 
+
+	qtwidgets/mytabwidget.h
+	qtwidgets/mytabwidget.cxx
 )
 
 SET( KardioPerfusionUI 

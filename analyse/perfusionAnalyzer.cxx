@@ -13,10 +13,6 @@ PerfusionAnalyzer::PerfusionAnalyzer(QWidget* p):
 	segments(p)
 {
 	parent = p;
-	//configure the plot
-	plot->setTitle(QObject::tr("Time Density Curves"));
-	plot->setAxisTitle(QwtPlot::xBottom, QObject::tr("Time [s]"));
-	plot->setAxisTitle(QwtPlot::yLeft, QObject::tr("Density [HU]"));
 }
 
 PerfusionAnalyzer::~PerfusionAnalyzer()
@@ -33,19 +29,20 @@ void PerfusionAnalyzer::addSegment(BinaryImageTreeItem *segment)
 	segments.addSegment(segment);
 }
 
-QwtPlot* PerfusionAnalyzer::getTacPlot()
+SegmentListModel* PerfusionAnalyzer::getSegments()
 {
 	calculateTacValues();
 
 	//iterate over the list of segments
-	BOOST_FOREACH( SegmentInfo &currentSegment, segments) {
+/*	BOOST_FOREACH( SegmentInfo &currentSegment, segments) {
 		//attach the curves for the actual segment to the plot
 		currentSegment.attachSampleCurves(plot);
 	}
-	return plot;
+	*/
+	return &segments;
 }
 
-std::string PerfusionAnalyzer::getTacValues()
+std::string PerfusionAnalyzer::getTacValuesAsString()
 {
 	std::ostringstream tacValueStream;
 	

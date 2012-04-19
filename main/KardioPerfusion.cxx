@@ -14,42 +14,15 @@
 #include "qmessagebox.h"
 #include <QtGui>
 
-//#include <vtkRenderer.h>
-//#include <vtkRenderWindow.h>
-//#include <vtkVectorText.h>
 #include "vtkSmartPointer.h"
-//#include "vtkKWImage.h"
-//#include "vtkImageData.h"
-//#include "vtkCamera.h"
-//#include "vtkInteractorStyleTrackballCamera.h"
-//#include "vtkObjectFactory.h"
-//#include "vtkDICOMImageReader.h"
-//#include "vtkVolumeRayCastCompositeFunction.h"
-//#include "vtkVolumeRayCastMapper.h"
-//#include "vtkColorTransferFunction.h"
-//#include "vtkPiecewiseFunction.h"
-//#include "vtkVolumeProperty.h"
-//#include "vtkImageShiftScale.h"
-//#include "vtkVolume16Reader.h"
-//#include "vtkPolyLine.h"
-//#include "vtkPoints.h"
-//#include "vtkCellArray.h"
-//#include "vtkPolyDataMapper.h"
-
-//#include "itkGDCMSeriesFileNames.h"
-//#include "itkOrientedImage.h"
-//#include "itkImageSeriesReader.h"
-//#include "itkGDCMImageIO.h"
-//#include "itkDicomImageIO2.h"
 #include <boost/assign.hpp>
 #include <boost/foreach.hpp>
 
 #include "QFileDialog.h"
 #include "qstring.h"
 
-//#include "MyTestInteractorStyle.h"
-
-//vtkStandardNewMacro(MyTestInteractorStyle);
+#include "qwt_plot.h"
+#include "segmentlistmodel.h"
 
 const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
   (DicomTagType("Patient Name", "0010|0010"))
@@ -59,7 +32,6 @@ const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
 // Constructor
 KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction(-1) 
 {
-	//this->showFullScreen();
 	this->ui = new Ui_KardioPerfusion;
 	this->ui->setupUi(this);
   
@@ -71,6 +43,14 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 	//m_tacDialog = NULL;
 	mmid4Analyzer = NULL;
 
+	//configure the plot
+	this->ui->qwtPlot_tac->setTitle(QObject::tr("Time Density Curves"));
+	this->ui->qwtPlot_tac->setAxisTitle(QwtPlot::xBottom, QObject::tr("Time [s]"));
+	this->ui->qwtPlot_tac->setAxisTitle(QwtPlot::yLeft, QObject::tr("Density [HU]"));
+
+	//just temporary until autoscale and zoom works
+	this->ui->qwtPlot_tac->setAxisScale(2,0,20);
+	this->ui->qwtPlot_tac->setAxisScale(0,0,500);
 
 	this->ui->mprView_ul->setOrientation(0);	//axial
 	this->ui->mprView_ur->setOrientation(1);	//coronal
@@ -158,7 +138,7 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 		TreeItem &item = imageModel.getItem( index );
 		//check if item is a CT image
 		if (item.isA(typeid(CTImageTreeItem))) {
-			//hide actual image
+			
 			if (displayedCTImage && &item == displayedCTImage->getBaseItem()) {
 				for(int i = 0; i < item.childCount(); i++)
 				{
@@ -444,6 +424,14 @@ void KardioPerfusion::on_btn_analyse_clicked()
 			mmid4Analyzer->addSegment( dynamic_cast<BinaryImageTreeItem*>(currentItem) );
 	}
 
+	SegmentListModel *segments = mmid4Analyzer->getSegments();
+	//iterate over the list of segments
+	BOOST_FOREACH( SegmentInfo &currentSegment, *segments) {
+		//attach the curves for the actual segment to the plot
+		currentSegment.attachSampleCurves(this->ui->qwtPlot_tac);
+	}
+
+	this->ui->qwtPlot_tac->replot();
 	//execute the dialog
 	//m_tacDialog->show();
 }

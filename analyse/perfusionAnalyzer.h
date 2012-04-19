@@ -4,15 +4,19 @@
 
 #include <set>
 #include "segmentlistmodel.h"
-#include "qwt_plot.h"
 #include <QWidget>
 
 class CTImageTreeItem;
 
+/*! \class PerfusionAnalyzer PerfusionAnalyzer.h "PerfusionAnalyzer.h"
+ *  \brief This abstract class defines the basics for a perfusion analyzer.
+ */
 class PerfusionAnalyzer
 {
 	public:
+		///Constructor
 		PerfusionAnalyzer(QWidget* p);
+		///Destructor
 		~PerfusionAnalyzer();
 
 		///Add an image to the dialog.
@@ -29,13 +33,13 @@ class PerfusionAnalyzer
 		/*!
 		\return QWT plot
 		*/
-		QwtPlot* getTacPlot();
+		SegmentListModel* getSegments();
 		///Gets the values of the TAC
 		/*!
 		\return Comma separated String containing the tac values. 
 				The segments are separated by "\r\n" and the values by ";".
 		*/
-		std::string getTacValues();
+		std::string getTacValuesAsString();
 		///Abstract method for calculating the perfusion results.
 		virtual void calculatePerfusionResults() = 0;
 
@@ -57,8 +61,6 @@ class PerfusionAnalyzer
 		ImageSet images;
 
 		SegmentListModel segments;
-
-		QwtPlot* plot;
 
 		QWidget* parent;
 };

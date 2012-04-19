@@ -546,7 +546,7 @@
         </property>
         <widget class="QWidget" name="tab_tac">
          <attribute name="title">
-          <string>TAC Curves</string>
+          <string>TACs</string>
          </attribute>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
           <item>

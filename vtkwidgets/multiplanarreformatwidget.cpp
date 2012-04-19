@@ -205,7 +205,7 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
 	static double coronalElements[16] = {
 	         1, 0, 0, 0,
 	         0, 0,-1, 0,
-	         0, 1, 0, 0,	//-1
+	         0, 1, 0, 0,
 	         0, 0, 0, 1 };
 
 	static double sagittalElements[16] = {
@@ -238,8 +238,6 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
 	m_imageViewer->Render();
 
     //window->AddRenderer(m_imageViewer->GetRenderer());
-
-
   }
   this->update();
 }

@@ -129,7 +129,7 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	setImage(blank);	//works but has effects on visualization 
 	//m_reslice->SetInput(blank);
 	m_imageViewer->Render();
-	
+
 }
 
 /** Destructor*/
@@ -152,9 +152,12 @@ void MultiPlanarReformatWidget::resizeEvent( QResizeEvent * event ) {
   this->m_menuButton->move(xres-20,yres-20);
   m_reslice->SetOutputExtent(0,xres,0,yres,0,0);
   m_reslice->SetOutputOrigin(-xres/2.0,-yres/2.0,0);
-  BOOST_FOREACH(OverlayMapType::value_type it, m_overlays) {
-    it.second->resize( xres, yres );
-  }
+  
+  m_imageViewer->UpdateDisplayExtent();
+  
+	BOOST_FOREACH(OverlayMapType::value_type it, m_overlays) {
+		it.second->resize( xres, yres );
+	}
 }
 
 void MultiPlanarReformatWidget::setCubicInterpolation(bool cubic) {
@@ -229,14 +232,13 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
     m_reslicePlaneTransform->SetElement(0, 3, center[0]);
     m_reslicePlaneTransform->SetElement(1, 3, center[1]);
     m_reslicePlaneTransform->SetElement(2, 3, center[2]);
-
+	
     m_reslice->SetInput( m_image );
     m_reslice->SetOutputSpacing(1,1,1);
 	m_imageViewer->SetInput(m_reslice->GetOutput());
 	
 	//m_imageViewer->GetRenderWindow()->GetInteractor()->Initialize();
 	m_imageViewer->Render();
-
     //window->AddRenderer(m_imageViewer->GetRenderer());
   }
   this->update();

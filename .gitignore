@@ -65,3 +65,6 @@ Ankh.NoLoad
 
 #Time Attenuation Curves
 *.tac
+
+#Dicom Images
+*.dcm

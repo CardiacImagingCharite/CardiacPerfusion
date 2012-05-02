@@ -317,11 +317,14 @@ void vtkInteractorStyleProjectionView::updateDisplay(void) {
   if (m_orientation->GetMTime() > this->GetInteractor()->GetMTime()) {
     updateRenderExtent();
   }
-*/  
+  */
+
   if (this->AutoAdjustCameraClippingRange) {
     updateRenderer();
   }
-  this->GetInteractor()->Render();
+  
+	//m_imageViewer->UpdateDisplayExtent();
+	this->GetInteractor()->Render();
 }
 
 

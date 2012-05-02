@@ -141,8 +141,7 @@ void BinaryImageTreeItem::drawSphere( float radius, float x, float y, float z, b
 	if (erase) 
 		pixelVal = BinaryPixelOff;
 
-//	for(int lz = start[2]; lz < end[2]; ++lz) {
-	for(int lz = start[2]; lz <= end[2]; lz++) {
+	for(int lz = start[2]; lz < end[2]; ++lz) {
 		float sumz = (lz - idx[2]) * spacing[2]; sumz *= sumz;
 		for(int ly = start[1]; ly < end[1]; ++ly) {
 			float sumy = (ly - idx[1]) * spacing[1]; sumy *= sumy; sumy += sumz;

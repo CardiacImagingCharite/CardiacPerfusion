@@ -79,6 +79,9 @@
             <property name="selectionMode">
              <enum>QAbstractItemView::ExtendedSelection</enum>
             </property>
+            <attribute name="headerShowSortIndicator" stdset="0">
+             <bool>false</bool>
+            </attribute>
            </widget>
           </item>
          </layout>
@@ -124,7 +127,7 @@
                </size>
               </property>
               <property name="minimum">
-               <number>5</number>
+               <number>2</number>
               </property>
               <property name="maximum">
                <number>50</number>

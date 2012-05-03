@@ -323,7 +323,6 @@ void vtkInteractorStyleProjectionView::updateDisplay(void) {
     updateRenderer();
   }
   
-	//m_imageViewer->UpdateDisplayExtent();
 	this->GetInteractor()->Render();
 }
 

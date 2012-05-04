@@ -42,8 +42,13 @@ class PerfusionAnalyzer
 		std::string getTacValuesAsString();
 		///Abstract method for calculating the perfusion results.
 		virtual void calculatePerfusionResults() = 0;
+		///Gets the time at a specific index
+		/*!
+		\return Time as a double. 
+		*/
+		double getTime(int index);
 
-	private:
+	protected:
 
 		void calculateTacValues();
 
@@ -56,11 +61,9 @@ class PerfusionAnalyzer
 		typedef std::set<CTImageTreeItem *, CTImageTimeCompareFunctor> ImageSet;
 		typedef std::vector< double > DoubleVector;
   
-
+		SegmentListModel *segments;
 		DoubleVector times;
 		ImageSet images;
-
-		SegmentListModel segments;
 
 		QWidget* parent;
 };

@@ -18,6 +18,8 @@ SET( KardioPerfusionSrcs
 	analyse/perfusionAnalyzer.h
 	analyse/mmid4Analyzer.cxx
 	analyse/mmid4Analyzer.h
+	analyse/maxSlopeAnalyzer.cxx
+	analyse/maxSlopeAnalyzer.h
 	analyse/tacdialog.cpp
 	analyse/tacdialog.h
 	analyse/timedensitydata.cpp

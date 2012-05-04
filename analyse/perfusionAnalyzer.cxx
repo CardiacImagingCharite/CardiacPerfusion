@@ -116,3 +116,8 @@ double PerfusionAnalyzer::getTime(int index)
 
 	return -1;
 }
+
+int PerfusionAnalyzer::getImageCount()
+{
+	return images.size();
+}

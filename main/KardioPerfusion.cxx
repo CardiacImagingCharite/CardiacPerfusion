@@ -22,7 +22,13 @@
 #include "qstring.h"
 
 #include "qwt_plot.h"
+#include <qwt_plot_marker.h>
+#include <qwt_plot_grid.h>
+#include <qwt_symbol.h>
+#include <qwt_legend.h>
+
 #include "segmentlistmodel.h"
+#include "timedensitydatapicker.h"
 
 const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
   (DicomTagType("Patient Name", "0010|0010"))
@@ -30,7 +36,14 @@ const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
   (DicomTagType("AcquisitionDatetime","0008|002a"));
 
 // Constructor
-KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction(-1) 
+KardioPerfusion::KardioPerfusion():
+     imageModel(CTModelHeaderFields)
+	,pendingAction(-1)
+	,markerStart(new QwtPlotMarker) 
+	,markerEnd(new QwtPlotMarker)
+    ,markerPickerX(new QwtPlotMarker)
+    ,markerPickerY(new QwtPlotMarker)
+    ,grid(new QwtPlotGrid) 
 {
 	this->ui = new Ui_KardioPerfusion;
 	this->ui->setupUi(this);
@@ -41,16 +54,51 @@ KardioPerfusion::KardioPerfusion():imageModel(CTModelHeaderFields),pendingAction
 	oneWindowIsMax = false;
 
 	//m_tacDialog = NULL;
-	mmid4Analyzer = NULL;
+	//mmid4Analyzer = NULL;
+	maxSlopeAnalyzer = NULL;
 
 	//configure the plot
 	this->ui->qwtPlot_tac->setTitle(QObject::tr("Time Density Curves"));
 	this->ui->qwtPlot_tac->setAxisTitle(QwtPlot::xBottom, QObject::tr("Time [s]"));
 	this->ui->qwtPlot_tac->setAxisTitle(QwtPlot::yLeft, QObject::tr("Density [HU]"));
+	this->ui->qwtPlot_tac->insertLegend(new QwtLegend(), QwtPlot::RightLegend);
 
 	//just temporary until autoscale and zoom works
 	this->ui->qwtPlot_tac->setAxisScale(2,0,20);
 	this->ui->qwtPlot_tac->setAxisScale(0,0,500);
+
+	markerStart->setLabel(tr("Start"));
+	markerStart->setLabelAlignment(Qt::AlignRight|Qt::AlignTop);
+	markerStart->setLineStyle(QwtPlotMarker::VLine);
+	markerStart->setXValue(0);
+	markerStart->setVisible(false);
+	markerStart->attach(this->ui->qwtPlot_tac);  
+  
+	markerEnd->setLabel(tr("End"));
+	markerEnd->setLabelAlignment(Qt::AlignLeft|Qt::AlignTop);
+	markerEnd->setLineStyle(QwtPlotMarker::VLine);
+	markerEnd->setXValue(0);
+	markerEnd->setVisible(false);
+	markerEnd->attach(this->ui->qwtPlot_tac);  
+  
+	markerPickerX->setLineStyle(QwtPlotMarker::VLine);
+	markerPickerY->setLineStyle(QwtPlotMarker::HLine);
+	markerPickerX->setLinePen(QPen(Qt::red));
+	markerPickerY->setLinePen(QPen(Qt::red));
+	markerPickerX->setVisible(false);
+	markerPickerY->setVisible(false);
+	markerPickerX->attach(this->ui->qwtPlot_tac);
+	markerPickerY->attach(this->ui->qwtPlot_tac);
+  
+  
+	grid->enableX(true); grid->enableX(false);
+	grid->attach(this->ui->qwtPlot_tac);
+
+	this->ui->slider_startTime->setTracking(true);
+	this->ui->slider_endTime->setTracking(true);
+    
+    this->ui->tbl_gammaFit->verticalHeader()->setVisible(false);
+    this->ui->tbl_gammaFit->resizeColumnsToContents();
 
 	this->ui->mprView_ul->setOrientation(0);	//axial
 	this->ui->mprView_ur->setOrientation(1);	//coronal
@@ -386,7 +434,9 @@ void KardioPerfusion::on_btn_analyse_clicked()
 	}
 	*/
 	
-	mmid4Analyzer = new MMID4Analyzer(this);
+	//mmid4Analyzer = new MMID4Analyzer(this);
+	maxSlopeAnalyzer = new MaxSlopeAnalyzer(this);
+	this->ui->tbl_gammaFit->setModel( maxSlopeAnalyzer->getSegments() );
 
 	this->ui->treeView->selectAll();
 	//get list of selected items
@@ -398,7 +448,7 @@ void KardioPerfusion::on_btn_analyse_clicked()
 			TreeItem *item = &imageModel.getItem( *index );
 			//add image to the dialog if it is a CT image
 			if (item->isA(typeid(CTImageTreeItem))) {
-				mmid4Analyzer->addImage( dynamic_cast<CTImageTreeItem*>(item) );
+				maxSlopeAnalyzer->addImage( dynamic_cast<CTImageTreeItem*>(item) );
 			}
 		}
 	}
@@ -419,21 +469,26 @@ void KardioPerfusion::on_btn_analyse_clicked()
 		for(int i = 0; i < cnum; i++ ) {
 			itemList.push_back( &currentItem->child(i) );
 		}
-		//if actual item is a segment add it to the dialog
+		//if actual item is a segment add it
 		if (currentItem->isA(typeid(BinaryImageTreeItem)))
-			mmid4Analyzer->addSegment( dynamic_cast<BinaryImageTreeItem*>(currentItem) );
+			maxSlopeAnalyzer->addSegment( dynamic_cast<BinaryImageTreeItem*>(currentItem) );
 	}
 
-	SegmentListModel *segments = mmid4Analyzer->getSegments();
+	SegmentListModel *segments = maxSlopeAnalyzer->getSegments();
+
+	picker = new TimeDensityDataPicker(markerPickerX, markerPickerY, segments, this->ui->qwtPlot_tac->canvas());
+	
 	//iterate over the list of segments
 	BOOST_FOREACH( SegmentInfo &currentSegment, *segments) {
 		//attach the curves for the actual segment to the plot
 		currentSegment.attachSampleCurves(this->ui->qwtPlot_tac);
 	}
 
+	this->ui->slider_startTime->setMaximum(maxSlopeAnalyzer->getImageCount()-1);
+	this->ui->slider_endTime->setMaximum(maxSlopeAnalyzer->getImageCount()-1);
+
 	this->ui->qwtPlot_tac->replot();
-	//execute the dialog
-	//m_tacDialog->show();
+	
 }
 
 //callback for exit
@@ -705,6 +760,31 @@ void KardioPerfusion::tabWidget_doubleClicked(MyTabWidget &w)
 	}
 }
 
+void KardioPerfusion::sliderStartValue_changed()
+{
+	int value = this->ui->slider_startTime->value();
+	QModelIndexList indexList = this->ui->tbl_gammaFit->selectionModel()->selectedRows();
+	this->ui->lbl_startTime->setText(QString::number(maxSlopeAnalyzer->getTime(value)));
+	markerStart->setXValue(maxSlopeAnalyzer->getTime(value));
+	if (indexList.size() == 1) 
+	{
+		maxSlopeAnalyzer->setGammaStartIndex(value, indexList);
+	}
+	this->ui->qwtPlot_tac->replot();
+}
+
+void KardioPerfusion::sliderEndValue_changed()
+{
+	int value = this->ui->slider_startTime->value();
+	QModelIndexList indexList = this->ui->tbl_gammaFit->selectionModel()->selectedRows();
+	this->ui->lbl_endTime->setText(QString::number(maxSlopeAnalyzer->getTime(value)));
+	markerEnd->setXValue(maxSlopeAnalyzer->getTime(value));
+	if (indexList.size() == 1) 
+	{
+		maxSlopeAnalyzer->setGammaEndIndex(value, indexList);
+	}
+	this->ui->qwtPlot_tac->replot();
+}
 /*void KardioPerfusion::loadFile(QString fname){
 
 	// define Pixeltype and set dimension

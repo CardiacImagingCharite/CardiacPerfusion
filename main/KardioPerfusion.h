@@ -13,7 +13,8 @@
 //#include "tacdialog.h"
 #include <QMouseEvent>
 #include "mytabwidget.h"
-#include "mmid4Analyzer.h"
+//#include "mmid4Analyzer.h"
+#include "maxSlopeAnalyzer.h"
 
 
 #define VTK_CREATE(type, name) \
@@ -23,6 +24,9 @@
 class Ui_KardioPerfusion;
 class DicomSelectorDialog;
 class MultiPlanarReformatWidget;
+class QwtPlotMarker;
+class QwtPlotGrid;
+class QwtPlotPicker;
 
 /*! \class KardioPerfusion KardioPerfusion.h "KardioPerfusion.h"
  *  \brief This is the main class for the graphical user interface.
@@ -87,12 +91,16 @@ class KardioPerfusion : public QMainWindow
 	\param pos contains the position of the contextmenu.
 	*/
 	void treeViewContextMenu(const QPoint &pos);
-	///creates a segment for selected image
+	///creates a segment for selected image.
 	void createSegmentForSelectedImage();
-	///changes the color for the selected item
+	///changes the color for the selected item.
 	void changeColorForSelectedSegment();
-	///removes a selected Image from the image model
+	///removes a selected Image from the image model.
 	void removeSelectedImages();
+	///Slot will be called, if the value of the startSlider has changed.
+	void sliderStartValue_changed();
+	///Slot will be called, if the value of the endSlider has changed.
+	void sliderEndValue_changed();
 
 protected:
 	///clears pending actions
@@ -144,8 +152,13 @@ private:
 
 	bool oneWindowIsMax;
 	//TacDialog* m_tacDialog;
-	MMID4Analyzer* mmid4Analyzer;
+	//MMID4Analyzer* mmid4Analyzer;
+	MaxSlopeAnalyzer* maxSlopeAnalyzer;
 
+	QwtPlotMarker *markerStart, *markerEnd;
+    QwtPlotMarker *markerPickerX, *markerPickerY;
+	QwtPlotGrid *grid;
+	QwtPlotPicker *picker;
 };
 
 #endif // KardioPerfusion_H

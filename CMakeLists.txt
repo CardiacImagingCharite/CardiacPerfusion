@@ -24,8 +24,8 @@ SET( KardioPerfusionSrcs
 	analyse/tacdialog.h
 	analyse/timedensitydata.cpp
 	analyse/timedensitydata.h	
-#	analyse/timedensitydatapicker.cpp
-#	analyse/timedensitydatapicker.h
+	analyse/timedensitydatapicker.cpp
+	analyse/timedensitydatapicker.h
 #	analyse/segmentselectbutton.cpp
 #	analyse/segmentselectbutton.h
 	analyse/segmentlistmodel.cpp

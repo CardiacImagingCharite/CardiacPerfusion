@@ -47,6 +47,7 @@ class PerfusionAnalyzer
 		\return Time as a double. 
 		*/
 		double getTime(int index);
+		int getImageCount();
 
 	protected:
 

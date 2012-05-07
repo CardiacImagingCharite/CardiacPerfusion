@@ -31,7 +31,7 @@ void PerfusionAnalyzer::addSegment(BinaryImageTreeItem *segment)
 
 SegmentListModel* PerfusionAnalyzer::getSegments()
 {
-	calculateTacValues();
+	//calculateTacValues();
 
 	//iterate over the list of segments
 /*	BOOST_FOREACH( SegmentInfo &currentSegment, segments) {
@@ -41,6 +41,8 @@ SegmentListModel* PerfusionAnalyzer::getSegments()
 	*/
 	return segments;
 }
+
+
 
 std::string PerfusionAnalyzer::getTacValuesAsString()
 {

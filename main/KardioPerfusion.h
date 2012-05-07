@@ -101,6 +101,12 @@ class KardioPerfusion : public QMainWindow
 	void sliderStartValue_changed();
 	///Slot will be called, if the value of the endSlider has changed.
 	void sliderEndValue_changed();
+	///Slot will be called, if the table was clicked.
+	void tableGamma_clicked(const QModelIndex & index);
+	///Slot will be called, if the checkbutton was toggled.
+	void cb_enableGamma_toggled();
+
+	void on_btn_arteryInput_selected(const SegmentInfo *segment);
 
 protected:
 	///clears pending actions

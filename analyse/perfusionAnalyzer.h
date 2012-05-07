@@ -29,11 +29,13 @@ class PerfusionAnalyzer
 		\param segment The segment, that is to be added. 
 		*/
 		void addSegment(BinaryImageTreeItem *segment);
-		///Gets a QwtPlot with the time attenuation curves
+		///Gets the model of the segmentlist
 		/*!
-		\return QWT plot
+		\return Segemnts
 		*/
 		SegmentListModel* getSegments();
+		///Calculates the time attenuation curves
+		void calculateTacValues();
 		///Gets the values of the TAC
 		/*!
 		\return Comma separated String containing the tac values. 
@@ -50,8 +52,6 @@ class PerfusionAnalyzer
 		int getImageCount();
 
 	protected:
-
-		void calculateTacValues();
 
 		///A structure that represents a functor for comparing two times
 		struct CTImageTimeCompareFunctor {

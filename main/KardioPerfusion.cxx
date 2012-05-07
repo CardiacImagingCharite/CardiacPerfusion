@@ -58,7 +58,7 @@ KardioPerfusion::KardioPerfusion():
 	maxSlopeAnalyzer = NULL;
 
 	//configure the plot
-	this->ui->qwtPlot_tac->setTitle(QObject::tr("Time Density Curves"));
+	this->ui->qwtPlot_tac->setTitle(QObject::tr("Time Attenuation Curves"));
 	this->ui->qwtPlot_tac->setAxisTitle(QwtPlot::xBottom, QObject::tr("Time [s]"));
 	this->ui->qwtPlot_tac->setAxisTitle(QwtPlot::yLeft, QObject::tr("Density [HU]"));
 	this->ui->qwtPlot_tac->insertLegend(new QwtLegend(), QwtPlot::RightLegend);
@@ -437,6 +437,7 @@ void KardioPerfusion::on_btn_analyse_clicked()
 	//mmid4Analyzer = new MMID4Analyzer(this);
 	maxSlopeAnalyzer = new MaxSlopeAnalyzer(this);
 	this->ui->tbl_gammaFit->setModel( maxSlopeAnalyzer->getSegments() );
+	this->ui->btn_arteryInput->setSegmentListModel( maxSlopeAnalyzer->getSegments() );
 
 	this->ui->treeView->selectAll();
 	//get list of selected items
@@ -473,10 +474,10 @@ void KardioPerfusion::on_btn_analyse_clicked()
 		if (currentItem->isA(typeid(BinaryImageTreeItem)))
 			maxSlopeAnalyzer->addSegment( dynamic_cast<BinaryImageTreeItem*>(currentItem) );
 	}
-
+	maxSlopeAnalyzer->calculateTacValues();
 	SegmentListModel *segments = maxSlopeAnalyzer->getSegments();
 
-	picker = new TimeDensityDataPicker(markerPickerX, markerPickerY, segments, this->ui->qwtPlot_tac->canvas());
+	//picker = new TimeDensityDataPicker(markerPickerX, markerPickerY, segments, this->ui->qwtPlot_tac->canvas());
 	
 	//iterate over the list of segments
 	BOOST_FOREACH( SegmentInfo &currentSegment, *segments) {
@@ -775,7 +776,7 @@ void KardioPerfusion::sliderStartValue_changed()
 
 void KardioPerfusion::sliderEndValue_changed()
 {
-	int value = this->ui->slider_startTime->value();
+	int value = this->ui->slider_endTime->value();
 	QModelIndexList indexList = this->ui->tbl_gammaFit->selectionModel()->selectedRows();
 	this->ui->lbl_endTime->setText(QString::number(maxSlopeAnalyzer->getTime(value)));
 	markerEnd->setXValue(maxSlopeAnalyzer->getTime(value));
@@ -784,6 +785,45 @@ void KardioPerfusion::sliderEndValue_changed()
 		maxSlopeAnalyzer->setGammaEndIndex(value, indexList);
 	}
 	this->ui->qwtPlot_tac->replot();
+}
+
+void KardioPerfusion::tableGamma_clicked(const QModelIndex & index)
+{
+	this->ui->tbl_gammaFit->selectionModel()->select(index, QItemSelectionModel::Rows);
+	this->ui->slider_startTime->setEnabled(true);
+	this->ui->slider_endTime->setEnabled(true);
+	this->ui->cb_enableGamma->setEnabled(true);
+	markerStart->setVisible(true);
+	markerEnd->setVisible(true);
+	
+	SegmentListModel* segments = maxSlopeAnalyzer->getSegments();
+	const SegmentInfo &seg = segments->getSegment( index );
+	this->ui->slider_startTime->setValue(seg.getGammaStartIndex());
+	this->ui->slider_endTime->setValue(seg.getGammaEndIndex());
+	this->ui->cb_enableGamma->setChecked(seg.isGammaEnabled());
+	this->ui->btn_arteryInput->setSelectedSegment(seg.getArterySegment());
+}
+
+void KardioPerfusion::cb_enableGamma_toggled()
+{
+	QModelIndexList indexList = this->ui->tbl_gammaFit->selectionModel()->selectedRows();
+	if (indexList.size() == 1) {
+		SegmentListModel* segments = maxSlopeAnalyzer->getSegments();
+		SegmentInfo &seg = segments->getSegment(indexList.at(0));
+		if (this->ui->cb_enableGamma->isChecked()) {
+			seg.setEnableGamma(true);
+		}
+		else 
+			seg.setEnableGamma(false);
+		maxSlopeAnalyzer->recalculateGamma(seg);
+  }
+}
+
+void KardioPerfusion::on_btn_arteryInput_selected(const SegmentInfo *segment) {
+  QModelIndexList indexList = this->ui->tbl_gammaFit->selectionModel()->selectedRows();
+  if (indexList.size() == 1) {
+    maxSlopeAnalyzer->getSegments()->setArterySegment(indexList.at(0), segment);
+  }
 }
 /*void KardioPerfusion::loadFile(QString fname){
 

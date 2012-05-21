@@ -82,6 +82,8 @@ class KardioPerfusion : public QMainWindow
 //	void on_btn_cannyEdges_clicked();
 	///Action for clicking on Analyse-Button.
 	void on_btn_analyse_clicked();
+	///Action for clicking on PerfusionMap-Button
+	void on_btn_perfusionMap_clicked();
 	///Action for double clicking on a mprWidget.
 	void mprWidget_doubleClicked(MultiPlanarReformatWidget &w);
 	///Action for double clicking on a mytabwidget.

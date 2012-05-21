@@ -215,6 +215,21 @@ void BinaryImageTreeItem::regionGrow( float x, float y, float z, int threshold, 
 	
 }
 
+void BinaryImageTreeItem::setPixel(float x, float y, float z)
+{
+	//get ITK image
+	ImageType::Pointer itkIm = getITKImage();
+	if (itkIm.IsNull()) 
+		return;
+
+	CTImageType::IndexType pixelIndex;
+    pixelIndex[0] = x;
+    pixelIndex[1] = y;
+	pixelIndex[2] = z;
+ 
+	itkIm->SetPixel(pixelIndex, BinaryPixelOn);
+}
+
 /*void BinaryImageTreeItem::regionGrow( float x, float y, float z, boost::function<void()> clearAction) {
   ImageType::IndexType idx;
   ImageType::PointType point;

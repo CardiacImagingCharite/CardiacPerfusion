@@ -97,6 +97,13 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
 	\return A pointer to the generated Binary tree item.
 	*/
     BinaryImageTreeItem *generateSegment(void);
+	///Generates an overlay segemnt for the actual image with a given name.
+	/*!
+	\param name The name of the segemnt.
+	\return A pointer to the generated Binary tree item.
+	*/
+    BinaryImageTreeItem *generateSegment(QString name);
+
 	/** @name Getter for Dicom tags */
     ///@{
     static const std::string &getNumberOfFramesTag();

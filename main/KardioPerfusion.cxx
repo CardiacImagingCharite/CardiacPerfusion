@@ -30,6 +30,8 @@
 #include "segmentlistmodel.h"
 #include "timedensitydatapicker.h"
 
+#include "itkShrinkImageFilter.h"
+
 const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
   (DicomTagType("Patient Name", "0010|0010"))
   (DicomTagType("#Slices",CTImageTreeItem::getNumberOfFramesTag()))
@@ -436,6 +438,7 @@ void KardioPerfusion::on_btn_analyse_clicked()
 	
 	//mmid4Analyzer = new MMID4Analyzer(this);
 	maxSlopeAnalyzer = new MaxSlopeAnalyzer(this);
+
 	this->ui->tbl_gammaFit->setModel( maxSlopeAnalyzer->getSegments() );
 	this->ui->btn_arteryInput->setSegmentListModel( maxSlopeAnalyzer->getSegments() );
 
@@ -490,6 +493,69 @@ void KardioPerfusion::on_btn_analyse_clicked()
 
 	this->ui->qwtPlot_tac->replot();
 	
+}
+
+void KardioPerfusion::on_btn_perfusionMap_clicked()
+{
+	maxSlopeAnalyzer = new MaxSlopeAnalyzer(this);
+
+	//get list of selected items
+	QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
+	
+	//test if one element is selected
+	if(selectedIndex.count() == 1)
+	{
+		//get the item from the image model
+		QModelIndex index = selectedIndex[0];
+		TreeItem* item = &imageModel.getItem(index);
+		//test if item is a CT image
+		if(item->isA(typeid(CTImageTreeItem)))
+		{
+			//get the number of segments
+			int cnum = item->childCount();
+			//test if the CT image has one segment
+			if(cnum == 1){
+				CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>(item);
+				CTImageType::Pointer image = ctitem-> getITKImage();
+
+				typedef itk::ShrinkImageFilter <CTImageType, CTImageType>
+					ShrinkImageFilterType;
+ 
+				ShrinkImageFilterType::Pointer shrinkFilter
+					= ShrinkImageFilterType::New();
+				shrinkFilter->SetInput(image);
+				shrinkFilter->SetShrinkFactors(4);
+
+				//ctitem->generateSegment("name");
+			}
+			else{
+				QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));
+				return;
+			}
+		}
+		else{
+			QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));
+			return;
+		}
+	}
+	else{
+		QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));
+		return;
+	}
+	//iterate over selected items
+	for(QModelIndexList::Iterator index = selectedIndex.begin(); index != selectedIndex.end(); ++index) {
+		if (index->isValid()) {
+			//get item at specific index
+			TreeItem *item = &imageModel.getItem( *index );
+			//add image to the dialog if it is a CT image
+			if (item->isA(typeid(CTImageTreeItem))) {
+				maxSlopeAnalyzer->addImage( dynamic_cast<CTImageTreeItem*>(item) );
+			}
+		}
+	}
+	this->ui->treeView->selectionModel()->clearSelection();
+
+
 }
 
 //callback for exit

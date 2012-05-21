@@ -445,6 +445,28 @@ BinaryImageTreeItem *CTImageTreeItem::generateSegment(void) {
 	return NULL;
 }
 
+//generate binary segment at actual CT image
+BinaryImageTreeItem *CTImageTreeItem::generateSegment(QString name) {
+	typedef itk::CastImageFilter< CTImageType, BinaryImageType> CastFilterType;
+	
+	BinaryImageTreeItem::ImageType::Pointer seg;
+	//if name is valid and dialog was closed with OK
+	if (!name.isEmpty()) {
+	    //create caster, that transforme the CT image to a binary image
+		CastFilterType::Pointer caster = CastFilterType::New();
+		caster->SetInput( getITKImage() );
+		caster->Update();
+		seg = caster->GetOutput();
+		//fills the segment with zeros
+		seg->FillBuffer(BinaryPixelOff);
+		//create a binary tree item as child of this CT image
+		BinaryImageTreeItem *result = new BinaryImageTreeItem(this, seg, name);
+		//insert child into the hierarchy
+		insertChild(result);
+		return result;
+	}
+	return NULL;
+}
 /*
 
 bool BinaryImageTreeItem::watershedParent(const BinaryImageTreeItem *includedSegment, const BinaryImageTreeItem *excludedSegment) {

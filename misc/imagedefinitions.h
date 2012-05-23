@@ -23,6 +23,7 @@
 #include <boost/array.hpp>
 
 const unsigned int ImageDimension = 3;
+const unsigned int TimeSeriesDimension = 4;
 
 typedef float RealPixelType;
 typedef itk::Image< RealPixelType, ImageDimension> RealImageType;
@@ -37,6 +38,8 @@ typedef itk::Image< BinaryPixelType, ImageDimension> BinaryImageType;
 
 typedef signed short CTPixelType;
 typedef itk::Image< CTPixelType, ImageDimension> CTImageType;
+
+typedef itk::Image< CTPixelType, TimeSeriesDimension > CTImageType4D;
 
 typedef boost::array< unsigned char, 3 > RGBType;
 

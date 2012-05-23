@@ -497,17 +497,18 @@ void KardioPerfusion::on_btn_analyse_clicked()
 
 void KardioPerfusion::on_btn_perfusionMap_clicked()
 {
+	const int shrinkFactor = 4;
+
 	maxSlopeAnalyzer = new MaxSlopeAnalyzer(this);
 
 	//get list of selected items
-	QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
+	QModelIndexList selectedIndexes = this->ui->treeView->selectionModel()->selectedRows();
 	
 	//test if one element is selected
-	if(selectedIndex.count() == 1)
+	if(selectedIndexes.count() == 1)
 	{
 		//get the item from the image model
-		QModelIndex index = selectedIndex[0];
-		TreeItem* item = &imageModel.getItem(index);
+		TreeItem* item = &imageModel.getItem(selectedIndexes[0]);
 		//test if item is a CT image
 		if(item->isA(typeid(CTImageTreeItem)))
 		{
@@ -515,16 +516,55 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 			int cnum = item->childCount();
 			//test if the CT image has one segment
 			if(cnum == 1){
-				CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>(item);
-				CTImageType::Pointer image = ctitem-> getITKImage();
-
 				typedef itk::ShrinkImageFilter <CTImageType, CTImageType>
 					ShrinkImageFilterType;
- 
 				ShrinkImageFilterType::Pointer shrinkFilter
 					= ShrinkImageFilterType::New();
-				shrinkFilter->SetInput(image);
-				shrinkFilter->SetShrinkFactors(4);
+				shrinkFilter->SetShrinkFactors(shrinkFactor);
+
+				CTImageTreeItem* testItem = dynamic_cast<CTImageTreeItem*>(&imageModel.getItem(selectedIndexes[0]));
+				CTImageType4D::SizeType outputSize;
+				for(int dim = 0; dim < ImageDimension; dim++)
+				{
+					outputSize[dim] = std::floorf(testItem->getITKImage()->GetLargestPossibleRegion().GetSize(dim)/shrinkFactor);
+				}
+				outputSize[3] = imageModel.rowCount();
+
+				CTImageType4D::Pointer image4D = CTImageType4D::New();
+				create4DImage(image4D, outputSize);
+				
+				QList<CTImageType*> imageList;
+
+				for(int i = 0; i < imageModel.rowCount(); i++)
+				{
+					QModelIndex index = imageModel.index(i,0);
+					CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>(&imageModel.getItem(index));
+
+					shrinkFilter->SetInput(ctitem->getITKImage());
+					shrinkFilter->Update();
+					imageList.append(shrinkFilter->GetOutput());
+				}
+
+				typedef itk::ImageRegionConstIterator< CTImageType >  Iterator3D;
+				typedef itk::ImageRegionIterator< CTImageType4D >  Iterator4D;
+
+				Iterator4D it4( image4D, image4D->GetBufferedRegion() );
+				it4.GoToBegin();
+
+				for(unsigned int i=0; i<2; i++)
+				{
+					CTImageType::RegionType region = imageList[i]->GetBufferedRegion();
+					Iterator3D it3( imageList[i], region );
+					it3.GoToBegin();
+					while( !it3.IsAtEnd() )
+					{
+						it4.Set( it3.Get() );
+						++it3;
+						++it4;
+					}
+				}
+				
+				
 
 				//ctitem->generateSegment("name");
 			}
@@ -542,20 +582,6 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 		QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));
 		return;
 	}
-	//iterate over selected items
-	for(QModelIndexList::Iterator index = selectedIndex.begin(); index != selectedIndex.end(); ++index) {
-		if (index->isValid()) {
-			//get item at specific index
-			TreeItem *item = &imageModel.getItem( *index );
-			//add image to the dialog if it is a CT image
-			if (item->isA(typeid(CTImageTreeItem))) {
-				maxSlopeAnalyzer->addImage( dynamic_cast<CTImageTreeItem*>(item) );
-			}
-		}
-	}
-	this->ui->treeView->selectionModel()->clearSelection();
-
-
 }
 
 //callback for exit
@@ -890,6 +916,20 @@ void KardioPerfusion::on_btn_arteryInput_selected(const SegmentInfo *segment) {
   if (indexList.size() == 1) {
     maxSlopeAnalyzer->getSegments()->setArterySegment(indexList.at(0), segment);
   }
+}
+
+void KardioPerfusion::create4DImage(CTImageType4D* image, CTImageType4D::SizeType size)
+{
+	  // Create an image with 2 connected components
+  CTImageType4D::RegionType region;
+  CTImageType4D::IndexType start;
+  start.Fill(0);
+ 
+  region.SetSize(size);
+  region.SetIndex(start);
+ 
+  image->SetRegions(region);
+  image->Allocate();
 }
 /*void KardioPerfusion::loadFile(QString fname){
 

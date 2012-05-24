@@ -26,8 +26,6 @@ SET( KardioPerfusionSrcs
 	analyse/timedensitydata.h	
 	analyse/timedensitydatapicker.cpp
 	analyse/timedensitydatapicker.h
-	qtwidgets/segmentselectbutton.cpp
-	qtwidgets/segmentselectbutton.h
 	analyse/segmentlistmodel.cpp
 	analyse/segmentlistmodel.h
 	analyse/segmentinfo.cpp
@@ -43,8 +41,6 @@ SET( KardioPerfusionSrcs
 	analyse/patlakdata.h
 #	analyse/SamplePoint.cxx
 #	analyse/SamplePoint.h
-
-
 
 	imagetree/ctimagetreemodel.cpp
 	imagetree/dicomtagtype.cpp
@@ -66,6 +62,11 @@ SET( KardioPerfusionSrcs
 
 	qtwidgets/mytabwidget.h
 	qtwidgets/mytabwidget.cxx
+	qtwidgets/segmentselectbutton.cpp
+	qtwidgets/segmentselectbutton.h
+
+	itkfilter/itkperfusionmapfilter.txx
+	itkfilter/itkperfusionmapfilter.h
 )
 
 SET( KardioPerfusionUI 

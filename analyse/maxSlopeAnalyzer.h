@@ -18,7 +18,6 @@ class MaxSlopeAnalyzer : public PerfusionAnalyzer
 		void setGammaEndIndex(int value, const QModelIndexList& indexList);
 		void recalculateGamma(SegmentInfo &seginfo);
 
-
 	private:
 		void recalculateData(SegmentInfo &seginfo);
 

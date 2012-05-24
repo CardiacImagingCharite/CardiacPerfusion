@@ -551,7 +551,7 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 				Iterator4D it4( image4D, image4D->GetBufferedRegion() );
 				it4.GoToBegin();
 
-				for(unsigned int i=0; i<2; i++)
+				for(unsigned int i=0; i<imageModel.rowCount(); i++)
 				{
 					CTImageType::RegionType region = imageList[i]->GetBufferedRegion();
 					Iterator3D it3( imageList[i], region );

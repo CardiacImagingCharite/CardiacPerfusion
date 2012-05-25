@@ -12,7 +12,7 @@ namespace itk{
 	{
 		public:
 			/** Standard class typedefs. */
-			typedef PerfusionMapFilter                         Self;
+			typedef PerfusionMapFilter							  Self;
 			typedef ImageToImageFilter<TInputImage,TOutputImage>  Superclass;
 			typedef SmartPointer<Self>                            Pointer;
 			typedef SmartPointer<const Self>                      ConstPointer;
@@ -34,6 +34,28 @@ namespace itk{
 			typedef typename     OutputImageType::RegionType OutputImageRegionType;
 			typedef typename     OutputImageType::PixelType  OutputImagePixelType;
 			
+			/** ImageDimension enumeration. */
+			itkStaticConstMacro(ImageDimension, unsigned int,
+								TInputImage::ImageDimension );
+			itkStaticConstMacro(OutputImageDimension, unsigned int,
+								TOutputImage::ImageDimension );
+			 
+			/** PerfusionMapFilter produces an image which is a different
+			* resolution and with a different pixel spacing than its input
+			* image.  As such, ShrinkImageFilter needs to provide an
+			* implementation for GenerateOutputInformation() in order to inform
+			* the pipeline execution model.  The original documentation of this
+			* method is below.
+			* \sa ProcessObject::GenerateOutputInformaton() */
+			virtual void GenerateOutputInformation();
+			
+			/** PerfusionMapFilter needs a larger input requested region than the output
+			* requested region.  As such, ShrinkImageFilter needs to provide an
+			* implementation for GenerateInputRequestedRegion() in order to inform the
+			* pipeline execution model.
+			* \sa ProcessObject::GenerateInputRequestedRegion() */
+//			virtual void GenerateInputRequestedRegion();
+
 		protected:
 			PerfusionMapFilter();
 			virtual ~PerfusionMapFilter() {};
@@ -44,6 +66,22 @@ namespace itk{
 			* \sa ImageToImageFilter::ThreadedGenerateData(),
 			*     ImageToImageFilter::GenerateData()  */
 			void GenerateData(void);
+
+			/** PerfusionMapFilter can be implemented as a multithreaded filter.
+			* Therefore, this implementation provides a ThreadedGenerateData()
+			* routine which is called for each processing thread. The output
+			* image data is allocated automatically by the superclass prior to
+			* calling ThreadedGenerateData().  ThreadedGenerateData can only
+			* write to the portion of the output image specified by the
+			* parameter "outputRegionForThread"
+			* \sa ImageToImageFilter::ThreadedGenerateData(),
+			*     ImageToImageFilter::GenerateData()  */
+ // void ThreadedGenerateData(const OutputImageRegionType& outputRegionForThread,
+ //                           int threadId );
+
+		private:
+			PerfusionMapFilter(const Self&); //purposely not implemented
+			void operator=(const Self&); //purposely not implemented
 	};
 } //end of namespace itk
 

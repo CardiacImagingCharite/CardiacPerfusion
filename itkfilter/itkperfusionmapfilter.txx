@@ -5,7 +5,10 @@
 #include "itkProgressReporter.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
+#include "itkImageDuplicator.h"
+#include "itkExtractImageFilter.h"
 
+#include "perfusionAnalyzer.h"
 
 namespace itk
 {
@@ -19,29 +22,7 @@ namespace itk
 		this->SetNumberOfRequiredInputs( 1 );
 	}
 
-	/**
-	* GenerateData Creates the perfusion map
-	*/
-/*	template <class TInputImage, class TOutputImage >
-	void
-	PerfusionMapFilter<TInputImage,TOutputImage>
-	::GenerateData( void )
-	{
-		typename Superclass::InputImageConstPointer  inputPtr = this->GetInput();
-		typename Superclass::OutputImagePointer outputPtr = this->GetOutput(0);
-		
-		InputImageType::RegionType inputLargestPossibleRegion;
-		inputLargestPossibleRegion = inputPtr->GetLargestPossibleRegion();
 
-		InputImageType::RegionType inputBufferedRegion;
-		inputBufferedRegion = inputPtr->GetBufferedRegion();
-
-		InputImageType::RegionType inputRequestedRegion;
-		inputRequestedRegion = inputPtr->GetRequestedRegion();
-
-
-	}
-*/
 	template <class TInputImage, class TOutputImage >
 	void
 	PerfusionMapFilter<TInputImage,TOutputImage>::
@@ -74,23 +55,62 @@ namespace itk
 		typedef ImageRegionIterator<TOutputImage>     OutputIterator;
 		typedef ImageRegionConstIterator<TInputImage> InputIterator;
 
-		OutputIterator outIt(outputPtr, outputRegionForThread);
-		InputIterator inIt(inputPtr, inputRegionForThread);
-		int i = 0;
-		// walk the output region, and sample the input image
+		OutputIterator outIt(outputPtr,outputRegionForThread );
+		InputIterator inIt(inputPtr, inputRegionForThread );
+		outIt.GoToBegin();
+		inIt.GoToBegin();
+
+		// walk the output region, and copy the input image
 		while( !outIt.IsAtEnd() )
 		{
-			OutputImagePixelType p = static_cast<OutputImagePixelType>(inIt.Get());
-			std::cout << "inputIterator at position" << i << ": " << p << std::endl;
-			++i;
 			// copy the input pixel to the output
-			outIt.Set( p );
+			//replace that by calculation of perfusion values
+			outIt.Set( static_cast<OutputImagePixelType>(inIt.Get()) );
 			++outIt; 
 			++inIt; 
 			progress.CompletedPixel();
 		}
 	}
-*/
+	/*
+		// Define the iterators.
+	typedef ImageRegionConstIterator<TInputImage>  InputIterator;
+    typedef ImageRegionIterator<TOutputImage>      OutputIterator;
+
+	OutputIterator outIt(outputPtr, outputPtr->GetLargestPossibleRegion() );
+	InputIterator inIt(inputPtr, inputPtr->GetLargestPossibleRegion() );
+	outIt.GoToBegin();
+	inIt.GoToBegin();
+
+	int maxTimePoints = inputPtr->GetLargestPossibleRegion().GetSize()[3];
+	int volumeSize = 1;
+	for(int i = 0; i < 3; i++)
+	{
+		volumeSize *= inputPtr->GetLargestPossibleRegion().GetSize()[i];
+	}
+
+	// walk the output region, and copy the input image
+	while( !outIt.IsAtEnd() )
+	{
+		InputIterator tempIt(inputPtr, inputPtr->GetLargestPossibleRegion() );
+		tempIt = inIt;
+
+		// copy the input pixel to the output
+		//replace that by calculation of perfusion 
+		
+		for(int time = 0; time < maxTimePoints; time++)
+		{
+//			tempIt = tempIt + (time * volumeSize);
+			
+		}
+		
+		outIt.Set( static_cast<OutputImagePixelType>(inIt.Get()) );
+
+		++outIt; 
+		++inIt; 
+		progress.CompletedPixel();
+	}
+	*/
+
 
 /**
  * GenerateData Performs the reflection
@@ -100,7 +120,11 @@ void
 PerfusionMapFilter<TInputImage,TOutputImage>
 ::GenerateData( void )
 {
-	itkDebugMacro(<<"Actually executing");
+/*	itkDebugMacro(<<"Actually executing");
+
+	
+	if(m_arterySegment == NULL || m_analyzer == NULL)
+		return;
 
 	// Get the input and output pointers
 	typename Superclass::InputImageConstPointer  inputPtr = this->GetInput();
@@ -108,27 +132,73 @@ PerfusionMapFilter<TInputImage,TOutputImage>
 
 	// support progress methods/callbacks
 	ProgressReporter progress(this, 0,  inputPtr->GetRequestedRegion().GetNumberOfPixels() );
-  
-	// Define the iterators.
-	typedef ImageRegionConstIterator<TInputImage>  InputIterator;
-    typedef ImageRegionIterator<TOutputImage>      OutputIterator;
+	
+	//define and create filter for extracting volumes from 4D data
+	typedef itk::ExtractImageFilter<TInputImage,CTImageType> ExtractFilterType;
 
-	OutputIterator outIt(outputPtr, outputPtr->GetLargestPossibleRegion() );
-	InputIterator inIt(inputPtr, inputPtr->GetLargestPossibleRegion() );
-	outIt.GoToBegin();
-	inIt.GoToBegin();
+	ExtractFilterType::Pointer extractFilter = ExtractFilterType::New();
 
-	// walk the output region, and copy the input image
-	while( !outIt.IsAtEnd() )
+	//create region for extracting the images
+	TInputImage::IndexType::Pointer desiredIndex;
+	desiredIndex->Fill(0);
+ 
+    TInputImage::SizeType desiredSize = inputPtr->GetLargestPossibleRegion().GetSize();
+	int timeSamples = desiredSize[3];
+	desiredSize[3] = 0;
+
+	TInputImage::RegionType::Pointer desiredRegion(desiredIndex, desiredSize);
+
+	extractFilter->SetInput(inputPtr);
+	extractFilter->SetExtractionRegion(desiredRegion);
+
+//	for(int i = 0; i < timeSamples; i++)
+//	{
+//		m_analyzer->addImage( dynamic_cast<CTImageTreeItem*>(item) )
+//	}
+	
+
+	//create image for segmenting
+	BinaryImageTreeItem::ImageType::Pointer segmentImage = BinaryImageTreeItem::ImageType::New();
+		
+	BinaryImageTreeItem::ImageType::RegionType region;
+	BinaryImageTreeItem::ImageType::IndexType start;
+	start.Fill(0);
+ 
+	region.SetSize(outputPtr->GetLargestPossibleRegion().GetSize());
+	region.SetIndex(start);
+ 
+	segmentImage->SetRegions(region);
+	segmentImage->Allocate();
+
+
+	//define iterator for the image
+	typedef ImageRegionIterator<BinaryImageTreeItem::ImageType>      SegmentIterator;
+	
+	SegmentIterator segIt(segmentImage, segmentImage->GetLargestPossibleRegion() );
+	segIt.GoToBegin();
+
+	//define duplicator
+	typedef itk::ImageDuplicator< BinaryImageTreeItem::ImageType > DuplicatorType;
+	DuplicatorType::Pointer duplicator = DuplicatorType::New();
+
+	while( !segIt.IsAtEnd() )
 	{
-		// copy the input pixel to the output
-		//replace that by calculation of perfusion values
-		outIt.Set( static_cast<OutputImagePixelType>(inIt.Get()) );
-		++outIt; 
-		++inIt; 
-		progress.CompletedPixel();
+		//set pixel and duplicate segment
+		segIt.Set(255);
+		duplicator->SetInputImage(segmentImage);
+		duplicator->Update();
+
+		//create binaryImageItem and add it to the analyzer
+		BinaryImageTreeItem::ImageType::Pointer clonedImage = duplicator->GetOutput();
+		BinaryImageTreeItem seg(NULL, clonedImage, "test");
+		m_analyzer->addSegment(&seg);
+
+		segIt.Set(0);
+
+		++segIt;
 	}
 
+*/
 }
 
 	template <class TInputImage, class TOutputImage>
@@ -197,6 +267,20 @@ PerfusionMapFilter<TInputImage,TOutputImage>
 		//Set origin
 		outputPtr->SetOrigin(outputOrigin);
 
+	}
+
+	template<class TInputImage, class TOutputImage>
+	void 
+	PerfusionMapFilter<TInputImage, TOutputImage>::setArterySegment(const SegmentInfo *arterySegment)
+	{
+		m_arterySegment = arterySegment;
+	}
+
+	template<class TInputImage, class TOutputImage>
+	void 
+	PerfusionMapFilter<TInputImage, TOutputImage>::setPerfusionAnalyzer(const PerfusionAnalyzer* analyzer)
+	{
+		m_analyzer = analyzer;
 	}
 
 /*	template <class TInputImage, class TOutputImage>

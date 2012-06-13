@@ -10,7 +10,9 @@ SET( KardioPerfusionSrcs
 	main/KardioPerfusion.cxx
 	main/KardioPerfusion.h
 	main/dicomselectordialog.cpp
-	main/dicomselectordialog.h	
+	main/dicomselectordialog.h
+	main/perfusionMapCreator.cxx
+	main/perfusionMapCreator.h
 #	main/MyTestInteractorStyle.cxx
 #	main/MyTestInteractorStyle.h
 
@@ -97,6 +99,7 @@ SET( HeaderDirs
 	misc
 	vtkwidgets
 	qtwidgets
+	itkfilter
 )
 
 FIND_PATH(QWT_INCLUDE_DIR qwt.h)

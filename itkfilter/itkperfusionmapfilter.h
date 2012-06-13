@@ -2,10 +2,12 @@
 #define itkPerfusionMapFilter_H
 
 #include "itkImageToImageFilter.h"
+#include "perfusionAnalyzer.h"
 
 namespace itk{
 
-
+	class SegmentInfo;
+	//class PerfusionAnalyzer;
 	
 	template <class TInputImage, class TOutputImage>
 	class ITK_EXPORT PerfusionMapFilter : public ImageToImageFilter< TInputImage, TOutputImage>
@@ -56,6 +58,14 @@ namespace itk{
 			* \sa ProcessObject::GenerateInputRequestedRegion() */
 //			virtual void GenerateInputRequestedRegion();
 
+			/** Sets the artery segment, which is needed for perfusion analysis.
+			*/
+			void setArterySegment(const SegmentInfo *arterySegment);
+
+			/** Sets the analyzer, which calculates the perfusion.
+			*/
+			void setPerfusionAnalyzer(const PerfusionAnalyzer* analyzer);
+
 		protected:
 			PerfusionMapFilter();
 			virtual ~PerfusionMapFilter() {};
@@ -82,6 +92,10 @@ namespace itk{
 		private:
 			PerfusionMapFilter(const Self&); //purposely not implemented
 			void operator=(const Self&); //purposely not implemented
+
+			SegmentInfo* m_arterySegment;
+			PerfusionAnalyzer* m_analyzer;
+
 	};
 } //end of namespace itk
 

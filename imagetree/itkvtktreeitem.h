@@ -77,6 +77,7 @@ class ITKVTKTreeItem : public TreeItem {
       typename ImageType::Pointer itkImage;
       typename ConnectorType::Pointer connector;
     };
+
     typedef VTKConnectorDataBasePtr ConnectorHandle;
    
     ITKVTKTreeItem(TreeItem * parent, ImagePointerType itkI = ImagePointerType())
@@ -102,7 +103,7 @@ class ITKVTKTreeItem : public TreeItem {
       if (typeid(BaseClass)==other) return true;
       return false;
     }
-    
+
   protected:
     inline typename ImageType::Pointer peekITKImage(void) const { 
       ConnectorHandle tHand = weakConnector.lock();
@@ -111,7 +112,9 @@ class ITKVTKTreeItem : public TreeItem {
       }
       return typename ImageType::Pointer();
     }
-    inline void setITKImage(typename ImageType::Pointer image) { 
+
+  protected:
+	inline void setITKImage(typename ImageType::Pointer image) { 
       if (image) {
 	ConnectorHandle connData( weakConnector.lock() );
 	if (!connData) {
@@ -124,7 +127,6 @@ class ITKVTKTreeItem : public TreeItem {
 	model->registerConnectorData(connData);
       }
     }
-  protected:
 
   private:
     typedef boost::weak_ptr<VTKConnectorDataBasePtr::value_type> WeakConnectorHandle;

@@ -31,6 +31,7 @@
 #include "timedensitydatapicker.h"
 
 #include "itkShrinkImageFilter.h"
+#include "perfusionmapcreator.h"
 
 const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
   (DicomTagType("Patient Name", "0010|0010"))
@@ -510,68 +511,18 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 		//get the item from the image model
 		TreeItem* item = &imageModel.getItem(selectedIndexes[0]);
 		//test if item is a CT image
-		if(item->isA(typeid(CTImageTreeItem)))
+		if(item->isA(typeid(BinaryImageTreeItem)))
 		{
-			//get the number of segments
-			int cnum = item->childCount();
-			//test if the CT image has one segment
-			if(cnum == 1){
-				typedef itk::ShrinkImageFilter <CTImageType, CTImageType>
-					ShrinkImageFilterType;
-				ShrinkImageFilterType::Pointer shrinkFilter
-					= ShrinkImageFilterType::New();
-				shrinkFilter->SetShrinkFactors(shrinkFactor);
+			maxSlopeAnalyzer->addSegment(dynamic_cast<BinaryImageTreeItem*>(item));
+		//	const SegmentInfo arterySegment = maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
+			//const SegmentInfo* arterySegment = reinterpret_cast<const SegmentInfo*>(&maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] ));
+			const SegmentInfo* arterySegment = &maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
+			
+			maxSlopeAnalyzer->getSegments()->setArterySegment(selectedIndexes.at(0), arterySegment);
 
-				CTImageTreeItem* testItem = dynamic_cast<CTImageTreeItem*>(&imageModel.getItem(selectedIndexes[0]));
-				CTImageType4D::SizeType outputSize;
-				for(int dim = 0; dim < ImageDimension; dim++)
-				{
-					outputSize[dim] = std::floorf(testItem->getITKImage()->GetLargestPossibleRegion().GetSize(dim)/shrinkFactor);
-				}
-				outputSize[3] = imageModel.rowCount();
-
-				CTImageType4D::Pointer image4D = CTImageType4D::New();
-				create4DImage(image4D, outputSize);
-				
-				QList<CTImageType*> imageList;
-
-				for(int i = 0; i < imageModel.rowCount(); i++)
-				{
-					QModelIndex index = imageModel.index(i,0);
-					CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>(&imageModel.getItem(index));
-
-					shrinkFilter->SetInput(ctitem->getITKImage());
-					shrinkFilter->Update();
-					imageList.append(shrinkFilter->GetOutput());
-				}
-
-				typedef itk::ImageRegionConstIterator< CTImageType >  Iterator3D;
-				typedef itk::ImageRegionIterator< CTImageType4D >  Iterator4D;
-
-				Iterator4D it4( image4D, image4D->GetBufferedRegion() );
-				it4.GoToBegin();
-
-				for(unsigned int i=0; i<imageModel.rowCount(); i++)
-				{
-					CTImageType::RegionType region = imageList[i]->GetBufferedRegion();
-					Iterator3D it3( imageList[i], region );
-					it3.GoToBegin();
-					while( !it3.IsAtEnd() )
-					{
-						it4.Set( it3.Get() );
-						++it3;
-						++it4;
-					}
-				}
-				
-				
-
-				//ctitem->generateSegment("name");
-			}
-			else{
-				QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));
-				return;
-			}
+			PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, 10);
+			mapCreator->getPerfusionMap(&imageModel);
+		
 		}
 		else{
 			QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));
@@ -862,6 +813,7 @@ void KardioPerfusion::sliderStartValue_changed()
 	if (indexList.size() == 1) 
 	{
 		maxSlopeAnalyzer->setGammaStartIndex(value, indexList);
+		maxSlopeAnalyzer->recalculateGamma(indexList);
 	}
 	this->ui->qwtPlot_tac->replot();
 }
@@ -875,6 +827,7 @@ void KardioPerfusion::sliderEndValue_changed()
 	if (indexList.size() == 1) 
 	{
 		maxSlopeAnalyzer->setGammaEndIndex(value, indexList);
+		maxSlopeAnalyzer->recalculateGamma(indexList);
 	}
 	this->ui->qwtPlot_tac->replot();
 }

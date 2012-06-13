@@ -57,7 +57,7 @@ QVariant SegmentListModel::headerData( int section, Qt::Orientation orientation,
       case 3: return tr("max slope [HU/s]");
       case 4: return tr("enhancement [HU]");
       case 5: return tr("artery");
-      case 6: return tr("perfusion [/min]");
+      case 6: return tr("perfusion [ml/min/ml]");
       case 7: return tr("MTT [s]");
       case 8: return tr("AUC");
     }

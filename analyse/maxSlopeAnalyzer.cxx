@@ -22,7 +22,6 @@ void MaxSlopeAnalyzer::setGammaStartIndex(int value, const QModelIndexList& inde
 
 	SegmentInfo &seg = segments->getSegment(indexList[0]);
 	seg.setGammaStartIndex(value);
-	recalculateData(seg);
 }
 
 void MaxSlopeAnalyzer::recalculateGamma(SegmentInfo &seginfo)
@@ -31,11 +30,16 @@ void MaxSlopeAnalyzer::recalculateGamma(SegmentInfo &seginfo)
 	segments->refresh();
 }
 
+void MaxSlopeAnalyzer::recalculateGamma(const QModelIndexList& indexList)
+{
+	SegmentInfo &seg = segments->getSegment(indexList[0]);
+	recalculateData(seg);
+}
+
 void MaxSlopeAnalyzer::setGammaEndIndex(int value, const QModelIndexList& indexList)
 {
 	SegmentInfo &seg = segments->getSegment(indexList[0]);
 	seg.setGammaEndIndex(value);
-	recalculateData(seg);
 }
 
 void MaxSlopeAnalyzer::recalculateData(SegmentInfo &seginfo)

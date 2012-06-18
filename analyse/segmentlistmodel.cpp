@@ -74,6 +74,9 @@ SegmentInfo &SegmentListModel::getSegment(const QModelIndex& index) {
   return segments.at( index.row() );
 }
 
+SegmentInfo &SegmentListModel::getSegment(unsigned row){
+	return segments.at( row );
+}
 
 int SegmentListModel::rowCount(const QModelIndex& parent) const
 {

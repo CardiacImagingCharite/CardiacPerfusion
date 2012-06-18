@@ -19,7 +19,7 @@
 #ifndef ITKVTKTREEITEM_H
 #define ITKVTKTREEITEM_H
 
-#include "treeitem.h"
+#include "treeitem.h" 
 #include "ctimagetreemodel.h"
 #include <itkImageToVTKImageFilter.h>
 #include <itkCommand.h>
@@ -104,16 +104,7 @@ class ITKVTKTreeItem : public TreeItem {
       return false;
     }
 
-  protected:
-    inline typename ImageType::Pointer peekITKImage(void) const { 
-      ConnectorHandle tHand = weakConnector.lock();
-      if (tHand) {
-	return dynamic_cast<ConnectorData*>(tHand.get())->getITKImage();
-      }
-      return typename ImageType::Pointer();
-    }
-
-  protected:
+	public:
 	inline void setITKImage(typename ImageType::Pointer image) { 
       if (image) {
 	ConnectorHandle connData( weakConnector.lock() );
@@ -126,6 +117,15 @@ class ITKVTKTreeItem : public TreeItem {
 	}
 	model->registerConnectorData(connData);
       }
+    }
+
+  protected:
+    inline typename ImageType::Pointer peekITKImage(void) const { 
+      ConnectorHandle tHand = weakConnector.lock();
+      if (tHand) {
+	return dynamic_cast<ConnectorData*>(tHand.get())->getITKImage();
+      }
+      return typename ImageType::Pointer();
     }
 
   private:

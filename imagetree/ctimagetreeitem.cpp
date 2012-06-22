@@ -36,6 +36,8 @@
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 
+//#include "itkImageFileWriter.h"
+
 //Constructor
 CTImageTreeItem::CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict )
   :BaseClass(parent),HeaderFields(headerFields),dict(_dict),imageTime(-1) {
@@ -87,7 +89,7 @@ bool CTImageTreeItem::internalGetSegmentationValues( SegmentationValues &values)
 	ImageType::Pointer image = getITKImage();
 	if (image.IsNull()) 
 		return false;
-	
+
 	//get buffered region of the image
 	ImageType::RegionType ctregion = image->GetBufferedRegion();
 	//define an iterator for the binary segment
@@ -96,6 +98,22 @@ bool CTImageTreeItem::internalGetSegmentationValues( SegmentationValues &values)
 	BinaryImageTreeItem::ImageType::Pointer segment = values.segment->getITKImage();
 	if (segment.IsNull()) 
 		return false;
+
+/*	typedef itk::ImageFileWriter< BinaryImageTreeItem::ImageType >  WriterType;
+	WriterType::Pointer writer = WriterType::New();
+	writer->SetFileName( "test.dcm" );
+
+	writer->SetInput( segment );
+		try 
+		{
+			writer->Update();
+		}
+		catch( itk::ExceptionObject & excep )
+		{
+			std::cerr << "Exception catched !" << std::endl;
+			std::cerr << excep << std::endl;
+		}
+*/
 	//create a binary iterator for the segment and its buffered region
 	BinaryIteratorType binIter( segment, segment->GetBufferedRegion() );
 	ImageType::PointType point;

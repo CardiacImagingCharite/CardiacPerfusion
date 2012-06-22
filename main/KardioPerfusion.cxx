@@ -10,6 +10,7 @@
 #include "ui_KardioPerfusion.h"
 #include "KardioPerfusion.h"
 #include "dicomselectordialog.h"
+#include "ctimagetreemodel.h"
 
 #include "qmessagebox.h"
 #include <QtGui>
@@ -32,6 +33,7 @@
 
 #include "itkShrinkImageFilter.h"
 #include "perfusionmapcreator.h"
+#include "vtkKWImage.h"
 
 const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
   (DicomTagType("Patient Name", "0010|0010"))
@@ -518,11 +520,16 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 			//const SegmentInfo* arterySegment = reinterpret_cast<const SegmentInfo*>(&maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] ));
 			const SegmentInfo* arterySegment = &maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
 			
-			maxSlopeAnalyzer->getSegments()->setArterySegment(selectedIndexes.at(0), arterySegment);
+			//maxSlopeAnalyzer->getSegments()->setArterySegment(selectedIndexes.at(0), arterySegment);
 
-			PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, 10);
-			mapCreator->getPerfusionMap(&imageModel);
-		
+			PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, arterySegment, 20);
+
+			RealImageType::Pointer perfusionMap = mapCreator->getPerfusionMap(&imageModel);
+
+			vtkKWImage* kwImage = vtkKWImage::New();
+			kwImage->SetITKImageBase(perfusionMap);
+
+			this->ui->mprView_lr->setImage(kwImage->GetVTKImage());
 		}
 		else{
 			QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));

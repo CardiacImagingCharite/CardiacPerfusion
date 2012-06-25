@@ -36,7 +36,7 @@
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 
-//#include "itkImageFileWriter.h"
+#include "itkImageFileWriter.h"
 
 //Constructor
 CTImageTreeItem::CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict )
@@ -71,7 +71,7 @@ struct IndexCompareFunctor {
 //returns the values of the segmentation
 bool CTImageTreeItem::getSegmentationValues( SegmentationValues &values) const {
 	//a map that contains the binary images and the segmentation values
-/*	SegmentationValueMap::const_iterator it = segmentationValueCache.find( values.segment );
+	SegmentationValueMap::const_iterator it = segmentationValueCache.find( values.segment );
 	// if values exist, no need to calculate again
 	if (it != segmentationValueCache.end() //if segment was found
 	&& it->second.mtime == values.segment->getITKMTime()
@@ -79,7 +79,7 @@ bool CTImageTreeItem::getSegmentationValues( SegmentationValues &values) const {
 		values = it->second;
 		return values.sampleCount > 0;
 	}
-*/	return internalGetSegmentationValues( values );
+	return internalGetSegmentationValues( values );
 }
 
 //calculate segmentation values
@@ -99,11 +99,11 @@ bool CTImageTreeItem::internalGetSegmentationValues( SegmentationValues &values)
 	if (segment.IsNull()) 
 		return false;
 
-/*	typedef itk::ImageFileWriter< BinaryImageTreeItem::ImageType >  WriterType;
+/*	typedef itk::ImageFileWriter< ImageType >  WriterType;
 	WriterType::Pointer writer = WriterType::New();
 	writer->SetFileName( "test.dcm" );
 
-	writer->SetInput( segment );
+	writer->SetInput( image );
 		try 
 		{
 			writer->Update();

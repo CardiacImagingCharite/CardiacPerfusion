@@ -41,25 +41,48 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 {
 	typedef itk::ShrinkImageFilter <CTImageType, CTImageType>
 				ShrinkImageFilterType;
+
 	ShrinkImageFilterType::Pointer shrinkFilter
 				= ShrinkImageFilterType::New();
+		
 	shrinkFilter->SetShrinkFactors(m_shrinkFactor);
+
+	QModelIndex index = model->index(0,0);
+	CTImageTreeItem *parent = dynamic_cast<CTImageTreeItem*>(&model->getItem(index));
+
+/*	typedef itk::ImageFileWriter< CTImageType >  WriterType;
+	WriterType::Pointer imageWriter = WriterType::New();
+	imageWriter->SetFileName( "test.dcm" );
+	*/
 
 	for(int i = 0; i < model->rowCount(); i++)
 	{
 		QModelIndex index = model->index(i,0);
-		CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>(&model->getItem(index));
+
+		TreeItem *t = &model->getItem(index);
+		CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>( t->clone(parent) );
+		//CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>(&model->getItem(index));
 
 		shrinkFilter->SetInput(ctitem->getITKImage());
 		shrinkFilter->Update();
 		ctitem->setITKImage(shrinkFilter->GetOutput());
+		ctitem->getITKImage()->DisconnectPipeline();
 
+/*		imageWriter->SetInput( shrinkFilter->GetOutput() );
+		try
+		{
+			imageWriter->Update();
+		}
+		catch( itk::ExceptionObject & excep )
+		{
+			std::cerr << "Exception catched !" << std::endl;
+			std::cerr << excep << std::endl;
+		}
+*/
 		m_analyzer->addImage(ctitem);
 	}
 
 	//create image for segmenting
-	QModelIndex index = model->index(0,0);
-	CTImageTreeItem *parent = dynamic_cast<CTImageTreeItem*>(&model->getItem(index));
 
 	BinaryImageTreeItem::ImageType::Pointer segmentImage;
 

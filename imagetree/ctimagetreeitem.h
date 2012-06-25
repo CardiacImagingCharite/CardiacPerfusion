@@ -40,6 +40,8 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
     typedef ITKVTKTreeItem< CTImageType > BaseClass;
 	///Constructor of the class.
     CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict=itk::MetaDataDictionary());
+	
+	CTImageTreeItem():imageTime(-1) {}
 	///Clones this item. 
 	/*!
 	\param clonesParent The parent of the item. Default is NULL.
@@ -165,7 +167,7 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
 
   private:
     friend class boost::serialization::access;
-    CTImageTreeItem():imageTime(-1) {}
+    
     BOOST_SERIALIZATION_SPLIT_MEMBER()
     template<class Archive>
     void load(Archive & ar, const unsigned int version);

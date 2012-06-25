@@ -9,6 +9,8 @@
 #include <qwt_legend.h>
 #include <sstream>
 
+#include "itkImageFileWriter.h"
+
 PerfusionAnalyzer::PerfusionAnalyzer(QWidget* p)
 {
 	segments = new SegmentListModel(p);
@@ -82,11 +84,27 @@ void PerfusionAnalyzer::calculateTacValues()
 	int imageIndex = 0;
 	//create object for segmentation values and set accuracy
 	SegmentationValues values; values.accuracy = SegmentationValues::SimpleAccuracy;
+
+	typedef itk::ImageFileWriter< CTImageTreeItem::ImageType >  WriterType;
+	WriterType::Pointer writer = WriterType::New();
+	writer->SetFileName( "test.dcm" );
+
 	//iterate over all images
 	for(ImageSet::const_iterator ii = images.begin(); ii != images.end(); ++ii) {
 		const CTImageTreeItem *ct = *ii;
 		//calculate relative time of actual image
 		double relTime = ct->getTime() - firstTime;
+
+		writer->SetInput( ct->getITKImage() );
+		try 
+		{
+			writer->Update();
+		}
+		catch( itk::ExceptionObject & excep )
+		{
+			std::cerr << "Exception catched !" << std::endl;
+			std::cerr << excep << std::endl;
+		}
 
 		//add relative time to the list of times
 		times.push_back(relTime);

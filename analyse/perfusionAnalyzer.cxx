@@ -85,9 +85,10 @@ void PerfusionAnalyzer::calculateTacValues()
 	//create object for segmentation values and set accuracy
 	SegmentationValues values; values.accuracy = SegmentationValues::SimpleAccuracy;
 
-	typedef itk::ImageFileWriter< CTImageTreeItem::ImageType >  WriterType;
+/*	typedef itk::ImageFileWriter< CTImageTreeItem::ImageType >  WriterType;
 	WriterType::Pointer writer = WriterType::New();
 	writer->SetFileName( "test.dcm" );
+	*/
 
 	//iterate over all images
 	for(ImageSet::const_iterator ii = images.begin(); ii != images.end(); ++ii) {
@@ -95,7 +96,7 @@ void PerfusionAnalyzer::calculateTacValues()
 		//calculate relative time of actual image
 		double relTime = ct->getTime() - firstTime;
 
-		writer->SetInput( ct->getITKImage() );
+/*		writer->SetInput( ct->getITKImage() );
 		try 
 		{
 			writer->Update();
@@ -105,7 +106,7 @@ void PerfusionAnalyzer::calculateTacValues()
 			std::cerr << "Exception catched !" << std::endl;
 			std::cerr << excep << std::endl;
 		}
-
+*/
 		//add relative time to the list of times
 		times.push_back(relTime);
 		//iterate over all segments

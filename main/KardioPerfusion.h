@@ -149,7 +149,7 @@ private:
 	*/
 	void segmentHide(const BinaryImageTreeItem *segItem );
 
-	void create4DImage(CTImageType4D* image, CTImageType4D::SizeType size);
+//	void create4DImage(CTImageType4D* image, CTImageType4D::SizeType size);
 
 	CTImageTreeModel imageModel;
 	CTImageTreeItem::ConnectorHandle displayedCTImage;

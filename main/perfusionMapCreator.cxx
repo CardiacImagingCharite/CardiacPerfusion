@@ -11,6 +11,7 @@
 #include <boost/foreach.hpp>
 
 #include "itkImageFileWriter.h"
+#include "itkRescaleIntensityImageFilter.h"
 
 PerfusionMapCreator::PerfusionMapCreator(MaxSlopeAnalyzer* analyzer, const SegmentInfo* artery, int factor)
 	:m_analyzer(analyzer), m_arterySegment(artery), m_shrinkFactor(factor)
@@ -61,7 +62,9 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 
 		TreeItem *t = &model->getItem(index);
 		CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>( t->clone(parent) );
-		//CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>(&model->getItem(index));
+		
+		//CTImageTreeItem *ctitem = new CTImageTreeItem();
+		//ctitem = dynamic_cast<CTImageTreeItem*>(&model->getItem(index));
 
 		shrinkFilter->SetInput(ctitem->getITKImage());
 		shrinkFilter->Update();
@@ -181,12 +184,34 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 		if(gammaMax != 0)
 		{
 			perfusion = 60 * maxSlope / gammaMax;
-			resultIt.Set(perfusion);
+			if(perfusion > 0)
+				resultIt.Set(perfusion);
 		}
 
 		++resultIt;
 	}
 	
+	typedef itk::RescaleIntensityImageFilter< RealImageType, CTImageType > RescaleFilterType;
+	RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
+	rescaleFilter->SetInput(resultImage);
+	rescaleFilter->SetOutputMinimum(0);
+	rescaleFilter->SetOutputMaximum(255);
+
+	typedef itk::ImageFileWriter< CTImageType >  WriterType;
+	WriterType::Pointer writer = WriterType::New();
+	writer->SetFileName( "result.dcm" );
+
+	writer->SetInput( rescaleFilter->GetOutput() );
+	try 
+	{
+		writer->Update();
+	}
+	catch( itk::ExceptionObject & excep )
+	{
+		std::cerr << "Exception catched !" << std::endl;
+		std::cerr << excep << std::endl;
+	}
+
 	return resultImage;
 	
 }

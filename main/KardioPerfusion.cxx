@@ -524,7 +524,8 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 
 			PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, arterySegment, 20);
 
-			RealImageType::Pointer perfusionMap = mapCreator->getPerfusionMap(&imageModel);
+			RealImageType* perfusionMap = RealImageType::New(); 
+			perfusionMap = mapCreator->getPerfusionMap(&imageModel);
 
 			vtkKWImage* kwImage = vtkKWImage::New();
 			kwImage->SetITKImageBase(perfusionMap);
@@ -878,7 +879,7 @@ void KardioPerfusion::on_btn_arteryInput_selected(const SegmentInfo *segment) {
   }
 }
 
-void KardioPerfusion::create4DImage(CTImageType4D* image, CTImageType4D::SizeType size)
+/*void KardioPerfusion::create4DImage(CTImageType4D* image, CTImageType4D::SizeType size)
 {
 	  // Create an image with 2 connected components
   CTImageType4D::RegionType region;
@@ -891,6 +892,8 @@ void KardioPerfusion::create4DImage(CTImageType4D* image, CTImageType4D::SizeTyp
   image->SetRegions(region);
   image->Allocate();
 }
+*/
+
 /*void KardioPerfusion::loadFile(QString fname){
 
 	// define Pixeltype and set dimension

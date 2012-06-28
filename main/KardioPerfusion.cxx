@@ -522,15 +522,16 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 			
 			//maxSlopeAnalyzer->getSegments()->setArterySegment(selectedIndexes.at(0), arterySegment);
 
-			PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, arterySegment, 20);
+			PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, arterySegment, this->ui->sb_shrinkFactor->value());
 
 			RealImageType* perfusionMap = RealImageType::New(); 
 			perfusionMap = mapCreator->getPerfusionMap(&imageModel);
 
-			vtkKWImage* kwImage = vtkKWImage::New();
+/*			vtkKWImage* kwImage = vtkKWImage::New();
 			kwImage->SetITKImageBase(perfusionMap);
 
 			this->ui->mprView_lr->setImage(kwImage->GetVTKImage());
+*/
 		}
 		else{
 			QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));

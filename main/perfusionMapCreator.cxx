@@ -195,7 +195,7 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 	RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
 	rescaleFilter->SetInput(resultImage);
 	rescaleFilter->SetOutputMinimum(0);
-	rescaleFilter->SetOutputMaximum(255);
+	rescaleFilter->SetOutputMaximum(32767);
 
 	typedef itk::ImageFileWriter< CTImageType >  WriterType;
 	WriterType::Pointer writer = WriterType::New();

@@ -478,6 +478,23 @@
             </property>
            </spacer>
           </item>
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Shrink factor</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="sb_shrinkFactor">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>20</number>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>

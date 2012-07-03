@@ -10,19 +10,19 @@ class PerfusionMapCreator
 {
 	public:
 
-	PerfusionMapCreator(MaxSlopeAnalyzer* analyzer, const SegmentInfo* artery, int factor);
+	PerfusionMapCreator(MaxSlopeAnalyzer* analyzer, SegmentInfo* artery, int factor);
 	~PerfusionMapCreator();
 
 	RealImageType* getPerfusionMap(CTImageTreeModel* model);
 	void setAnalyzer(MaxSlopeAnalyzer* analyzer);
 	void setShrinkFactor(int shrinkFactor);
-	void setArterySegment(const SegmentInfo* artery);
+	void setArterySegment(SegmentInfo* artery);
 
 private:
 
 	MaxSlopeAnalyzer*   m_analyzer;
 	int					m_shrinkFactor;
-	const SegmentInfo*	m_arterySegment;
+	SegmentInfo*		m_arterySegment;
 };
 
 #endif

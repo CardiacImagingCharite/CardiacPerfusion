@@ -33,7 +33,8 @@
 
 #include "itkShrinkImageFilter.h"
 #include "perfusionmapcreator.h"
-#include "vtkKWImage.h"
+
+
 
 const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
   (DicomTagType("Patient Name", "0010|0010"))
@@ -518,9 +519,11 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 			maxSlopeAnalyzer->addSegment(dynamic_cast<BinaryImageTreeItem*>(item));
 		//	const SegmentInfo arterySegment = maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
 			//const SegmentInfo* arterySegment = reinterpret_cast<const SegmentInfo*>(&maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] ));
-			const SegmentInfo* arterySegment = &maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
+			SegmentInfo* arterySegment = &maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
 			
 			//maxSlopeAnalyzer->getSegments()->setArterySegment(selectedIndexes.at(0), arterySegment);
+
+			
 
 			PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, arterySegment, this->ui->sb_shrinkFactor->value());
 

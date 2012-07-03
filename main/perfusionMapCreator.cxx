@@ -12,8 +12,10 @@
 
 #include "itkImageFileWriter.h"
 #include "itkRescaleIntensityImageFilter.h"
+#include "itkDiscreteGaussianImageFilter.h"
+#include "itkNaryPerfusionImageFilter.h"
 
-PerfusionMapCreator::PerfusionMapCreator(MaxSlopeAnalyzer* analyzer, const SegmentInfo* artery, int factor)
+PerfusionMapCreator::PerfusionMapCreator(MaxSlopeAnalyzer* analyzer, SegmentInfo* artery, int factor)
 	:m_analyzer(analyzer), m_arterySegment(artery), m_shrinkFactor(factor)
 {
 	
@@ -33,19 +35,27 @@ void PerfusionMapCreator::setShrinkFactor(int shrinkFactor)
 	m_shrinkFactor = shrinkFactor;
 }
 	
-void PerfusionMapCreator::setArterySegment(const SegmentInfo* artery)
+void PerfusionMapCreator::setArterySegment(SegmentInfo* artery)
 {
 	m_arterySegment = artery;
 }
 
 RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 {
+	typedef itk::NaryPerfusionImageFilter<CTImageType, RealImageType> PerfusionFilterType;
+
+	typedef itk::DiscreteGaussianImageFilter<CTImageType, CTImageType>
+			GaussianFilterType;
 	typedef itk::ShrinkImageFilter <CTImageType, CTImageType>
 				ShrinkImageFilterType;
 
-	ShrinkImageFilterType::Pointer shrinkFilter
-				= ShrinkImageFilterType::New();
-		
+	PerfusionFilterType::Pointer perfusionFilter = PerfusionFilterType::New();
+
+	GaussianFilterType::Pointer gaussianFilter = GaussianFilterType::New();
+	gaussianFilter->SetVariance((m_shrinkFactor/2) * (m_shrinkFactor/2));
+	gaussianFilter->SetUseImageSpacingOff();
+
+	ShrinkImageFilterType::Pointer shrinkFilter = ShrinkImageFilterType::New();
 	shrinkFilter->SetShrinkFactors(m_shrinkFactor);
 
 	QModelIndex index = model->index(0,0);
@@ -55,6 +65,9 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 	WriterType::Pointer imageWriter = WriterType::New();
 	imageWriter->SetFileName( "test.dcm" );
 	*/
+	
+	double firstTime = parent->getTime();
+	std::vector < double > times; 
 
 	for(int i = 0; i < model->rowCount(); i++)
 	{
@@ -63,13 +76,17 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 		TreeItem *t = &model->getItem(index);
 		CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>( t->clone(parent) );
 		
+		times.push_back(ctitem->getTime() - firstTime);
 		//CTImageTreeItem *ctitem = new CTImageTreeItem();
 		//ctitem = dynamic_cast<CTImageTreeItem*>(&model->getItem(index));
-
-		shrinkFilter->SetInput(ctitem->getITKImage());
+		
+		gaussianFilter->SetInput(ctitem->getITKImage());
+		shrinkFilter->SetInput(gaussianFilter->GetOutput());
 		shrinkFilter->Update();
 		ctitem->setITKImage(shrinkFilter->GetOutput());
 		ctitem->getITKImage()->DisconnectPipeline();
+
+		perfusionFilter->PushBackInput(ctitem->getITKImage());
 
 /*		imageWriter->SetInput( shrinkFilter->GetOutput() );
 		try
@@ -82,12 +99,13 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 			std::cerr << excep << std::endl;
 		}
 */
-		m_analyzer->addImage(ctitem);
+		//m_analyzer->addImage(ctitem);
+
 	}
 
 	//create image for segmenting
 
-	BinaryImageTreeItem::ImageType::Pointer segmentImage;
+/*	BinaryImageTreeItem::ImageType::Pointer segmentImage;
 
 	//create caster, that transforme the CT image to a binary image
 	typedef itk::CastImageFilter< CTImageType, BinaryImageType> BinaryCastFilterType;
@@ -143,6 +161,7 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 
 		++segIt;
 	}
+*/
 
 /*	typedef itk::ImageFileWriter< BinaryImageTreeItem::ImageType >  WriterType;
 	WriterType::Pointer writer = WriterType::New();
@@ -163,11 +182,21 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 		}
 	}
 	*/
-	m_analyzer->calculateTacValues();
+//	m_analyzer->calculateTacValues();
+
 
 	SegmentListModel* segments = m_analyzer->getSegments();
 
-	for(int i = 0; i < segments->rowCount();i++)
+	m_arterySegment->setEnableGamma(true);
+	m_arterySegment->setGammaStartIndex(0);
+	m_arterySegment->setGammaEndIndex(model->rowCount());
+	m_analyzer->recalculateGamma(*m_arterySegment);
+
+	perfusionFilter->GetFunctor().setArteryGammaFunction(*m_arterySegment->getGamma());
+	perfusionFilter->GetFunctor().setTimePoints(times);
+
+	/*
+	for(int i = 1; i < segments->rowCount();i++)
 	{
 		SegmentInfo &seg = segments->getSegment(i);
 		seg.setArterySegment(m_arterySegment);
@@ -190,10 +219,12 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 
 		++resultIt;
 	}
-	
+	*/
+
+
 	typedef itk::RescaleIntensityImageFilter< RealImageType, CTImageType > RescaleFilterType;
 	RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
-	rescaleFilter->SetInput(resultImage);
+	rescaleFilter->SetInput(perfusionFilter->GetOutput());
 	rescaleFilter->SetOutputMinimum(0);
 	rescaleFilter->SetOutputMaximum(32767);
 
@@ -212,6 +243,6 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 		std::cerr << excep << std::endl;
 	}
 
-	return resultImage;
+	return perfusionFilter->GetOutput() ;
 	
 }

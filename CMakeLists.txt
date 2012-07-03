@@ -69,6 +69,8 @@ SET( KardioPerfusionSrcs
 
 	itkfilter/itkperfusionmapfilter.txx
 	itkfilter/itkperfusionmapfilter.h
+
+	itkfilter/itkNaryPerfusionImageFilter.h
 )
 
 SET( KardioPerfusionUI 

@@ -501,8 +501,6 @@ void KardioPerfusion::on_btn_analyse_clicked()
 
 void KardioPerfusion::on_btn_perfusionMap_clicked()
 {
-	const int shrinkFactor = 4;
-
 	maxSlopeAnalyzer = new MaxSlopeAnalyzer(this);
 
 	//get list of selected items
@@ -521,8 +519,24 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 			//const SegmentInfo* arterySegment = reinterpret_cast<const SegmentInfo*>(&maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] ));
 			SegmentInfo* arterySegment = &maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
 			
-			//maxSlopeAnalyzer->getSegments()->setArterySegment(selectedIndexes.at(0), arterySegment);
+			this->ui->treeView->selectAll();
+			//get list of selected items
+			QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
+			//iterate over selected items
+			for(QModelIndexList::Iterator index = selectedIndex.begin(); index != selectedIndex.end(); ++index) {
+				if (index->isValid()) {
+					//get item at specific index
+					TreeItem *item = &imageModel.getItem( *index );
+					//add image to the dialog if it is a CT image
+					if (item->isA(typeid(CTImageTreeItem))) {
+						maxSlopeAnalyzer->addImage( dynamic_cast<CTImageTreeItem*>(item) );
+					}
+				}
+			}
+			this->ui->treeView->selectionModel()->clearSelection();
 
+			//maxSlopeAnalyzer->getSegments()->setArterySegment(selectedIndexes.at(0), arterySegment);
+			maxSlopeAnalyzer->calculateTacValues();
 			
 
 			PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, arterySegment, this->ui->sb_shrinkFactor->value());

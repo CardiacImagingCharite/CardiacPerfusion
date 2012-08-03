@@ -488,7 +488,7 @@
           <item>
            <widget class="QSpinBox" name="sb_shrinkFactor">
             <property name="minimum">
-             <number>1</number>
+             <number>0</number>
             </property>
             <property name="value">
              <number>20</number>

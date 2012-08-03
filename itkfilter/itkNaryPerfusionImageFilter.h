@@ -24,6 +24,7 @@ public:
 	{
 		GammaFunctions::GammaVariate gamma;
 		OutputValueType A = NumericTraits< TOutput >::NonpositiveMin();
+		
 		if(B.size() == times.size())
 		{
 			for(int i = 0; i < B.size(); i++)
@@ -71,14 +72,14 @@ class ITK_EXPORT NaryPerfusionImageFilter:
 	public
 	NaryFunctorImageFilter< TInputImage, TOutputImage,
 	Functor::Perfusion1< typename TInputImage::PixelType,
-	typename TInputImage::PixelType > >
+	typename TOutputImage::PixelType > >
 {
 public:
 	typedef NaryPerfusionImageFilter Self;
 	typedef NaryFunctorImageFilter<
 			TInputImage, TOutputImage,
 			Functor::Perfusion1< typename TInputImage::PixelType,
-			typename TInputImage::PixelType > > Superclass;
+			typename TOutputImage::PixelType > > Superclass;
  
 	typedef SmartPointer< Self > Pointer;
 	typedef SmartPointer< const Self > ConstPointer;

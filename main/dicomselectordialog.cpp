@@ -61,7 +61,7 @@ void DicomSelectorDialog::exec() {
 	indexProgress.setMinimumDuration(1000);
 	indexProgress.setWindowModality(Qt::ApplicationModal);
 	while( index < fileNames.size() ) {
-		indexProgress.setValue(index);
+		indexProgress.setValue(index + 1);
 		if (indexProgress.wasCanceled()) break;
 		if ( boost::filesystem::is_directory( fileNames[index].toAscii().data() ) ) 
 		{

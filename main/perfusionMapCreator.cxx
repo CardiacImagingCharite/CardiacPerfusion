@@ -77,15 +77,15 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 		CTImageTreeItem *ctitem = dynamic_cast<CTImageTreeItem*>( t->clone(parent) );
 		
 		times.push_back(ctitem->getTime() - firstTime);
-		//CTImageTreeItem *ctitem = new CTImageTreeItem();
-		//ctitem = dynamic_cast<CTImageTreeItem*>(&model->getItem(index));
 		
-		gaussianFilter->SetInput(ctitem->getITKImage());
-		shrinkFilter->SetInput(gaussianFilter->GetOutput());
-		shrinkFilter->Update();
-		ctitem->setITKImage(shrinkFilter->GetOutput());
-		ctitem->getITKImage()->DisconnectPipeline();
-
+		if(m_shrinkFactor > 1)
+		{
+			gaussianFilter->SetInput(ctitem->getITKImage());
+			shrinkFilter->SetInput(gaussianFilter->GetOutput());
+			shrinkFilter->Update();
+			ctitem->setITKImage(shrinkFilter->GetOutput());
+			ctitem->getITKImage()->DisconnectPipeline();
+		}
 		perfusionFilter->PushBackInput(ctitem->getITKImage());
 
 /*		imageWriter->SetInput( shrinkFilter->GetOutput() );
@@ -220,19 +220,52 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 		++resultIt;
 	}
 	*/
+	//Get perfusion results
+	perfusionFilter->Update();
+	//assign them to an image
+	RealImageType::Pointer realImage = RealImageType::New();
+	realImage = perfusionFilter->GetOutput();
+	
+	//Create output image
+	CTImageType::Pointer resultImage = CTImageType::New();
+
+	typedef itk::CastImageFilter<RealImageType, CTImageType> CastFilterType;
+	CastFilterType::Pointer castfilter = CastFilterType::New();
+	castfilter->SetInput( perfusionFilter->GetOutput() );
+	castfilter->Update();
+	resultImage = castfilter->GetOutput();
+
+	//fills output image with zeros
+	resultImage->FillBuffer(BinaryPixelOff);
+
+	typedef itk::ImageRegionIterator<RealImageType> RealIterator;
+	typedef itk::ImageRegionIterator<CTImageType>	ResultIterator;
 
 
-	typedef itk::RescaleIntensityImageFilter< RealImageType, CTImageType > RescaleFilterType;
+	RealIterator realIt(realImage, realImage->GetLargestPossibleRegion() );
+	realIt.GoToBegin();
+
+	ResultIterator resultIt(resultImage, resultImage->GetLargestPossibleRegion());
+	resultIt.GoToBegin();
+
+	while( !realIt.IsAtEnd() )
+	{
+		resultIt.Set((int)(realIt.Get()*1000));
+		++resultIt;
+		++realIt;
+	}
+
+	/*typedef itk::RescaleIntensityImageFilter< RealImageType, CTImageType > RescaleFilterType;
 	RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
 	rescaleFilter->SetInput(perfusionFilter->GetOutput());
 	rescaleFilter->SetOutputMinimum(0);
 	rescaleFilter->SetOutputMaximum(32767);
-
+	*/
 	typedef itk::ImageFileWriter< CTImageType >  WriterType;
 	WriterType::Pointer writer = WriterType::New();
 	writer->SetFileName( "result.dcm" );
 
-	writer->SetInput( rescaleFilter->GetOutput() );
+	writer->SetInput( resultImage );
 	try 
 	{
 		writer->Update();

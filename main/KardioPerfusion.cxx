@@ -541,8 +541,12 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 
 			PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, arterySegment, this->ui->sb_shrinkFactor->value());
 
-			RealImageType* perfusionMap = RealImageType::New(); 
+			RealImageType::Pointer perfusionMap = RealImageType::New(); 
 			perfusionMap = mapCreator->getPerfusionMap(&imageModel);
+
+
+
+			//this->ui->mprView_ur->addColoredOverlay(perfusionMap);
 
 /*			vtkKWImage* kwImage = vtkKWImage::New();
 			kwImage->SetITKImageBase(perfusionMap);

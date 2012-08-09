@@ -52,9 +52,13 @@ SET( KardioPerfusionSrcs
 	imagetree/binaryimagetreeitem.cpp 
 	imagetree/itkvtktreeitem.cpp 
 	imagetree/segmentationvalues.cpp
+	imagetree/realimagetreeitem.cxx
+	imagetree/realimagetreeitem.h
 
 	vtkwidgets/vtkbinaryimagetocolor.cpp 
 	vtkwidgets/vtkbinaryimageoverlay.cpp 
+	vtkwidgets/vtkcoloredimageoverlay.h
+	vtkwidgets/vtkcoloredimageoverlay.cxx
 #	vtkwidgets/interactorstylevolumeview.cpp 
 	vtkwidgets/multiplanarreformatwidget.cpp 
 	vtkwidgets/vtkinteractorstyleprojectionview.cpp 

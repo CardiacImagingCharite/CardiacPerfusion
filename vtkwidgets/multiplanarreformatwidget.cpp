@@ -137,7 +137,8 @@ MultiPlanarReformatWidget::~MultiPlanarReformatWidget() {
   this->hide();
   //if (m_renderer) m_renderer->Delete();
   //if(m_imageViewer) m_imageViewer->Delete();
-  m_overlays.clear();
+  m_binaryOverlays.clear();
+  m_coloredOverlays.clear();
   if (m_colormap) m_colormap->Delete();
   if (m_reslice) m_reslice->Delete();
   //if (m_actor) m_actor->Delete();
@@ -155,7 +156,11 @@ void MultiPlanarReformatWidget::resizeEvent( QResizeEvent * event ) {
   
   m_imageViewer->UpdateDisplayExtent();
   
-	BOOST_FOREACH(OverlayMapType::value_type it, m_overlays) {
+	BOOST_FOREACH(BinaryOverlayMapType::value_type it, m_binaryOverlays) {
+		it.second->resize( xres, yres );
+	}
+
+	BOOST_FOREACH(ColoredOverlayMapType::value_type it, m_coloredOverlays) {
 		it.second->resize( xres, yres );
 	}
 }
@@ -251,7 +256,7 @@ void MultiPlanarReformatWidget::setOrientation(int orientation)
 }
 
 int MultiPlanarReformatWidget::addBinaryOverlay(vtkImageData *image, const QColor &color, const ActionDispatch &dispatch) {
-  if (m_overlays.find( image ) == m_overlays.end() ) {
+  if (m_binaryOverlays.find( image ) == m_binaryOverlays.end() ) {
     int actionHandle;
     RGBType rgbColor;
     rgbColor[0] = color.red();
@@ -259,7 +264,7 @@ int MultiPlanarReformatWidget::addBinaryOverlay(vtkImageData *image, const QColo
     rgbColor[2] = color.blue();
     boost::shared_ptr< vtkBinaryImageOverlay > overlay(
 		new vtkBinaryImageOverlay( m_imageViewer->GetRenderer(), m_interactorStyle, dispatch, image, m_reslicePlaneTransform, rgbColor, actionHandle ) );
-    m_overlays.insert( OverlayMapType::value_type( image, overlay ) );
+    m_binaryOverlays.insert( BinaryOverlayMapType::value_type( image, overlay ) );
     overlay->resize( this->size().width(), this->size().height() );
     this->update();
     return actionHandle;
@@ -268,14 +273,37 @@ int MultiPlanarReformatWidget::addBinaryOverlay(vtkImageData *image, const QColo
 }
 
 void MultiPlanarReformatWidget::removeBinaryOverlay(vtkImageData *image) {
-  m_overlays.erase(image);
+  m_binaryOverlays.erase(image);
+  this->update();
+}
+
+int MultiPlanarReformatWidget::addColoredOverlay(vtkImageData *image, const ActionDispatch &dispatch) {
+  if (m_coloredOverlays.find( image ) == m_coloredOverlays.end() ) {
+    int actionHandle;
+    boost::shared_ptr< vtkColoredImageOverlay > overlay(
+		new vtkColoredImageOverlay( m_imageViewer->GetRenderer(), m_interactorStyle, dispatch, image, m_reslicePlaneTransform, actionHandle ) );
+    m_coloredOverlays.insert( ColoredOverlayMapType::value_type( image, overlay ) );
+    overlay->resize( this->size().width(), this->size().height() );
+    this->update();
+    return actionHandle;
+  }
+  return -1;
+}
+
+void MultiPlanarReformatWidget::removeColoredOverlay(vtkImageData *image) {
+  m_coloredOverlays.erase(image);
   this->update();
 }
 
 void MultiPlanarReformatWidget::activateOverlayAction(vtkImageData *image) {
-  OverlayMapType::iterator it = m_overlays.find( image );
-  if (it != m_overlays.end()) {
-    it->second->activateAction();
+  BinaryOverlayMapType::iterator binIt = m_binaryOverlays.find( image );
+  if (binIt != m_binaryOverlays.end()) {
+    binIt->second->activateAction();
+  }
+
+  ColoredOverlayMapType::iterator colIt = m_coloredOverlays.find( image );
+  if (colIt != m_coloredOverlays.end()) {
+    colIt->second->activateAction();
   }
 }
 

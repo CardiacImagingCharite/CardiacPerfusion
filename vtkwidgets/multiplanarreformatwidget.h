@@ -23,6 +23,7 @@
 #include <QtGui>
 #include <map>
 #include "vtkbinaryimageoverlay.h"
+#include "vtkcoloredimageoverlay.h"
 #include "vtkinteractorstyleprojectionview.h"
 #include "vtkinteractoractiondispatch.h"
 #include <vtkSmartPointer.h>
@@ -66,6 +67,12 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	\param dispatch (optional) Contains the associated action. Default creates new action.
 	*/
 	int addBinaryOverlay(vtkImageData *image, const QColor &color, const ActionDispatch &dispatch = ActionDispatch() );
+	///Adds a colored overlay to the actual image
+	/*!
+	\param image Contains a pointer to the image.
+	\param dispatch (optional) Contains the associated action. Default creates new action.
+	*/
+	int addColoredOverlay(vtkImageData *image, const ActionDispatch &dispatch = ActionDispatch() );
 	///Adds an action to the action list.
 	/*!
 	\param dispatch The action that is to be added.
@@ -93,6 +100,11 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	\param image A pointer to the image.
 	*/
 	void removeBinaryOverlay(vtkImageData *image);
+	///Removes an overlay from a specific image.
+	/*!
+	\param image A pointer to the image.
+	*/
+	void removeColoredOverlay(vtkImageData *image);
 	///Resizes the form.
 	/*!
 	\param event The resize event.
@@ -121,8 +133,10 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	protected:
 	///double click event
 	void mouseDoubleClickEvent ( QMouseEvent * e );
-	typedef std::map< vtkImageData *, boost::shared_ptr< vtkBinaryImageOverlay > > OverlayMapType;
-	OverlayMapType m_overlays;
+	typedef std::map< vtkImageData *, boost::shared_ptr< vtkBinaryImageOverlay > > BinaryOverlayMapType;
+	typedef std::map< vtkImageData *, boost::shared_ptr< vtkColoredImageOverlay > > ColoredOverlayMapType;
+	ColoredOverlayMapType m_coloredOverlays;
+	BinaryOverlayMapType m_binaryOverlays;
 	vtkImageData *m_image; ///< volume image data to be displayed - set by setImage()
 	vtkImageReslice *m_reslice; ///< vtkImageAlgorithm to reslice the image
 	vtkImageMapToWindowLevelColors *m_colormap; ///< used to apply Window and Level

@@ -11,6 +11,7 @@
 #include "KardioPerfusion.h"
 #include "dicomselectordialog.h"
 #include "ctimagetreemodel.h"
+#include "realimagetreeitem.h"
 
 #include "qmessagebox.h"
 #include <QtGui>
@@ -543,16 +544,13 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 
 			RealImageType::Pointer perfusionMap = RealImageType::New(); 
 			perfusionMap = mapCreator->getPerfusionMap(&imageModel);
+			
+			TreeItem root = &imageModel.getRootItem();
+			RealImageTreeItem *result = new RealImageTreeItem(&root, perfusionMap, "PerfusionMap");
+			root.insertChild(result);
 
+			this->ui->mprView_ur->addColoredOverlay(result->getVTKConnector()->getVTKImageData());
 
-
-			//this->ui->mprView_ur->addColoredOverlay(perfusionMap);
-
-/*			vtkKWImage* kwImage = vtkKWImage::New();
-			kwImage->SetITKImageBase(perfusionMap);
-
-			this->ui->mprView_lr->setImage(kwImage->GetVTKImage());
-*/
 		}
 		else{
 			QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));

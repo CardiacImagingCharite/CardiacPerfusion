@@ -134,6 +134,12 @@ class CTImageTreeModel : public QAbstractItemModel {
 	*/
     const TreeItem &getItem(const QModelIndex &index) const;
     TreeItem &getItem(const QModelIndex &index);
+	///Get the root item of the tree.
+	/*!
+	\return The roo tree item.
+	*/
+    const TreeItem &getRootItem() const;
+    TreeItem &getRootItem();
     ///Loads an existing model from a file.
 	/*!
 	\param fname The filename of the model file. 

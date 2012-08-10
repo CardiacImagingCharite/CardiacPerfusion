@@ -975,8 +975,8 @@
    <slot>sliderStartValue_changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>459</x>
-     <y>738</y>
+     <x>422</x>
+     <y>535</y>
     </hint>
     <hint type="destinationlabel">
      <x>213</x>
@@ -991,8 +991,8 @@
    <slot>sliderEndValue_changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>695</x>
-     <y>795</y>
+     <x>422</x>
+     <y>540</y>
     </hint>
     <hint type="destinationlabel">
      <x>254</x>
@@ -1007,8 +1007,8 @@
    <slot>tableGamma_clicked(QModelIndex)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>412</x>
-     <y>586</y>
+     <x>404</x>
+     <y>499</y>
     </hint>
     <hint type="destinationlabel">
      <x>217</x>
@@ -1023,8 +1023,8 @@
    <slot>cb_enableGamma_toggled()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>378</x>
-     <y>707</y>
+     <x>404</x>
+     <y>502</y>
     </hint>
     <hint type="destinationlabel">
      <x>244</x>

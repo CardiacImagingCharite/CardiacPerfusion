@@ -538,19 +538,18 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 
 			//maxSlopeAnalyzer->getSegments()->setArterySegment(selectedIndexes.at(0), arterySegment);
 			maxSlopeAnalyzer->calculateTacValues();
-			
 
 			PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, arterySegment, this->ui->sb_shrinkFactor->value());
 
 			RealImageType::Pointer perfusionMap = RealImageType::New(); 
 			perfusionMap = mapCreator->getPerfusionMap(&imageModel);
 			
-			TreeItem root = &imageModel.getRootItem();
+/*			TreeItem root = &imageModel.getRootItem();
 			RealImageTreeItem *result = new RealImageTreeItem(&root, perfusionMap, "PerfusionMap");
 			root.insertChild(result);
 
 			this->ui->mprView_ur->addColoredOverlay(result->getVTKConnector()->getVTKImageData());
-
+			*/
 		}
 		else{
 			QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));

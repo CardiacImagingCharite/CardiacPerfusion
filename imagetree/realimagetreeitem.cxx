@@ -29,7 +29,7 @@ QVariant RealImageTreeItem::do_getData_DisplayRole(int c) const {
 
 //returns the color of the TreeItem
 QVariant RealImageTreeItem::do_getData_BackgroundRole(int column) const {
-	return QBrush( Qt::GlobalColor::red );
+	return QBrush(QColor(255,0,0));//QBrush( Qt::GlobalColor::red );
 }
 
 

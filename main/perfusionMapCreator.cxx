@@ -40,7 +40,7 @@ void PerfusionMapCreator::setArterySegment(SegmentInfo* artery)
 	m_arterySegment = artery;
 }
 
-RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
+RealImageTreeItem::ImageType::Pointer PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 {
 	typedef itk::NaryPerfusionImageFilter<CTImageType, RealImageType> PerfusionFilterType;
 
@@ -223,7 +223,7 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 	//Get perfusion results
 	perfusionFilter->Update();
 	//assign them to an image
-	RealImageType::Pointer realImage = RealImageType::New();
+	RealImageTreeItem::ImageType::Pointer realImage = RealImageTreeItem::ImageType::New();
 	realImage = perfusionFilter->GetOutput();
 	
 	//Create output image
@@ -276,6 +276,6 @@ RealImageType* PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
 		std::cerr << excep << std::endl;
 	}
 
-	return perfusionFilter->GetOutput() ;
+	return realImage ;
 	
 }

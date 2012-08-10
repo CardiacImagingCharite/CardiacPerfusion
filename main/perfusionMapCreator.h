@@ -5,6 +5,9 @@
 #include "maxslopeanalyzer.h"
 #include "ctimagetreemodel.h"
 #include "imagedefinitions.h"
+#include "itkSmartPointer.h"
+#include "realimagetreeitem.h"
+
 
 class PerfusionMapCreator
 {
@@ -13,7 +16,7 @@ class PerfusionMapCreator
 	PerfusionMapCreator(MaxSlopeAnalyzer* analyzer, SegmentInfo* artery, int factor);
 	~PerfusionMapCreator();
 
-	RealImageType* getPerfusionMap(CTImageTreeModel* model);
+	RealImageTreeItem::ImageType::Pointer getPerfusionMap(CTImageTreeModel* model);
 	void setAnalyzer(MaxSlopeAnalyzer* analyzer);
 	void setShrinkFactor(int shrinkFactor);
 	void setArterySegment(SegmentInfo* artery);

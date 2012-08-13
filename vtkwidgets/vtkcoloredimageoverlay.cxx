@@ -10,7 +10,8 @@
 #include <vtkRenderer.h>
 #include "vtkinteractorstyleprojectionview.h"
 #include <boost/bind.hpp>
-
+#include <itkBSplineInterpolateImageFunction.h>
+#include "realimagetreeitem.h"
 
 vtkColoredImageOverlay::vtkColoredImageOverlay( vtkRenderer *renderer,
 			  vtkInteractorStyleProjectionView *interactorStyle,
@@ -82,8 +83,13 @@ vtkColoredImageOverlay::~vtkColoredImageOverlay() {
 }
 
 void vtkColoredImageOverlay::resize( unsigned int xres, unsigned int yres ) {
-  m_reslice->SetOutputExtent(0,xres,0,yres,0,0);
-  m_reslice->SetOutputOrigin(xres/-2.0,yres/-2.0,0);
+
+//	typedef itk::BSplineInterpolateImageFunction< RealImageTreeItem::ImageType > InterpolatorType;
+//	InterpolatorType::Pointer interpolator = InterpolatorType::New();
+	
+	m_reslice->SetInterpolationModeToCubic();
+	m_reslice->SetOutputExtent(0,xres,0,yres,0,0);
+	m_reslice->SetOutputOrigin(xres/-2.0,yres/-2.0,0);
 }
 
 void vtkColoredImageOverlay::activateAction() {

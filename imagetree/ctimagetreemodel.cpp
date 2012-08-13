@@ -22,7 +22,7 @@
 #include <QSettings>
 #include <boost/make_shared.hpp>
 #include <boost/foreach.hpp>
-//#include "ctimagetreemodel_serializer.h"
+#include "ctimagetreemodel_serializer.h"
 #include "ctimagetreeitem.h"
 
 
@@ -217,12 +217,12 @@ QModelIndex CTImageTreeModel::createIndex(int r, int c, const TreeItem*p) const 
 }
 
 
-/*void CTImageTreeModel::openModelFromFile(const std::string &fname) {
+void CTImageTreeModel::openModelFromFile(const std::string &fname) {
   deserializeCTImageTreeModelFromFile( *this, fname );
 }
 
 void CTImageTreeModel::saveModelToFile(const std::string &fname) {
   serializeCTImageTreeModelToFile(*this, fname);
 }
-*/
+
 

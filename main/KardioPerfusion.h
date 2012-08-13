@@ -57,6 +57,11 @@ class KardioPerfusion : public QMainWindow
 	virtual void slotOpenFile();
 	///Action to exit the application
 	virtual void slotExit();
+	///Action to save a project
+	void on_actionSave_Project_triggered();
+      
+	///Action to load a project
+	void on_actionOpen_Project_triggered();
 	
 	//void on_treeView_doubleClicked(const QModelIndex &index);
 

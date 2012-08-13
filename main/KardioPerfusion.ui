@@ -860,7 +860,8 @@
      <string>File</string>
     </property>
     <addaction name="actionOpenFile"/>
-    <addaction name="actionSave"/>
+    <addaction name="actionSave_Project"/>
+    <addaction name="actionOpen_Project"/>
     <addaction name="separator"/>
     <addaction name="actionHelp"/>
     <addaction name="actionExit"/>
@@ -885,7 +886,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionOpenFile"/>
-   <addaction name="actionSave"/>
+   <addaction name="actionSave_Project"/>
    <addaction name="separator"/>
    <addaction name="actionHelp"/>
   </widget>
@@ -898,7 +899,7 @@
      <normaloff>:/Icons/fileopen.png</normaloff>:/Icons/fileopen.png</iconset>
    </property>
    <property name="text">
-    <string>Open File...</string>
+    <string>Open Images...</string>
    </property>
   </action>
   <action name="actionExit">
@@ -928,13 +929,18 @@
     <string>Help</string>
    </property>
   </action>
-  <action name="actionSave">
+  <action name="actionSave_Project">
    <property name="icon">
     <iconset resource="../Icons/icons.qrc">
      <normaloff>:/Icons/filesave.png</normaloff>:/Icons/filesave.png</iconset>
    </property>
    <property name="text">
-    <string>Save</string>
+    <string>Save Project</string>
+   </property>
+  </action>
+  <action name="actionOpen_Project">
+   <property name="text">
+    <string>Open Project...</string>
    </property>
   </action>
  </widget>

@@ -44,6 +44,9 @@ SET( KardioPerfusionSrcs
 #	analyse/SamplePoint.cxx
 #	analyse/SamplePoint.h
 
+	serialization/ctimagetreemodel_serializer.cpp 
+	serialization/ctimagetreemodel_serializer.h
+
 	imagetree/ctimagetreemodel.cpp
 	imagetree/dicomtagtype.cpp
 	imagetree/vtkconnectordatabase.cpp
@@ -101,7 +104,7 @@ SET( HeaderDirs
 	main
 	analyse
 	imagetree
-#	serialization
+	serialization
 	misc
 	vtkwidgets
 	qtwidgets

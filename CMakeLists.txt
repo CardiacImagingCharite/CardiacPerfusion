@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT(KardioPerfusion)
 
+IF (NOT CMAKE_CXX_FLAGS MATCHES "/MP")
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") 
+ENDIF ()
 
 # Set your files and resources here  
 

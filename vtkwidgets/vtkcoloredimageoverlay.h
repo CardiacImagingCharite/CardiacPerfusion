@@ -34,6 +34,12 @@ class vtkColoredImageOverlay {
     vtkImageData *getImage() const { return m_image; }
 	///Activates the overlay image.
     void activateAction();
+	///Gets the ColorMap
+	/*!
+	\return Return the color map.
+	*/
+	vtkLookupTable* getColorMap() {return m_colorMap; }
+	
 	///Gets the actual actor.
 	/*!
 	\return Return the image actor.

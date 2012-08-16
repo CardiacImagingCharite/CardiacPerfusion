@@ -68,3 +68,6 @@ Ankh.NoLoad
 
 #Dicom Images
 *.dcm
+
+#Perfusion Project
+*.perfproj

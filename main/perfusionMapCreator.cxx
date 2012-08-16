@@ -1,19 +1,23 @@
 
 #include "perfusionMapCreator.h"
-#include "itkShrinkImageFilter.h"
+#include <itkShrinkImageFilter.h>
 #include "ctimagetreeitem.h"
 #include "binaryimagetreeitem.h"
-#include "itkImageRegionIterator.h"
-#include "itkImageDuplicator.h"
-#include "itkCastImageFilter.h"
+#include <itkImageRegionIterator.h>
+#include <itkCastImageFilter.h>
 #include "segmentinfo.h"
 
 #include <boost/foreach.hpp>
 
-#include "itkImageFileWriter.h"
-#include "itkRescaleIntensityImageFilter.h"
-#include "itkDiscreteGaussianImageFilter.h"
+#include <itkImageFileWriter.h>
+#include <itkRescaleIntensityImageFilter.h>
+#include <itkDiscreteGaussianImageFilter.h>
 #include "itkNaryPerfusionImageFilter.h"
+#include <itkCenteredAffineTransform.h>
+#include <itkBSplineInterpolateImageFunction.h>
+#include <itkResampleImageFilter.h>
+#include <itkLinearInterpolateImageFunction.h>
+#include <itkWindowedSincInterpolateImageFunction.h>
 
 PerfusionMapCreator::PerfusionMapCreator(MaxSlopeAnalyzer* analyzer, SegmentInfo* artery, int factor)
 	:m_analyzer(analyzer), m_arterySegment(artery), m_shrinkFactor(factor)
@@ -103,87 +107,6 @@ RealImageTreeItem::ImageType::Pointer PerfusionMapCreator::getPerfusionMap(CTIma
 
 	}
 
-	//create image for segmenting
-
-/*	BinaryImageTreeItem::ImageType::Pointer segmentImage;
-
-	//create caster, that transforme the CT image to a binary image
-	typedef itk::CastImageFilter< CTImageType, BinaryImageType> BinaryCastFilterType;
-	BinaryCastFilterType::Pointer binaryCaster = BinaryCastFilterType::New();
-	binaryCaster->SetInput( shrinkFilter->GetOutput() );
-	binaryCaster->Update();
-	segmentImage = binaryCaster->GetOutput();
-	//fills the segment with zeros
-	segmentImage->FillBuffer(BinaryPixelOff);
-
-	//define caster, that transforms a CT image to a real image
-	RealImageType::Pointer resultImage;
-
-	//create caster, that transforme the CT image to a binary image
-	typedef itk::CastImageFilter< CTImageType, RealImageType> RealCastFilterType;
-	RealCastFilterType::Pointer realCaster = RealCastFilterType::New();
-	realCaster->SetInput( shrinkFilter->GetOutput() );
-	realCaster->Update();
-	resultImage = realCaster->GetOutput();
-	//fills the segment with zeros
-	resultImage->FillBuffer(BinaryPixelOff);
-
-
-	//define iterator for the images
-	typedef itk::ImageRegionIterator<BinaryImageTreeItem::ImageType>    SegmentIterator;
-	typedef itk::ImageRegionIterator<RealImageType>						ResultIterator;
-
-
-	SegmentIterator segIt(segmentImage, segmentImage->GetLargestPossibleRegion() );
-	segIt.GoToBegin();
-
-	ResultIterator resultIt(resultImage, resultImage->GetLargestPossibleRegion());
-	resultIt.GoToBegin();
-
-	//define duplicator for binary image
-	typedef itk::ImageDuplicator< BinaryImageTreeItem::ImageType > BinaryDuplicatorType;
-	BinaryDuplicatorType::Pointer binaryDuplicator = BinaryDuplicatorType::New();
-
-	//prepare segments for each voxel
-	while( !segIt.IsAtEnd() )
-	{
-		//set pixel and duplicate segment
-		segIt.Set(BinaryPixelOn);
-		binaryDuplicator->SetInputImage(segmentImage);
-		binaryDuplicator->Update();
-
-		//create binaryImageItem and add it to the analyzer
-		BinaryImageTreeItem* seg = new BinaryImageTreeItem(parent, binaryDuplicator->GetOutput(), "test");
-
-		m_analyzer->addSegment(seg);
-		segmentImage->DisconnectPipeline();
-		segIt.Set(BinaryPixelOff);
-
-		++segIt;
-	}
-*/
-
-/*	typedef itk::ImageFileWriter< BinaryImageTreeItem::ImageType >  WriterType;
-	WriterType::Pointer writer = WriterType::New();
-	writer->SetFileName( "test.dcm" );
-
-	SegmentListModel* testSegments = m_analyzer->getSegments();
-	BOOST_FOREACH( SegmentInfo &currentSegment, *testSegments) {
-	
-		writer->SetInput( currentSegment.getSegment()->getITKImage() );
-		try 
-		{
-			writer->Update();
-		}
-		catch( itk::ExceptionObject & excep )
-		{
-			std::cerr << "Exception catched !" << std::endl;
-			std::cerr << excep << std::endl;
-		}
-	}
-	*/
-//	m_analyzer->calculateTacValues();
-
 
 	SegmentListModel* segments = m_analyzer->getSegments();
 
@@ -195,43 +118,48 @@ RealImageTreeItem::ImageType::Pointer PerfusionMapCreator::getPerfusionMap(CTIma
 	perfusionFilter->GetFunctor().setArteryGammaFunction(*m_arterySegment->getGamma());
 	perfusionFilter->GetFunctor().setTimePoints(times);
 
-	/*
-	for(int i = 1; i < segments->rowCount();i++)
-	{
-		SegmentInfo &seg = segments->getSegment(i);
-		seg.setArterySegment(m_arterySegment);
-
-		seg.setEnableGamma(true);
-		seg.setGammaStartIndex(0);
-		seg.setGammaEndIndex(model->rowCount());
-
-		m_analyzer->recalculateGamma(seg);
-
-		double gammaMax = seg.getArterySegment()->getGammaMaximum();
-		double maxSlope = seg.getGammaMaxSlope();
-		double perfusion = 0;
-		if(gammaMax != 0)
-		{
-			perfusion = 60 * maxSlope / gammaMax;
-			if(perfusion > 0)
-				resultIt.Set(perfusion);
-		}
-
-		++resultIt;
-	}
-	*/
+	
 	//Get perfusion results
-	perfusionFilter->Update();
+	//perfusionFilter->Update();
+	
+	typedef itk::ResampleImageFilter<RealImageTreeItem::ImageType, RealImageTreeItem::ImageType> ResampleFilterType;
+	ResampleFilterType::Pointer resizeFilter = ResampleFilterType::New();
+
+	typedef itk::CenteredAffineTransform<double> TransformFilterType;
+	TransformFilterType::Pointer transformFilter = TransformFilterType::New();
+
+	//typedef itk::WindowedSincInterpolateImageFunction<RealImageTreeItem::ImageType, 2> InterpolatorType;
+	//typedef itk::BSplineInterpolateImageFunction<RealImageTreeItem::ImageType, float, float> InterpolatorType;
+	typedef itk::LinearInterpolateImageFunction<RealImageTreeItem::ImageType> InterpolatorType;
+	InterpolatorType::Pointer interpolator = InterpolatorType::New();
+
+	transformFilter->Scale(0.10);
+
+	//interpolator->SetSplineOrder(3);
+	resizeFilter->SetInterpolator(interpolator);
+	resizeFilter->SetDefaultPixelValue(100);
+	
+	//resizeFilter->SetTransform(transformFilter);
+
+	resizeFilter->SetOutputSpacing(parent->getITKImage()->GetSpacing());
+	resizeFilter->SetOutputOrigin(parent->getITKImage()->GetOrigin());
+	resizeFilter->SetSize(parent->getITKImage()->GetLargestPossibleRegion().GetSize());
+
+	resizeFilter->SetInput(perfusionFilter->GetOutput());
+
+	resizeFilter->Update();
+
 	//assign them to an image
 	RealImageTreeItem::ImageType::Pointer realImage = RealImageTreeItem::ImageType::New();
-	realImage = perfusionFilter->GetOutput();
-	
+	realImage = resizeFilter->GetOutput();
+
+	//------------------------write image to filesystem---------------------------
 	//Create output image
 	CTImageType::Pointer resultImage = CTImageType::New();
 
 	typedef itk::CastImageFilter<RealImageType, CTImageType> CastFilterType;
 	CastFilterType::Pointer castfilter = CastFilterType::New();
-	castfilter->SetInput( perfusionFilter->GetOutput() );
+	castfilter->SetInput( realImage );
 	castfilter->Update();
 	resultImage = castfilter->GetOutput();
 
@@ -255,14 +183,8 @@ RealImageTreeItem::ImageType::Pointer PerfusionMapCreator::getPerfusionMap(CTIma
 		++realIt;
 	}
 
-	/*typedef itk::RescaleIntensityImageFilter< RealImageType, CTImageType > RescaleFilterType;
-	RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New();
-	rescaleFilter->SetInput(perfusionFilter->GetOutput());
-	rescaleFilter->SetOutputMinimum(0);
-	rescaleFilter->SetOutputMaximum(32767);
-	*/
 	typedef itk::ImageFileWriter< CTImageType >  WriterType;
-	WriterType::Pointer writer = WriterType::New();
+		WriterType::Pointer writer = WriterType::New();
 	writer->SetFileName( "result.dcm" );
 
 	writer->SetInput( resultImage );
@@ -275,7 +197,8 @@ RealImageTreeItem::ImageType::Pointer PerfusionMapCreator::getPerfusionMap(CTIma
 		std::cerr << "Exception catched !" << std::endl;
 		std::cerr << excep << std::endl;
 	}
+	//------------------------write image to filesystem---------------------------
 
-	return realImage ;
+	return realImage;
 	
 }

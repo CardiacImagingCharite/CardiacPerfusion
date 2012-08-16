@@ -8,6 +8,8 @@
 #include <vtkImageActor.h>
 #include <vtkImageData.h>
 #include <vtkRenderer.h>
+#include <vtkSmartPointer.h>
+#include <vtkScalarBarActor.h>
 #include "vtkinteractorstyleprojectionview.h"
 #include <boost/bind.hpp>
 
@@ -29,7 +31,7 @@ vtkColoredImageOverlay::vtkColoredImageOverlay( vtkRenderer *renderer,
   //Set the range of the image values
   m_colorMap->SetTableRange( 0, 10);
   //Set the range of the available colors
-  m_colorMap->SetHueRange(0.667,0.0);
+  m_colorMap->SetHueRange(0.0,0.667);
   //Set the saturation range of the colors
   //m_colorMap->SetSaturationRange( 0.7, 1 );
   //set the brightness of the colors
@@ -58,10 +60,26 @@ vtkColoredImageOverlay::vtkColoredImageOverlay( vtkRenderer *renderer,
   m_reslice->SetInput( m_image );
 
   m_reslice->SetOutputSpacing(1,1,1);
+
+  //create legend for LUT
+  vtkSmartPointer<vtkScalarBarActor> legend =
+	  vtkSmartPointer<vtkScalarBarActor>::New();
   
+  //create legend for the LUT
+  legend->SetLookupTable(m_colorMap);
+  legend->SetTitle("Values");
+  legend->SetOrientationToHorizontal();
+  legend->GetPositionCoordinate()->SetCoordinateSystemToNormalizedViewport();
+  legend->GetPositionCoordinate()->SetValue(0.614, 0.94);
+  legend->SetWidth(0.3);
+  legend->SetHeight(0.1);
+
   if (m_renderer)
+  {
     m_renderer->AddActor(m_actor);
-  
+	m_renderer->AddActor(legend);
+  }
+
   if (action.valid) {
     action.sig->connect( boost::bind(&vtkImageReslice::Modified, m_reslice) );
     this->actionHandle = interactorStyle->addAction(action);
@@ -82,8 +100,9 @@ vtkColoredImageOverlay::~vtkColoredImageOverlay() {
 }
 
 void vtkColoredImageOverlay::resize( unsigned int xres, unsigned int yres ) {
-  m_reslice->SetOutputExtent(0,xres,0,yres,0,0);
-  m_reslice->SetOutputOrigin(xres/-2.0,yres/-2.0,0);
+
+	m_reslice->SetOutputExtent(0,xres,0,yres,0,0);
+	m_reslice->SetOutputOrigin(xres/-2.0,yres/-2.0,0);
 }
 
 void vtkColoredImageOverlay::activateAction() {

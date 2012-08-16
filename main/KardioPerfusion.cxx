@@ -546,12 +546,15 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 			perfusionMap = mapCreator->getPerfusionMap(&imageModel);
 
 
-			TreeItem root = &imageModel.getRootItem();
+			TreeItem* root = &imageModel.getRootItem();
 
-			RealImageTreeItem* result = new RealImageTreeItem(&root, perfusionMap, "PerfusionMap");
-			root.insertChild(result);
+			RealImageTreeItem* result = new RealImageTreeItem(root, perfusionMap, "PerfusionMap");
+			root->insertChild(result);
 
 			this->ui->mprView_ur->addColoredOverlay(result->getVTKConnector()->getVTKImageData());
+			this->ui->mprView_ul->addColoredOverlay(result->getVTKConnector()->getVTKImageData());
+			this->ui->mprView_lr->addColoredOverlay(result->getVTKConnector()->getVTKImageData());
+
 			
 		}
 		else{

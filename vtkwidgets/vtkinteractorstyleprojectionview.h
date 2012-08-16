@@ -28,6 +28,7 @@ class vtkMatrix4x4;
 class vtkTextActor;
 class vtkTransform;
 class vtkImageViewer2;
+class vtkLookupTable;
 
 
 /// Interactor Style specific for Projection Views.
@@ -58,6 +59,7 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   virtual void OnRightButtonDown();
   virtual void OnRightButtonUp();
   virtual void OnKeyDown();
+  virtual void OnKeyUp();
   virtual void OnMouseWheelForward();
   virtual void OnMouseWheelBackward();
   virtual void OnTimer();
@@ -70,6 +72,8 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   void SetImageMapToWindowLevelColors(vtkImageMapToWindowLevelColors *map/**<[in]*/) { m_imageMapToWindowLevelColors = map; }
   void SetOrientationMatrix(vtkMatrix4x4 *orientation/**<[in]*/) { m_orientation = orientation; }
   void SetImageViewer(vtkImageViewer2 * viewer) { m_imageViewer = viewer; }
+  void SetColorMap(vtkLookupTable* lut) {m_colorMap = lut; }
+//  void Set
   ///@}
   void CycleLeftButtonAction();
   void WindowLevelDelta( int dw, int dl );
@@ -78,6 +82,9 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   void Spin( int alpha );
   void Zoom( int delta );
   void Pan( int dx, int dy );
+  void WindowLUTDelta(int dx, int dy);
+  void ResizeLUTDelta(int dx, int dy);
+
   int addAction(const std::string &label, const ActionSignal::slot_type &slot,
     ActionDispatch::ActionType atype, ActionDispatch::RestrictionType restrict);
   int addAction(const ActionDispatch &action);
@@ -112,7 +119,7 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   ActionListType m_actionList;
   int m_interAction; ///< selected interaction due to mouse button presses - determined by dipatchActions()
   int m_leftButtonAction; ///< selected interaction for the left mouse button - changed by pressing Space in CycleLeftButtonAction()
-  int ActionFirst, ActionSpin, ActionRotate, ActionZoom, ActionPan, ActionWindowLevel, ActionSlice, ActionNone;
+  int ActionFirst, ActionSpin, ActionRotate, ActionZoom, ActionPan, ActionWindowLevel, ActionSlice, ActionNone, ActionResizeLUT, ActionWindowLUT;
   
   /** @name Mouse Button Flags
       State of the Mouse Buttons (Pressed?) */
@@ -121,11 +128,14 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   bool m_stateLButton;
   bool m_stateMButton;
   //@}
+
+  bool m_stateCtrl;///< State of the CTRL-Key
   float m_sliceIncrement; ///< Value to Increment the Viewers Z-Position when slicing
   vtkTextActor *m_leftMBHint; ///< Hint actor for showing the Action associated with the Left Mouse Button
   float m_leftMBHintAlpha; ///< alpha value for #m_leftMBHint
   vtkImageMapToWindowLevelColors *m_imageMapToWindowLevelColors; ///< Mapper (set external via SetImageMapToWindowLevelColors()) for Window and Level (changed via vtkInteractorStyleProjectionView::ActionWindowLevel)
   vtkImageViewer2 *m_imageViewer;
+  vtkLookupTable *m_colorMap; 
   vtkMatrix4x4 *m_orientation; ///< the Transformation Matrix of the displayed Data
   DisplayState m_initialState; ///< Display state at the beginning of an action
   private:

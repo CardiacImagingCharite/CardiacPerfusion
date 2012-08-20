@@ -101,7 +101,8 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   bool restrictAction();
   void saveDisplayState(void);
   void updateDisplay(void);
-  
+  double modulus(double a, double b);
+
   struct DisplayState {
     int window;
     int level;

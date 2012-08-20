@@ -408,18 +408,26 @@ void vtkInteractorStyleProjectionView::WindowLUTDelta( int dw/**<[in] delta wind
 	{
 		double *range = m_colorMap->GetRange();
 		
-		if(range[0] - dw < range[1] + dw)
-			range[0] -= dw;
-		if(range[1] + dw > range[0] - dw)
-			range[1] += dw;
+		double ddw, ddl;
+
+		ddw = (double)dw / (double)m_imageViewer->GetSize()[0] * 10;
+		ddl = (double)dl / (double)m_imageViewer->GetSize()[0] * 10;
+
+		if(range[0] - ddw < range[1] + ddw)
+			range[0] -= ddw;
+		if(range[1] + ddw > range[0] - ddw)
+			range[1] += ddw;
 		
-		range[0] += dl;
-		range[1] += dl;
+		range[0] += ddl;
+		range[1] += ddl;
 
 		if(range)
 		{
+			
 			m_colorMap->SetRange(range);
 			m_colorMap->ForceBuild();
+			m_colorMap->SetTableValue(0,0,0,0,0);
+			m_colorMap->SetTableValue(m_colorMap->GetNumberOfColors()-1,0,0,0,0);
 			m_imageViewer->Render();
 
 			std::cout << "range[0]= " << range[0] << "; range[1]= " << range[1] << std::endl;
@@ -444,32 +452,36 @@ void vtkInteractorStyleProjectionView::WindowLUTDelta( int dw/**<[in] delta wind
 void vtkInteractorStyleProjectionView::ResizeLUTDelta( int dw/**<[in] delta window*/, int dl/**<[in] delta level*/) {
 	if (m_colorMap && m_imageViewer && (dw || dl)) 
 	{
-		double *hueRange = m_colorMap->GetHueRange();
+		double *alphaRange = m_colorMap->GetAlphaRange();
 		double ddw, ddl;
 		int *size = m_imageViewer->GetSize();
 		ddw = (double)dw / (double)size[0];
 		ddl = (double)dl / (double)size[1];
 
-		if(hueRange[0] - ddw > 0)
-			hueRange[0] -= ddw;
-		if(hueRange[1] + ddw < 1)
-			hueRange[1] += ddw;
+		if(alphaRange[0] - ddw > 0)
+			alphaRange[0] -= ddw;
+		if(alphaRange[1] + ddw < 1)
+			alphaRange[1] += ddw;
 		
-		if(hueRange[0] + ddl > 0 && hueRange[0] + ddl < 1
-			&& hueRange[1] + ddl > 0 && hueRange[1] + ddl < 1)
-		{
-			hueRange[0] += ddl;
-			hueRange[1] += ddl;
-		}
+		//if(alphaRange[0] + ddl > 0 && alphaRange[0] + ddl < 1
+		//	&& alphaRange[1] + ddl > 0 && alphaRange[1] + ddl < 1)
+		//{
+			alphaRange[0] = modulus(alphaRange[0] + ddl, 1);
+			alphaRange[1] = modulus(alphaRange[1] + ddl, 1);
+			
+		//}
 
-		if(hueRange)
+		if(alphaRange)
 		{
-			m_colorMap->SetHueRange(hueRange);
+			m_colorMap->SetAlphaRange(alphaRange);
 			m_colorMap->ForceBuild();
+			m_colorMap->SetTableValue(0,0,0,0,0);
+			m_colorMap->SetTableValue(m_colorMap->GetNumberOfColors()-1,0,0,0,0);
 			m_imageViewer->Render();
 
-			std::cout << "hue range[0]= " << hueRange[0] << "; hue range[1]= " << hueRange[1] << std::endl;
+			std::cout << "alpha range[0]= " << alphaRange[0] << "; alpha range[1]= " << alphaRange[1] << std::endl;
 		}
+		updateDisplay();
 	}
 	/*if (m_imageMapToWindowLevelColors && m_imageViewer && (dw || dl)) 
 	{
@@ -488,6 +500,12 @@ void vtkInteractorStyleProjectionView::ResizeLUTDelta( int dw/**<[in] delta wind
 		updateDisplay();
 	}
 	*/
+}
+
+double modulus(double a, double b)
+{
+int result = static_cast<int>( a / b );
+return a - static_cast<double>( result ) * b;
 }
 
 void vtkInteractorStyleProjectionView::OnLeftButtonDown()

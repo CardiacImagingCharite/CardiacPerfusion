@@ -34,6 +34,8 @@ public:
 
 			gamma.findFromSamples();
 			A = static_cast< OutputValueType >( 60 * gamma.getMaxSlope() / arteryGamma.getMaximum() );
+			if(!isNumber(A) || !isFiniteNumber(A))
+				A = 0;
 		}
 
 		return A;
@@ -57,6 +59,16 @@ public:
 	inline void setArteryGammaFunction(const GammaFunctions::GammaVariate &gamma)
 	{
 		arteryGamma = gamma;
+	}
+
+	inline bool isNumber(const TOutput x) const 
+	{
+		return (x == x);
+	}
+
+	inline bool isFiniteNumber(const TOutput x) const
+	{
+		return (x <= DBL_MAX && x >= -DBL_MAX); 
 	}
 
 private:

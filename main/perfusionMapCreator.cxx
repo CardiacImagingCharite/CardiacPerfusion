@@ -13,7 +13,7 @@
 #include <itkRescaleIntensityImageFilter.h>
 #include <itkDiscreteGaussianImageFilter.h>
 #include "itkNaryPerfusionImageFilter.h"
-#include <itkCenteredAffineTransform.h>
+#include <itkIdentityTransform.h>
 #include <itkBSplineInterpolateImageFunction.h>
 #include <itkResampleImageFilter.h>
 #include <itkLinearInterpolateImageFunction.h>
@@ -125,21 +125,22 @@ RealImageTreeItem::ImageType::Pointer PerfusionMapCreator::getPerfusionMap(CTIma
 	typedef itk::ResampleImageFilter<RealImageTreeItem::ImageType, RealImageTreeItem::ImageType> ResampleFilterType;
 	ResampleFilterType::Pointer resizeFilter = ResampleFilterType::New();
 
-	typedef itk::CenteredAffineTransform<double> TransformFilterType;
+	typedef itk::IdentityTransform<double> TransformFilterType;
 	TransformFilterType::Pointer transformFilter = TransformFilterType::New();
 
-	//typedef itk::WindowedSincInterpolateImageFunction<RealImageTreeItem::ImageType, 2> InterpolatorType;
-	//typedef itk::BSplineInterpolateImageFunction<RealImageTreeItem::ImageType, float, float> InterpolatorType;
-	typedef itk::LinearInterpolateImageFunction<RealImageTreeItem::ImageType> InterpolatorType;
+	typedef itk::WindowedSincInterpolateImageFunction<RealImageTreeItem::ImageType, 2> InterpolatorType;
+//	typedef itk::BSplineInterpolateImageFunction<RealImageTreeItem::ImageType> InterpolatorType;
+	//typedef itk::LinearInterpolateImageFunction<RealImageTreeItem::ImageType> InterpolatorType;
 	InterpolatorType::Pointer interpolator = InterpolatorType::New();
 
-	transformFilter->Scale(0.10);
+	//transformFilter->Scale(0.10);
+	transformFilter->SetIdentity();
 
 	//interpolator->SetSplineOrder(3);
 	resizeFilter->SetInterpolator(interpolator);
 	resizeFilter->SetDefaultPixelValue(100);
 	
-	//resizeFilter->SetTransform(transformFilter);
+	resizeFilter->SetTransform(transformFilter);
 
 	resizeFilter->SetOutputSpacing(parent->getITKImage()->GetSpacing());
 	resizeFilter->SetOutputOrigin(parent->getITKImage()->GetOrigin());

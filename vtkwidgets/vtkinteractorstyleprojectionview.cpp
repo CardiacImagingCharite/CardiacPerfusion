@@ -432,18 +432,7 @@ void vtkInteractorStyleProjectionView::WindowLUTDelta( int dw/**<[in] delta wind
 
 			std::cout << "range[0]= " << range[0] << "; range[1]= " << range[1] << std::endl;
 		}
-		//dl += m_imageMapToWindowLevelColors->GetLevel();
-	/*	if (dw) 
-		{
-			m_imageMapToWindowLevelColors->SetWindow(dw);
-			m_imageViewer->SetColorWindow(dw);
-		}
-		if (dl) 
-		{
-			m_imageMapToWindowLevelColors->SetLevel(dl);
-			m_imageViewer->SetColorLevel(dl);
-		}
-		*/
+
 		updateDisplay();
 	}
 }
@@ -458,18 +447,20 @@ void vtkInteractorStyleProjectionView::ResizeLUTDelta( int dw/**<[in] delta wind
 		ddw = (double)dw / (double)size[0];
 		ddl = (double)dl / (double)size[1];
 
-		if(alphaRange[0] - ddw > 0)
+		//if(alphaRange[0] - ddw > 0)
 			alphaRange[0] -= ddw;
-		if(alphaRange[1] + ddw < 1)
+		//if(alphaRange[1] + ddw < 1)
 			alphaRange[1] += ddw;
 		
 		//if(alphaRange[0] + ddl > 0 && alphaRange[0] + ddl < 1
 		//	&& alphaRange[1] + ddl > 0 && alphaRange[1] + ddl < 1)
 		//{
-			alphaRange[0] = modulus(alphaRange[0] + ddl, 1);
-			alphaRange[1] = modulus(alphaRange[1] + ddl, 1);
+			alphaRange[0] += ddl;
+			alphaRange[1] += ddl;
 			
 		//}
+			alphaRange[0] = modulus(alphaRange[0],1);
+			alphaRange[1] = modulus(alphaRange[1],1);
 
 		if(alphaRange)
 		{
@@ -483,26 +474,9 @@ void vtkInteractorStyleProjectionView::ResizeLUTDelta( int dw/**<[in] delta wind
 		}
 		updateDisplay();
 	}
-	/*if (m_imageMapToWindowLevelColors && m_imageViewer && (dw || dl)) 
-	{
-		dw += m_imageMapToWindowLevelColors->GetWindow();
-		dl += m_imageMapToWindowLevelColors->GetLevel();
-		if (dw) 
-		{
-			m_imageMapToWindowLevelColors->SetWindow(dw);
-			m_imageViewer->SetColorWindow(dw);
-		}
-		if (dl) 
-		{
-			m_imageMapToWindowLevelColors->SetLevel(dl);
-			m_imageViewer->SetColorLevel(dl);
-		}
-		updateDisplay();
-	}
-	*/
 }
 
-double modulus(double a, double b)
+double vtkInteractorStyleProjectionView::modulus(double a, double b)
 {
 int result = static_cast<int>( a / b );
 return a - static_cast<double>( result ) * b;

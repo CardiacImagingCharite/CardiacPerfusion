@@ -285,6 +285,7 @@ int MultiPlanarReformatWidget::addColoredOverlay(vtkImageData *image, const Acti
     m_coloredOverlays.insert( ColoredOverlayMapType::value_type( image, overlay ) );
     overlay->resize( this->size().width(), this->size().height() );
     this->update();
+
 	m_interactorStyle->SetColorMap(overlay->getColorMap());
     return actionHandle;
   }

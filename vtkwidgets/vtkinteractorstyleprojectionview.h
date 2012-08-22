@@ -128,7 +128,7 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   ActionListType m_actionList;
   int m_interAction; ///< selected interaction due to mouse button presses - determined by dipatchActions()
   int m_leftButtonAction; ///< selected interaction for the left mouse button - changed by pressing Space in CycleLeftButtonAction()
-  int ActionFirst, ActionSpin, ActionRotate, ActionZoom, ActionPan, ActionWindowLevel, ActionSlice, ActionNone, ActionResizeLUT, ActionWindowLUT;
+  int ActionFirst, ActionSpin, ActionRotate, ActionZoom, ActionPan, ActionWindowLevel, ActionSlice, ActionNone, ActionResizeLUT, ActionWindowLUT, ActionColorPick;
   
   /** @name Mouse Button Flags
       State of the Mouse Buttons (Pressed?) */

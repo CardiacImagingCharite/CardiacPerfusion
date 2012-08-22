@@ -93,6 +93,7 @@ void vtkInteractorStyleProjectionView::resetActions() {
   ActionWindowLUT = addAction("Window Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::WindowLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   ActionResizeLUT = addAction("Resize Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::ResizeLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
  
+  ActionColorPick = addAction("", boost::bind(&vtkInteractorStyleProjectionView::PickColor, this), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
   //m_leftButtonAction = ActionSlice;
   m_leftButtonAction = ActionWindowLevel;
@@ -185,7 +186,7 @@ void vtkInteractorStyleProjectionView::dipatchActions() {
 	{
 		if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionResizeLUT; return; }
 		if (!m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionWindowLUT; return; }
-		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
+		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionColorPick; return; }
 	}
 }
 
@@ -670,117 +671,4 @@ void vtkInteractorStyleProjectionView::PickColor()
 	}
 
 	m_annotation->SetText( 0, message.str().c_str() );
-	/*
-	// There could be other props assigned to this picker, so 
-	// make sure we picked the image actor
-	vtkAssemblyPath* path = m_picker->GetPath();
-	bool validPick = false;
-	vtkImageActor* actor = m_imageViewer->GetImageActor();
-
-    if( path )
-    {
-		vtkCollectionSimpleIterator sit;
-		path->InitTraversal( sit );
-		vtkAssemblyNode *node;
-		for( int i = 0; i < path->GetNumberOfItems() && !validPick; ++i )
-        {
-			node = path->GetNextNode( sit );
-			if( actor == vtkImageActor::SafeDownCast( node->GetViewProp() ) )
-			{
-				validPick = true;
-			}
-        }
-    }
- 
-    if( !validPick )
-    {
-		m_annotation->SetText( 0, "Off Image" );
-        updateDisplay();
-        return;
-    }
-	
-    // Get the world coordinates of the pick
-    double pos[3];
-    m_picker->GetPickPosition( pos );
-
-	 int image_coordinate[3];
- 
-	 int axis = m_imageViewer->GetSliceOrientation();
-    switch (axis)
-      {
-      case vtkImageViewer2::SLICE_ORIENTATION_XZ:
-        image_coordinate[0] = vtkMath::Round(pos[0]);
-        image_coordinate[1] = m_imageViewer->GetSlice();
-        image_coordinate[2] = vtkMath::Round(pos[2]);
-        break;
-      case vtkImageViewer2::SLICE_ORIENTATION_YZ:
-        image_coordinate[0] = m_imageViewer->GetSlice();
-        image_coordinate[1] = vtkMath::Round(pos[0]);
-        image_coordinate[2] = vtkMath::Round(pos[1]);
-        break;
-      default:  // vtkImageViewer2::SLICE_ORIENTATION_XY
-        image_coordinate[0] = vtkMath::Round(pos[0]);
-        image_coordinate[1] = vtkMath::Round(pos[1]);
-        image_coordinate[2] = m_imageViewer->GetSlice();
-        break;
-      }
-
-	
-    // Fixes some numerical problems with the picking
-    double *bounds = actor->GetDisplayBounds();
-	//int axis = m_imageViewer->GetSliceOrientation();
-    pos[axis] = bounds[2*axis];
- 
-	vtkPointData* pointData;
-	pointData = vtkPointData::New();
-
-	if(m_OverlayImage)
-	{
-		vtkPointData* pd = m_OverlayImage->GetPointData();
-		if( !pd )
-		{
-			return;
-		}
-		pointData->InterpolateAllocate( pd, 1, 1 );
-
-		// Use tolerance as a function of size of source data
-		double tol2 = m_OverlayImage->GetLength();
-		tol2 = tol2 ? tol2*tol2 / 1000.0 : 0.001;
-
-		// Find the cell that contains pos
-		int subId;
-		double pcoords[3], weights[8];
-		vtkCell* cell = m_OverlayImage->FindAndGetCell(
-        pos, NULL, -1, tol2, subId, pcoords, weights );
-
-		if( cell )
-        {
-			// Interpolate the point data
-			pointData->InterpolatePoint( pd, 0, cell->PointIds, weights );
-			int components =
-			  pointData->GetScalars()->GetNumberOfComponents();
-			double* tuple = pointData->GetScalars()->GetTuple( 0 );
- 
-			std::string message = "Location: ( ";
-			message += vtkVariant( pos[0] ).ToString();
-			message += ", ";
-			message += vtkVariant( pos[1] ).ToString();
-			message += ", ";
-			message += vtkVariant( pos[2] ).ToString();
-			message += " )\nValue: ( ";
- 
-			for( int c = 0; c < components; ++c )
-			  {
-			  message += vtkVariant( tuple[ c ] ).ToString();
-			  if( c != components - 1 ) 
-				{
-				message += ", ";
-				}
-			  }
-			message += " )";
-			m_annotation->SetText( 0, message.c_str() );
-			updateDisplay();	
-		}
-	} 
-	*/
 }

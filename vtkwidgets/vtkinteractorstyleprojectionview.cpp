@@ -30,6 +30,14 @@
 #include <vtkRenderer.h>
 #include <vtkImageViewer2.h>
 #include <vtkLookupTable.h>
+#include <vtkCornerAnnotation.h>
+#include <vtkPropPicker.h>
+#include <vtkSmartPointer.h>
+#include <vtkAssemblyPath.h>
+#include <vtkPointData.h>
+#include <vtkCell.h>
+#include <vtkMath.h>
+#include <vtkInteractorObserver.h>
 
 #include <string>
 #include <iostream>
@@ -38,6 +46,7 @@
 
 #include <vtkRenderWindow.h>
 #include <vtkRendererCollection.h>
+#include "vtkcoloredimageoverlay.h"
 
 using namespace std;
 
@@ -61,7 +70,8 @@ vtkInteractorStyleProjectionView::vtkInteractorStyleProjectionView():
   m_leftMBHint( NULL ),
   m_imageMapToWindowLevelColors(NULL),
   m_orientation(NULL),
-  tempTransform( vtkTransform::New() )
+  tempTransform( vtkTransform::New() ),
+  m_OverlayImage(NULL)
 {
   State = VTKIS_NONE;
   UseTimers = 1;
@@ -82,6 +92,8 @@ void vtkInteractorStyleProjectionView::resetActions() {
   
   ActionWindowLUT = addAction("Window Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::WindowLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   ActionResizeLUT = addAction("Resize Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::ResizeLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
+ 
+  
   //m_leftButtonAction = ActionSlice;
   m_leftButtonAction = ActionWindowLevel;
   m_interAction = ActionNone;
@@ -161,11 +173,11 @@ void vtkInteractorStyleProjectionView::dipatchActions() {
 	if(!m_stateCtrl)
 	{
 		if ( m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = ActionSpin; return; }
-		if ( m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionRotate; return; }
+		if ( m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
 		if ( m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionZoom; return; }
 		if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = m_leftButtonAction; return; }
 		if (!m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = ActionPan; return; }
-		if (!m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionWindowLevel; return; }
+		if (!m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionRotate; return; }
 		if (!m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionSlice; return; }
 		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
 	}
@@ -375,12 +387,14 @@ void vtkInteractorStyleProjectionView::Rotate( int theta/**<[in] angle around ve
 
 /** slice the viewed object */
 void vtkInteractorStyleProjectionView::Slice(int dpos/**<[in] delta in position perpendicular to the viewing direction*/) {
-  if (m_orientation) {
+  
+if (m_orientation) {
     tempTransform->SetMatrix( m_orientation );
     tempTransform->Translate(0, 0, dpos* m_sliceIncrement);
     tempTransform->GetMatrix( m_orientation );
     updateDisplay();
   }
+  
 }
 
 /** change Window and Level */
@@ -502,7 +516,7 @@ void vtkInteractorStyleProjectionView::ResizeLUTDelta( int dw/**<[in] delta wind
 	*/
 }
 
-double modulus(double a, double b)
+double vtkInteractorStyleProjectionView::modulus(double a, double b)
 {
 int result = static_cast<int>( a / b );
 return a - static_cast<double>( result ) * b;
@@ -555,14 +569,22 @@ void vtkInteractorStyleProjectionView::OnKeyDown()
 {
 	m_stateCtrl = this->GetInteractor()->GetControlKey();
 
-  const char *keySym = this->GetInteractor()->GetKeySym();
-  if (m_stateCtrl) {
-    if (keySymLeft == keySym) { Rotate(90,0); return; }
-    if (keySymRight == keySym) { Rotate(-90,0); return; }
-    if (keySymUp == keySym) { Rotate(0,90); return; }
-    if (keySymDown == keySym) { Rotate(0,-90); return; }
+  //const char *keySym = this->GetInteractor()->GetKeySym();
+	std::string keySym = this->GetInteractor()->GetKeySym();
+
+	if (!m_stateCtrl) {
+		if (keySymLeft.compare(keySym) == 0) { Rotate(90,0); return; }
+		if (keySymRight.compare(keySym) == 0) { Rotate(-90,0); return; }
+		if (keySymUp.compare(keySym) == 0) { Rotate(0,90); return; }
+		if (keySymDown.compare(keySym) == 0) { Rotate(0,-90); return; }
+  
+		if (keySymSpace.compare(keySym) == 0) { CycleLeftButtonAction(); return; }
+  
+		if(keySym.compare("p") == 0)
+			PickColor();
   }
-  if (keySymSpace == keySym) { CycleLeftButtonAction(); return; }
+
+
   cerr << __FILE__ << "[" << __LINE__ << "]:" << __FUNCTION__ << " Code:" << (int)this->GetInteractor()->GetKeyCode() << " Sym:" << this->GetInteractor()->GetKeySym() << endl;
 }
 
@@ -588,4 +610,177 @@ void vtkInteractorStyleProjectionView::OnTimer()
   } else {
     StopAnimate();
   }
+}
+
+void vtkInteractorStyleProjectionView::SetAnnotation(vtkCornerAnnotation* annotation)
+{
+	m_annotation = annotation;
+	if(m_imageViewer)
+	{
+		m_imageViewer->GetRenderer()->AddViewProp(m_annotation);
+	}
+}
+
+void vtkInteractorStyleProjectionView::PickColor()
+{
+	m_picker = vtkSmartPointer<vtkPointPicker>::New();
+	
+	m_picker->SetTolerance(0.0);
+	m_imageViewer->GetRenderWindow()->GetInteractor()->SetPicker(m_picker);
+//	m_picker->AddPickList(m_imageViewer->GetImageActor());
+//	m_picker->PickFromListOn();
+
+	int x,y;
+	double coord[4] = {0};
+	int perfusionIndex;
+	// Pick at the mouse location provided by the interactor
+	if (GetEventPosition(x,y)) 
+	{
+		m_picker->Pick( x, y , 0.0, m_imageViewer->GetRenderer() );
+	
+		vtkRenderer *ren = //this->GetCurrentRenderer();
+		GetInteractor()->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
+		if (ren) {
+		ren->SetDisplayPoint( x, y, 0);// 0.38 );
+		ren->DisplayToWorld();
+		ren->GetWorldPoint( coord );
+		coord[2] = 0.0;
+		m_orientation->MultiplyPoint(coord, coord);
+
+		perfusionIndex = m_OverlayImage->FindPoint(coord);
+      }
+	}
+
+	//i(jk) = (x(yz) - origin) / spacing
+	std::stringstream message;
+	
+    // We have to handle different number of scalar components.
+    switch (m_OverlayImage->GetNumberOfScalarComponents()) {
+        case 1:
+        {
+              // Get a shortcut to the raw pixel data. This should be further
+              // updated to check if your data is signed or not, but for this
+              // example we'll just assume it's unsigned. You should also check
+              // the type of your data too (unsigned char, unsigned short, etc).
+			float* pPix = (float*)m_OverlayImage->GetScalarPointer();
+			float usPix = pPix[perfusionIndex];
+			message << "Perfusion = [" << usPix << "],\nCoordinates(" << coord[0] << "," << coord[1] << "," << coord[2] << ")";
+        }
+        break;
+	}
+
+	m_annotation->SetText( 0, message.str().c_str() );
+	/*
+	// There could be other props assigned to this picker, so 
+	// make sure we picked the image actor
+	vtkAssemblyPath* path = m_picker->GetPath();
+	bool validPick = false;
+	vtkImageActor* actor = m_imageViewer->GetImageActor();
+
+    if( path )
+    {
+		vtkCollectionSimpleIterator sit;
+		path->InitTraversal( sit );
+		vtkAssemblyNode *node;
+		for( int i = 0; i < path->GetNumberOfItems() && !validPick; ++i )
+        {
+			node = path->GetNextNode( sit );
+			if( actor == vtkImageActor::SafeDownCast( node->GetViewProp() ) )
+			{
+				validPick = true;
+			}
+        }
+    }
+ 
+    if( !validPick )
+    {
+		m_annotation->SetText( 0, "Off Image" );
+        updateDisplay();
+        return;
+    }
+	
+    // Get the world coordinates of the pick
+    double pos[3];
+    m_picker->GetPickPosition( pos );
+
+	 int image_coordinate[3];
+ 
+	 int axis = m_imageViewer->GetSliceOrientation();
+    switch (axis)
+      {
+      case vtkImageViewer2::SLICE_ORIENTATION_XZ:
+        image_coordinate[0] = vtkMath::Round(pos[0]);
+        image_coordinate[1] = m_imageViewer->GetSlice();
+        image_coordinate[2] = vtkMath::Round(pos[2]);
+        break;
+      case vtkImageViewer2::SLICE_ORIENTATION_YZ:
+        image_coordinate[0] = m_imageViewer->GetSlice();
+        image_coordinate[1] = vtkMath::Round(pos[0]);
+        image_coordinate[2] = vtkMath::Round(pos[1]);
+        break;
+      default:  // vtkImageViewer2::SLICE_ORIENTATION_XY
+        image_coordinate[0] = vtkMath::Round(pos[0]);
+        image_coordinate[1] = vtkMath::Round(pos[1]);
+        image_coordinate[2] = m_imageViewer->GetSlice();
+        break;
+      }
+
+	
+    // Fixes some numerical problems with the picking
+    double *bounds = actor->GetDisplayBounds();
+	//int axis = m_imageViewer->GetSliceOrientation();
+    pos[axis] = bounds[2*axis];
+ 
+	vtkPointData* pointData;
+	pointData = vtkPointData::New();
+
+	if(m_OverlayImage)
+	{
+		vtkPointData* pd = m_OverlayImage->GetPointData();
+		if( !pd )
+		{
+			return;
+		}
+		pointData->InterpolateAllocate( pd, 1, 1 );
+
+		// Use tolerance as a function of size of source data
+		double tol2 = m_OverlayImage->GetLength();
+		tol2 = tol2 ? tol2*tol2 / 1000.0 : 0.001;
+
+		// Find the cell that contains pos
+		int subId;
+		double pcoords[3], weights[8];
+		vtkCell* cell = m_OverlayImage->FindAndGetCell(
+        pos, NULL, -1, tol2, subId, pcoords, weights );
+
+		if( cell )
+        {
+			// Interpolate the point data
+			pointData->InterpolatePoint( pd, 0, cell->PointIds, weights );
+			int components =
+			  pointData->GetScalars()->GetNumberOfComponents();
+			double* tuple = pointData->GetScalars()->GetTuple( 0 );
+ 
+			std::string message = "Location: ( ";
+			message += vtkVariant( pos[0] ).ToString();
+			message += ", ";
+			message += vtkVariant( pos[1] ).ToString();
+			message += ", ";
+			message += vtkVariant( pos[2] ).ToString();
+			message += " )\nValue: ( ";
+ 
+			for( int c = 0; c < components; ++c )
+			  {
+			  message += vtkVariant( tuple[ c ] ).ToString();
+			  if( c != components - 1 ) 
+				{
+				message += ", ";
+				}
+			  }
+			message += " )";
+			m_annotation->SetText( 0, message.c_str() );
+			updateDisplay();	
+		}
+	} 
+	*/
 }

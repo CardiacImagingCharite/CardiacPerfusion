@@ -70,9 +70,9 @@ vtkColoredImageOverlay::vtkColoredImageOverlay( vtkRenderer *renderer,
   legend->SetTitle("Values");
   legend->SetOrientationToHorizontal();
   legend->GetPositionCoordinate()->SetCoordinateSystemToNormalizedViewport();
-  legend->GetPositionCoordinate()->SetValue(0.614, 0.94);
-  legend->SetWidth(0.3);
-  legend->SetHeight(0.1);
+  legend->GetPositionCoordinate()->SetValue(0.57, 0.87);
+  legend->SetWidth(0.4);
+  legend->SetHeight(0.15);
 
   if (m_renderer)
   {

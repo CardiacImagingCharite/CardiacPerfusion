@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT(KardioPerfusion)
 
+IF (NOT CMAKE_CXX_FLAGS MATCHES "/MP")
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") 
+ENDIF ()
 
 # Set your files and resources here  
 
@@ -10,7 +13,9 @@ SET( KardioPerfusionSrcs
 	main/KardioPerfusion.cxx
 	main/KardioPerfusion.h
 	main/dicomselectordialog.cpp
-	main/dicomselectordialog.h	
+	main/dicomselectordialog.h
+	main/perfusionMapCreator.cxx
+	main/perfusionMapCreator.h
 #	main/MyTestInteractorStyle.cxx
 #	main/MyTestInteractorStyle.h
 
@@ -18,14 +23,14 @@ SET( KardioPerfusionSrcs
 	analyse/perfusionAnalyzer.h
 	analyse/mmid4Analyzer.cxx
 	analyse/mmid4Analyzer.h
+	analyse/maxSlopeAnalyzer.cxx
+	analyse/maxSlopeAnalyzer.h
 	analyse/tacdialog.cpp
 	analyse/tacdialog.h
 	analyse/timedensitydata.cpp
 	analyse/timedensitydata.h	
-#	analyse/timedensitydatapicker.cpp
-#	analyse/timedensitydatapicker.h
-#	analyse/segmentselectbutton.cpp
-#	analyse/segmentselectbutton.h
+	analyse/timedensitydatapicker.cpp
+	analyse/timedensitydatapicker.h
 	analyse/segmentlistmodel.cpp
 	analyse/segmentlistmodel.h
 	analyse/segmentinfo.cpp
@@ -42,8 +47,6 @@ SET( KardioPerfusionSrcs
 #	analyse/SamplePoint.cxx
 #	analyse/SamplePoint.h
 
-
-
 	imagetree/ctimagetreemodel.cpp
 	imagetree/dicomtagtype.cpp
 	imagetree/vtkconnectordatabase.cpp
@@ -52,9 +55,13 @@ SET( KardioPerfusionSrcs
 	imagetree/binaryimagetreeitem.cpp 
 	imagetree/itkvtktreeitem.cpp 
 	imagetree/segmentationvalues.cpp
+	imagetree/realimagetreeitem.cxx
+	imagetree/realimagetreeitem.h
 
 	vtkwidgets/vtkbinaryimagetocolor.cpp 
 	vtkwidgets/vtkbinaryimageoverlay.cpp 
+	vtkwidgets/vtkcoloredimageoverlay.h
+	vtkwidgets/vtkcoloredimageoverlay.cxx
 #	vtkwidgets/interactorstylevolumeview.cpp 
 	vtkwidgets/multiplanarreformatwidget.cpp 
 	vtkwidgets/vtkinteractorstyleprojectionview.cpp 
@@ -64,6 +71,13 @@ SET( KardioPerfusionSrcs
 
 	qtwidgets/mytabwidget.h
 	qtwidgets/mytabwidget.cxx
+	qtwidgets/segmentselectbutton.cpp
+	qtwidgets/segmentselectbutton.h
+
+	itkfilter/itkperfusionmapfilter.txx
+	itkfilter/itkperfusionmapfilter.h
+
+	itkfilter/itkNaryPerfusionImageFilter.h
 )
 
 SET( KardioPerfusionUI 
@@ -79,8 +93,7 @@ SET( KardioPerfusionHeaders
 	analyse/tacdialog.h
 	imagetree/ctimagetreemodel.h
 	qtwidgets/mytabwidget.h
-	
-#	analyse/segmentselectbutton.h
+	qtwidgets/segmentselectbutton.h
 )
 
 SET( KardioPerfusionResources 
@@ -95,6 +108,7 @@ SET( HeaderDirs
 	misc
 	vtkwidgets
 	qtwidgets
+	itkfilter
 )
 
 FIND_PATH(QWT_INCLUDE_DIR qwt.h)

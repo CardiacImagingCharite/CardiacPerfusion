@@ -127,10 +127,13 @@
                </size>
               </property>
               <property name="minimum">
-               <number>2</number>
+               <number>3</number>
               </property>
               <property name="maximum">
                <number>50</number>
+              </property>
+              <property name="value">
+               <number>5</number>
               </property>
              </widget>
             </item>
@@ -453,6 +456,50 @@
           </item>
          </layout>
         </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_14">
+          <item>
+           <widget class="QPushButton" name="btn_perfusionMap">
+            <property name="text">
+             <string>Create Perfusion Map</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_10">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Maximum</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>110</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Shrink factor</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="sb_shrinkFactor">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>4</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
        </layout>
       </item>
       <item>
@@ -571,11 +618,217 @@
         </widget>
         <widget class="QWidget" name="tab_perfResults">
          <attribute name="title">
-          <string>Perfusion Results</string>
+          <string>Gamma Fit</string>
          </attribute>
-         <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
-           <widget class="QTextEdit" name="textEdit"/>
+           <widget class="QTableView" name="tbl_gammaFit">
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="cb_enableGamma">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>enable Gamma</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>start [s]: </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="lbl_startTime">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>50</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="slider_startTime">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+                <horstretch>5</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Maximum</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>371</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>end [s]: </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>5</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="lbl_endTime">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>50</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="slider_endTime">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+                <horstretch>5</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Maximum</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>371</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <item>
+             <widget class="SegmentSelectButton" name="btn_arteryInput">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>75</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>artery Button</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_9">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>236</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -708,11 +961,81 @@
    <header>mytabwidget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>SegmentSelectButton</class>
+   <extends>QPushButton</extends>
+   <header>segmentselectbutton.h</header>
+  </customwidget>
  </customwidgets>
  <resources>
   <include location="../Icons/icons.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>slider_startTime</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>KardioPerfusion</receiver>
+   <slot>sliderStartValue_changed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>422</x>
+     <y>535</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>213</x>
+     <y>710</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>slider_endTime</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>KardioPerfusion</receiver>
+   <slot>sliderEndValue_changed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>422</x>
+     <y>540</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>254</x>
+     <y>786</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tbl_gammaFit</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>KardioPerfusion</receiver>
+   <slot>tableGamma_clicked(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>404</x>
+     <y>499</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>217</x>
+     <y>587</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_enableGamma</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>KardioPerfusion</receiver>
+   <slot>cb_enableGamma_toggled()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>404</x>
+     <y>502</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>244</x>
+     <y>690</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
  <slots>
   <slot>on_btn_draw_clicked()</slot>
   <slot>on_btn_regionGrow_clicked()</slot>
@@ -721,5 +1044,9 @@
   <slot>on_btn_cannyEdges_clicked()</slot>
   <slot>on_btn_analyse_clicked()</slot>
   <slot>on_mprWidget_doubleClicked()</slot>
+  <slot>sliderStartValue_changed()</slot>
+  <slot>sliderEndValue_changed()</slot>
+  <slot>tableGamma_clicked(QModelIndex)</slot>
+  <slot>cb_enableGamma_toggled()</slot>
  </slots>
 </ui>

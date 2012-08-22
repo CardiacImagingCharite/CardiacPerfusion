@@ -29,11 +29,13 @@ class PerfusionAnalyzer
 		\param segment The segment, that is to be added. 
 		*/
 		void addSegment(BinaryImageTreeItem *segment);
-		///Gets a QwtPlot with the time attenuation curves
+		///Gets the model of the segmentlist
 		/*!
-		\return QWT plot
+		\return Segemnts
 		*/
 		SegmentListModel* getSegments();
+		///Calculates the time attenuation curves
+		void calculateTacValues();
 		///Gets the values of the TAC
 		/*!
 		\return Comma separated String containing the tac values. 
@@ -42,10 +44,14 @@ class PerfusionAnalyzer
 		std::string getTacValuesAsString();
 		///Abstract method for calculating the perfusion results.
 		virtual void calculatePerfusionResults() = 0;
+		///Gets the time at a specific index
+		/*!
+		\return Time as a double. 
+		*/
+		double getTime(int index);
+		int getImageCount();
 
-	private:
-
-		void calculateTacValues();
+	protected:
 
 		///A structure that represents a functor for comparing two times
 		struct CTImageTimeCompareFunctor {
@@ -56,11 +62,9 @@ class PerfusionAnalyzer
 		typedef std::set<CTImageTreeItem *, CTImageTimeCompareFunctor> ImageSet;
 		typedef std::vector< double > DoubleVector;
   
-
+		SegmentListModel *segments;
 		DoubleVector times;
 		ImageSet images;
-
-		SegmentListModel segments;
 
 		QWidget* parent;
 };

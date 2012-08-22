@@ -13,7 +13,8 @@
 //#include "tacdialog.h"
 #include <QMouseEvent>
 #include "mytabwidget.h"
-#include "mmid4Analyzer.h"
+//#include "mmid4Analyzer.h"
+#include "maxSlopeAnalyzer.h"
 
 
 #define VTK_CREATE(type, name) \
@@ -23,6 +24,9 @@
 class Ui_KardioPerfusion;
 class DicomSelectorDialog;
 class MultiPlanarReformatWidget;
+class QwtPlotMarker;
+class QwtPlotGrid;
+class QwtPlotPicker;
 
 /*! \class KardioPerfusion KardioPerfusion.h "KardioPerfusion.h"
  *  \brief This is the main class for the graphical user interface.
@@ -78,6 +82,8 @@ class KardioPerfusion : public QMainWindow
 //	void on_btn_cannyEdges_clicked();
 	///Action for clicking on Analyse-Button.
 	void on_btn_analyse_clicked();
+	///Action for clicking on PerfusionMap-Button
+	void on_btn_perfusionMap_clicked();
 	///Action for double clicking on a mprWidget.
 	void mprWidget_doubleClicked(MultiPlanarReformatWidget &w);
 	///Action for double clicking on a mytabwidget.
@@ -87,12 +93,22 @@ class KardioPerfusion : public QMainWindow
 	\param pos contains the position of the contextmenu.
 	*/
 	void treeViewContextMenu(const QPoint &pos);
-	///creates a segment for selected image
+	///creates a segment for selected image.
 	void createSegmentForSelectedImage();
-	///changes the color for the selected item
+	///changes the color for the selected item.
 	void changeColorForSelectedSegment();
-	///removes a selected Image from the image model
+	///removes a selected Image from the image model.
 	void removeSelectedImages();
+	///Slot will be called, if the value of the startSlider has changed.
+	void sliderStartValue_changed();
+	///Slot will be called, if the value of the endSlider has changed.
+	void sliderEndValue_changed();
+	///Slot will be called, if the table was clicked.
+	void tableGamma_clicked(const QModelIndex & index);
+	///Slot will be called, if the checkbutton was toggled.
+	void cb_enableGamma_toggled();
+
+	void on_btn_arteryInput_selected(const SegmentInfo *segment);
 
 protected:
 	///clears pending actions
@@ -133,6 +149,8 @@ private:
 	*/
 	void segmentHide(const BinaryImageTreeItem *segItem );
 
+//	void create4DImage(CTImageType4D* image, CTImageType4D::SizeType size);
+
 	CTImageTreeModel imageModel;
 	CTImageTreeItem::ConnectorHandle displayedCTImage;
 
@@ -144,8 +162,13 @@ private:
 
 	bool oneWindowIsMax;
 	//TacDialog* m_tacDialog;
-	MMID4Analyzer* mmid4Analyzer;
+	//MMID4Analyzer* mmid4Analyzer;
+	MaxSlopeAnalyzer* maxSlopeAnalyzer;
 
+	QwtPlotMarker *markerStart, *markerEnd;
+    QwtPlotMarker *markerPickerX, *markerPickerY;
+	QwtPlotGrid *grid;
+	QwtPlotPicker *picker;
 };
 
 #endif // KardioPerfusion_H

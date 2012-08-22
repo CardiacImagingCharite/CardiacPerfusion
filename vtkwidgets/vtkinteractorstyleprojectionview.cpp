@@ -29,6 +29,7 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkImageViewer2.h>
+#include <vtkLookupTable.h>
 
 #include <string>
 #include <iostream>
@@ -55,6 +56,7 @@ vtkInteractorStyleProjectionView::vtkInteractorStyleProjectionView():
   m_stateRButton(false),
   m_stateLButton(false),
   m_stateMButton(false),
+  m_stateCtrl(false),
   m_sliceIncrement(1.0),
   m_leftMBHint( NULL ),
   m_imageMapToWindowLevelColors(NULL),
@@ -77,6 +79,9 @@ void vtkInteractorStyleProjectionView::resetActions() {
   ActionZoom = addAction("Zoom", boost::bind(&vtkInteractorStyleProjectionView::Zoom, this, _2 ), ActionDispatch::MovingAction, ActionDispatch::UnRestricted );
   ActionPan = addAction("Pan", boost::bind(&vtkInteractorStyleProjectionView::Pan, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   ActionWindowLevel = addAction("Window/Level", boost::bind(&vtkInteractorStyleProjectionView::WindowLevelDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
+  
+  ActionWindowLUT = addAction("Window Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::WindowLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
+  ActionResizeLUT = addAction("Resize Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::ResizeLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   //m_leftButtonAction = ActionSlice;
   m_leftButtonAction = ActionWindowLevel;
   m_interAction = ActionNone;
@@ -152,15 +157,24 @@ void vtkInteractorStyleProjectionView::saveDisplayState(void) {
 
 /** dispatch Actions according to the State of the Mouse Buttons */
 void vtkInteractorStyleProjectionView::dipatchActions() {
-  saveDisplayState();
-  if ( m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = ActionSpin; return; }
-  if ( m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionRotate; return; }
-  if ( m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionZoom; return; }
-  if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = m_leftButtonAction; return; }
-  if (!m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = ActionPan; return; }
-  if (!m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionWindowLevel; return; }
-  if (!m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionSlice; return; }
-  if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
+	saveDisplayState();
+	if(!m_stateCtrl)
+	{
+		if ( m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = ActionSpin; return; }
+		if ( m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionRotate; return; }
+		if ( m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionZoom; return; }
+		if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = m_leftButtonAction; return; }
+		if (!m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = ActionPan; return; }
+		if (!m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionWindowLevel; return; }
+		if (!m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionSlice; return; }
+		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
+	}
+	else
+	{
+		if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionResizeLUT; return; }
+		if (!m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionWindowLUT; return; }
+		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
+	}
 }
 
 /** Cycles through all vtkInteractorStyleProjectionView::InterAction. */
@@ -389,6 +403,84 @@ void vtkInteractorStyleProjectionView::WindowLevelDelta( int dw/**<[in] delta wi
 	}
 }
 
+void vtkInteractorStyleProjectionView::WindowLUTDelta( int dw/**<[in] delta window*/, int dl/**<[in] delta level*/) {
+	if (m_colorMap && m_imageViewer && (dw || dl)) 
+	{
+		double *range = m_colorMap->GetRange();
+		
+		double ddw, ddl;
+
+		ddw = (double)dw / (double)m_imageViewer->GetSize()[0] * 10;
+		ddl = (double)dl / (double)m_imageViewer->GetSize()[0] * 10;
+
+		if(range[0] - ddw < range[1] + ddw)
+			range[0] -= ddw;
+		if(range[1] + ddw > range[0] - ddw)
+			range[1] += ddw;
+		
+		range[0] += ddl;
+		range[1] += ddl;
+
+		if(range)
+		{
+			
+			m_colorMap->SetRange(range);
+			m_colorMap->ForceBuild();
+			m_colorMap->SetTableValue(0,0,0,0,0);
+			m_colorMap->SetTableValue(m_colorMap->GetNumberOfColors()-1,0,0,0,0);
+			m_imageViewer->Render();
+
+			std::cout << "range[0]= " << range[0] << "; range[1]= " << range[1] << std::endl;
+		}
+
+		updateDisplay();
+	}
+}
+
+
+void vtkInteractorStyleProjectionView::ResizeLUTDelta( int dw/**<[in] delta window*/, int dl/**<[in] delta level*/) {
+	if (m_colorMap && m_imageViewer && (dw || dl)) 
+	{
+		double *alphaRange = m_colorMap->GetAlphaRange();
+		double ddw, ddl;
+		int *size = m_imageViewer->GetSize();
+		ddw = (double)dw / (double)size[0];
+		ddl = (double)dl / (double)size[1];
+
+		//if(alphaRange[0] - ddw > 0)
+			alphaRange[0] -= ddw;
+		//if(alphaRange[1] + ddw < 1)
+			alphaRange[1] += ddw;
+		
+		//if(alphaRange[0] + ddl > 0 && alphaRange[0] + ddl < 1
+		//	&& alphaRange[1] + ddl > 0 && alphaRange[1] + ddl < 1)
+		//{
+			alphaRange[0] += ddl;
+			alphaRange[1] += ddl;
+			
+		//}
+			alphaRange[0] = modulus(alphaRange[0],1);
+			alphaRange[1] = modulus(alphaRange[1],1);
+
+		if(alphaRange)
+		{
+			m_colorMap->SetAlphaRange(alphaRange);
+			m_colorMap->ForceBuild();
+			m_colorMap->SetTableValue(0,0,0,0,0);
+			m_colorMap->SetTableValue(m_colorMap->GetNumberOfColors()-1,0,0,0,0);
+			m_imageViewer->Render();
+
+			std::cout << "alpha range[0]= " << alphaRange[0] << "; alpha range[1]= " << alphaRange[1] << std::endl;
+		}
+		updateDisplay();
+	}
+}
+
+double vtkInteractorStyleProjectionView::modulus(double a, double b)
+{
+int result = static_cast<int>( a / b );
+return a - static_cast<double>( result ) * b;
+}
 
 void vtkInteractorStyleProjectionView::OnLeftButtonDown()
 {
@@ -435,8 +527,10 @@ void vtkInteractorStyleProjectionView::OnRightButtonUp()
   */
 void vtkInteractorStyleProjectionView::OnKeyDown()
 {
+	m_stateCtrl = this->GetInteractor()->GetControlKey();
+
   const char *keySym = this->GetInteractor()->GetKeySym();
-  if (this->GetInteractor()->GetControlKey()) {
+  if (m_stateCtrl) {
     if (keySymLeft == keySym) { Rotate(90,0); return; }
     if (keySymRight == keySym) { Rotate(-90,0); return; }
     if (keySymUp == keySym) { Rotate(0,90); return; }
@@ -444,6 +538,12 @@ void vtkInteractorStyleProjectionView::OnKeyDown()
   }
   if (keySymSpace == keySym) { CycleLeftButtonAction(); return; }
   cerr << __FILE__ << "[" << __LINE__ << "]:" << __FUNCTION__ << " Code:" << (int)this->GetInteractor()->GetKeyCode() << " Sym:" << this->GetInteractor()->GetKeySym() << endl;
+}
+
+void vtkInteractorStyleProjectionView::OnKeyUp()
+{
+	if(m_stateCtrl)
+		m_stateCtrl = false;
 }
 
 /** animate the Left Mouse Button hint*/

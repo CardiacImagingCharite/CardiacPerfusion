@@ -102,6 +102,13 @@ class BinaryImageTreeItem : public ITKVTKTreeItem< BinaryImageType > {
 	\param postGrowingAction This function is called after the regionGrow algorithm.
 	*/
     void regionGrow( float x, float y, float z, int threshold, boost::function<void()> postGrowingAction);
+	///Sets the pixel at a given position to 255
+	/*!
+	\param x The point of the seed on the x-axis.
+	\param y The point of the seed on the y-axis.
+	\param z The point of the seed on the z-axis.
+	*/
+	void setPixel(float x, float y, float z);
 
 	///Getter for the item color.
     /*!

@@ -36,6 +36,8 @@
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 
+#include "itkImageFileWriter.h"
+
 //Constructor
 CTImageTreeItem::CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict )
   :BaseClass(parent),HeaderFields(headerFields),dict(_dict),imageTime(-1) {
@@ -87,7 +89,7 @@ bool CTImageTreeItem::internalGetSegmentationValues( SegmentationValues &values)
 	ImageType::Pointer image = getITKImage();
 	if (image.IsNull()) 
 		return false;
-	
+
 	//get buffered region of the image
 	ImageType::RegionType ctregion = image->GetBufferedRegion();
 	//define an iterator for the binary segment
@@ -96,6 +98,22 @@ bool CTImageTreeItem::internalGetSegmentationValues( SegmentationValues &values)
 	BinaryImageTreeItem::ImageType::Pointer segment = values.segment->getITKImage();
 	if (segment.IsNull()) 
 		return false;
+
+/*	typedef itk::ImageFileWriter< ImageType >  WriterType;
+	WriterType::Pointer writer = WriterType::New();
+	writer->SetFileName( "test.dcm" );
+
+	writer->SetInput( image );
+		try 
+		{
+			writer->Update();
+		}
+		catch( itk::ExceptionObject & excep )
+		{
+			std::cerr << "Exception catched !" << std::endl;
+			std::cerr << excep << std::endl;
+		}
+*/
 	//create a binary iterator for the segment and its buffered region
 	BinaryIteratorType binIter( segment, segment->GetBufferedRegion() );
 	ImageType::PointType point;
@@ -445,6 +463,28 @@ BinaryImageTreeItem *CTImageTreeItem::generateSegment(void) {
 	return NULL;
 }
 
+//generate binary segment at actual CT image
+BinaryImageTreeItem *CTImageTreeItem::generateSegment(QString name) {
+	typedef itk::CastImageFilter< CTImageType, BinaryImageType> CastFilterType;
+	
+	BinaryImageTreeItem::ImageType::Pointer seg;
+	//if name is valid and dialog was closed with OK
+	if (!name.isEmpty()) {
+	    //create caster, that transforme the CT image to a binary image
+		CastFilterType::Pointer caster = CastFilterType::New();
+		caster->SetInput( getITKImage() );
+		caster->Update();
+		seg = caster->GetOutput();
+		//fills the segment with zeros
+		seg->FillBuffer(BinaryPixelOff);
+		//create a binary tree item as child of this CT image
+		BinaryImageTreeItem *result = new BinaryImageTreeItem(this, seg, name);
+		//insert child into the hierarchy
+		insertChild(result);
+		return result;
+	}
+	return NULL;
+}
 /*
 
 bool BinaryImageTreeItem::watershedParent(const BinaryImageTreeItem *includedSegment, const BinaryImageTreeItem *excludedSegment) {

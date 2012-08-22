@@ -38,7 +38,7 @@
 using namespace boost::lambda;
 
 const unsigned int MaximumNumberOfIterations = 1000;
-
+const double minAlpha = 1.000001;
 
 namespace itk {
 class GammaCostFunction : public itk::SingleValuedCostFunction  {
@@ -58,6 +58,11 @@ class GammaCostFunction : public itk::SingleValuedCostFunction  {
       myGamma.setSamples( samples );
       myGamma.setParameters( parameters[0], parameters[1], parameters[2], parameters[3], parameters[4] );
       double dist = myGamma.distanceToSamples();
+
+	  if (parameters[4] < minAlpha){
+		  if (parameters[4] <= 1.0) dist = std::numeric_limits< double >::max();
+		  else dist /= (1.0/(minAlpha-1.0))*(parameters[4]-1.0);
+	  }
       return dist;
     }
     protected:
@@ -143,7 +148,7 @@ double GammaVariate::distanceToSamples() const {
 
 
 double GammaVariate::findAlpha() {
-  const double minAlpha = 1.000001;
+
   if (t0max == 0) { alpha = minAlpha; return minAlpha; }
   std::vector<double> lnX;
   std::vector<double> lnY;
@@ -208,6 +213,7 @@ void GammaVariate::optimize() {
     std::cerr << err << std::endl;
   }
   p = optimizer->GetCurrentPosition();
+
   setParameters( p[0], p[1], p[2], p[3], p[4]);
 }
 

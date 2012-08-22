@@ -9,9 +9,11 @@
 #include <qwt_legend.h>
 #include <sstream>
 
-PerfusionAnalyzer::PerfusionAnalyzer(QWidget* p):
-	segments(p)
+#include "itkImageFileWriter.h"
+
+PerfusionAnalyzer::PerfusionAnalyzer(QWidget* p)
 {
+	segments = new SegmentListModel(p);
 	parent = p;
 }
 
@@ -26,12 +28,12 @@ void PerfusionAnalyzer::addImage(CTImageTreeItem *image)
 
 void PerfusionAnalyzer::addSegment(BinaryImageTreeItem *segment)
 {
-	segments.addSegment(segment);
+	segments->addSegment(segment);
 }
 
 SegmentListModel* PerfusionAnalyzer::getSegments()
 {
-	calculateTacValues();
+	//calculateTacValues();
 
 	//iterate over the list of segments
 /*	BOOST_FOREACH( SegmentInfo &currentSegment, segments) {
@@ -39,8 +41,10 @@ SegmentListModel* PerfusionAnalyzer::getSegments()
 		currentSegment.attachSampleCurves(plot);
 	}
 	*/
-	return &segments;
+	return segments;
 }
+
+
 
 std::string PerfusionAnalyzer::getTacValuesAsString()
 {
@@ -56,7 +60,7 @@ std::string PerfusionAnalyzer::getTacValuesAsString()
 
 	tacValueStream << "\r\n";
 
-	BOOST_FOREACH( SegmentInfo &currentSegment, segments) {
+	BOOST_FOREACH( SegmentInfo &currentSegment, *segments) {
 		//attach the curves for the actual segment to the plot
 		TimeDensityData* data = currentSegment.getSampleData();
 		for(int i = 0; i < data->size(); i++)
@@ -71,7 +75,7 @@ std::string PerfusionAnalyzer::getTacValuesAsString()
 void PerfusionAnalyzer::calculateTacValues()
 {
 	//if image list or segment list is empty, reject dialog and print warning
-	if (!images.size() || !segments.rowCount()) {
+	if (!images.size() || !segments->rowCount()) {
 		QMessageBox::warning(parent,QObject::tr("Analyse Error"),QObject::tr("Select at least one volume with at least one segment"));
 		return;
 	}
@@ -80,16 +84,33 @@ void PerfusionAnalyzer::calculateTacValues()
 	int imageIndex = 0;
 	//create object for segmentation values and set accuracy
 	SegmentationValues values; values.accuracy = SegmentationValues::SimpleAccuracy;
+
+/*	typedef itk::ImageFileWriter< CTImageTreeItem::ImageType >  WriterType;
+	WriterType::Pointer writer = WriterType::New();
+	writer->SetFileName( "test.dcm" );
+	*/
+
 	//iterate over all images
 	for(ImageSet::const_iterator ii = images.begin(); ii != images.end(); ++ii) {
 		const CTImageTreeItem *ct = *ii;
 		//calculate relative time of actual image
 		double relTime = ct->getTime() - firstTime;
 
+/*		writer->SetInput( ct->getITKImage() );
+		try 
+		{
+			writer->Update();
+		}
+		catch( itk::ExceptionObject & excep )
+		{
+			std::cerr << "Exception catched !" << std::endl;
+			std::cerr << excep << std::endl;
+		}
+*/
 		//add relative time to the list of times
 		times.push_back(relTime);
 		//iterate over all segments
-		BOOST_FOREACH( SegmentInfo &currentSegment, segments) {
+		BOOST_FOREACH( SegmentInfo &currentSegment, *segments) {
 			//add segment to the segmentation values 
 			values.segment = currentSegment.getSegment();
 			//get segmentation values and add the sample to the list of segments
@@ -107,4 +128,17 @@ void PerfusionAnalyzer::calculateTacValues()
 //functor for comparing two times
 bool PerfusionAnalyzer::CTImageTimeCompareFunctor::operator()(const argT &x, const argT &y) const {
   return (x->getTime() < y->getTime());
+}
+
+double PerfusionAnalyzer::getTime(int index)
+{
+	if(index < times.size())
+		return times[index];
+
+	return -1;
+}
+
+int PerfusionAnalyzer::getImageCount()
+{
+	return images.size();
 }

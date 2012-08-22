@@ -19,7 +19,7 @@
 #ifndef ITKVTKTREEITEM_H
 #define ITKVTKTREEITEM_H
 
-#include "treeitem.h"
+#include "treeitem.h" 
 #include "ctimagetreemodel.h"
 #include <itkImageToVTKImageFilter.h>
 #include <itkCommand.h>
@@ -77,6 +77,7 @@ class ITKVTKTreeItem : public TreeItem {
       typename ImageType::Pointer itkImage;
       typename ConnectorType::Pointer connector;
     };
+
     typedef VTKConnectorDataBasePtr ConnectorHandle;
    
     ITKVTKTreeItem(TreeItem * parent, ImagePointerType itkI = ImagePointerType())
@@ -102,16 +103,9 @@ class ITKVTKTreeItem : public TreeItem {
       if (typeid(BaseClass)==other) return true;
       return false;
     }
-    
-  protected:
-    inline typename ImageType::Pointer peekITKImage(void) const { 
-      ConnectorHandle tHand = weakConnector.lock();
-      if (tHand) {
-	return dynamic_cast<ConnectorData*>(tHand.get())->getITKImage();
-      }
-      return typename ImageType::Pointer();
-    }
-    inline void setITKImage(typename ImageType::Pointer image) { 
+
+	public:
+	inline void setITKImage(typename ImageType::Pointer image) { 
       if (image) {
 	ConnectorHandle connData( weakConnector.lock() );
 	if (!connData) {
@@ -124,7 +118,15 @@ class ITKVTKTreeItem : public TreeItem {
 	model->registerConnectorData(connData);
       }
     }
+
   protected:
+    inline typename ImageType::Pointer peekITKImage(void) const { 
+      ConnectorHandle tHand = weakConnector.lock();
+      if (tHand) {
+	return dynamic_cast<ConnectorData*>(tHand.get())->getITKImage();
+      }
+      return typename ImageType::Pointer();
+    }
 
   private:
     typedef boost::weak_ptr<VTKConnectorDataBasePtr::value_type> WeakConnectorHandle;

@@ -153,6 +153,14 @@ const TreeItem &CTImageTreeModel::getItem(const QModelIndex &index) const {
   return rootItem;
 }
 
+TreeItem &CTImageTreeModel::getRootItem() {
+  return rootItem;
+}
+
+const TreeItem &CTImageTreeModel::getRootItem() const {
+  return rootItem;
+}
+
 void CTImageTreeModel::appendFilename( const itk::MetaDataDictionary &dict, const std::string &fname) {
   std::string iUID;
   CTImageTreeItem::getUIDFromDict( dict, iUID );

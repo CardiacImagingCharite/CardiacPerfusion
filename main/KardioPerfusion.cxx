@@ -140,7 +140,26 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 		if (item.isA(typeid(CTImageTreeItem))) {
 			
 			if (displayedCTImage && &item == displayedCTImage->getBaseItem()) {
-				for(int i = 0; i < item.childCount(); i++)
+				setImage(NULL);
+			}
+			else
+			{
+				setImage(dynamic_cast<CTImageTreeItem*>(&item));
+			}
+		}else if(item.isA(typeid(BinaryImageTreeItem)))
+		{
+			BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item);
+			if(displayedSegments.find(SegItem->getVTKConnector()) == displayedSegments.end())
+			{
+				segmentShow(SegItem);
+			}
+			else 
+			{
+				segmentHide(SegItem);
+			}
+		}
+
+				/*for(int i = 0; i < item.childCount(); i++)
 				{
 					if(item.child(i).isA(typeid(BinaryImageTreeItem)))
 					{
@@ -172,9 +191,9 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 		//	} else {
 				//else hide it
 		//		segmentHide( SegItem );
+		*/
 		//	}
 		}
-	}
 }
 //set image to the widget
 void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
@@ -196,30 +215,6 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 		this->ui->mprView_ul->setImage( vtkImage );
 		this->ui->mprView_ur->setImage(vtkImage);
 		this->ui->mprView_lr->setImage(vtkImage);
-
-     /*	for(int i=0;i<3;i++)
-		{
-		m_pViewer[i]->SetInput(vtkImage);
-		m_pViewer[i]->GetRenderer()->ResetCamera();
-		m_pViewer[i]->SetColorLevel(128);
-		m_pViewer[i]->SetColorWindow(254);
-		m_pViewer[i]->Render();
-		}
-
-
-
-		m_pViewer[0]->SetSliceOrientationToXY();
-		m_pViewer[1]->SetSliceOrientationToXZ();
-		m_pViewer[2]->SetSliceOrientationToYZ();
-
-		for(int i = 0; i < 3; i++)
-		{
-		m_pViewer[i]->Render();
-		}
-
-		setCustomStyle();
-		*/
-		//volumeView->setImage( vtkImage );
 
 
 		if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->clearActiveDown();

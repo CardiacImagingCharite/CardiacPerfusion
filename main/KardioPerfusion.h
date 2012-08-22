@@ -71,6 +71,7 @@ class KardioPerfusion : public QMainWindow
 	\param index contains the double clicked index.
 	*/
 	void on_treeView_doubleClicked(const QModelIndex &index);
+
 	///Action for changing the selection of the treeView.
 	/*! 
 	\param selected contains the selected elements.

@@ -20,6 +20,10 @@
 #define VTKINTERACTORSTYLEPROJECTIONVIEW_H
 
 #include <vtkInteractorStyle.h>
+#include <vtkPointPicker.h>
+#include <vtkImageActor.h>
+#include <vtkImageViewer2.h>
+#include <vtkSmartPointer.h>
 #include "vtkinteractoractiondispatch.h"
 
 
@@ -27,9 +31,9 @@ class vtkImageMapToWindowLevelColors;
 class vtkMatrix4x4;
 class vtkTextActor;
 class vtkTransform;
-class vtkImageViewer2;
 class vtkLookupTable;
-
+class vtkCornerAnnotation;
+class vtkImageData;
 
 /// Interactor Style specific for Projection Views.
 /** This class should be used as interaction style for projection views.
@@ -71,8 +75,10 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   ///@{
   void SetImageMapToWindowLevelColors(vtkImageMapToWindowLevelColors *map/**<[in]*/) { m_imageMapToWindowLevelColors = map; }
   void SetOrientationMatrix(vtkMatrix4x4 *orientation/**<[in]*/) { m_orientation = orientation; }
-  void SetImageViewer(vtkImageViewer2 * viewer) { m_imageViewer = viewer; }
-  void SetColorMap(vtkLookupTable* lut) {m_colorMap = lut; }
+  void SetImageViewer(vtkImageViewer2 * viewer) { m_imageViewer = viewer;}
+  void SetColorMap(vtkLookupTable* lut) { m_colorMap = lut; }
+  void SetAnnotation(vtkCornerAnnotation* annotation);
+  void SetOverlayImage(vtkImageData* overlay) { m_OverlayImage = overlay; }
 //  void Set
   ///@}
   void CycleLeftButtonAction();
@@ -84,6 +90,7 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   void Pan( int dx, int dy );
   void WindowLUTDelta(int dx, int dy);
   void ResizeLUTDelta(int dx, int dy);
+  void PickColor(); 
 
   int addAction(const std::string &label, const ActionSignal::slot_type &slot,
     ActionDispatch::ActionType atype, ActionDispatch::RestrictionType restrict);
@@ -102,6 +109,7 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   void saveDisplayState(void);
   void updateDisplay(void);
   double modulus(double a, double b);
+ 
 
   struct DisplayState {
     int window;
@@ -120,7 +128,7 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   ActionListType m_actionList;
   int m_interAction; ///< selected interaction due to mouse button presses - determined by dipatchActions()
   int m_leftButtonAction; ///< selected interaction for the left mouse button - changed by pressing Space in CycleLeftButtonAction()
-  int ActionFirst, ActionSpin, ActionRotate, ActionZoom, ActionPan, ActionWindowLevel, ActionSlice, ActionNone, ActionResizeLUT, ActionWindowLUT;
+  int ActionFirst, ActionSpin, ActionRotate, ActionZoom, ActionPan, ActionWindowLevel, ActionSlice, ActionNone, ActionResizeLUT, ActionWindowLUT, ActionColorPick;
   
   /** @name Mouse Button Flags
       State of the Mouse Buttons (Pressed?) */
@@ -137,6 +145,9 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   vtkImageMapToWindowLevelColors *m_imageMapToWindowLevelColors; ///< Mapper (set external via SetImageMapToWindowLevelColors()) for Window and Level (changed via vtkInteractorStyleProjectionView::ActionWindowLevel)
   vtkImageViewer2 *m_imageViewer;
   vtkLookupTable *m_colorMap; 
+  vtkImageData* m_OverlayImage;
+  vtkCornerAnnotation* m_annotation;
+  vtkSmartPointer<vtkPointPicker> m_picker;
   vtkMatrix4x4 *m_orientation; ///< the Transformation Matrix of the displayed Data
   DisplayState m_initialState; ///< Display state at the beginning of an action
   private:

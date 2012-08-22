@@ -71,3 +71,6 @@ Ankh.NoLoad
 
 #Perfusion Project
 *.perfproj
+
+#git merging files
+*.orig

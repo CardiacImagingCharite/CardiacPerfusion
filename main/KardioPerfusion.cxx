@@ -194,23 +194,14 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 		//check if item is a CT image
 		if (item.isA(typeid(CTImageTreeItem))) {
 			
-			if (displayedCTImage && &item == displayedCTImage->getBaseItem()) {
-				setImage(NULL);
-			}
-			else
+			setImage(dynamic_cast<CTImageTreeItem*>(&item));
+			for(int i = 0; i < item.childCount(); i++)
 			{
-				setImage(dynamic_cast<CTImageTreeItem*>(&item));
-			}
-		}else if(item.isA(typeid(BinaryImageTreeItem)))
-		{
-			BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item);
-			if(displayedSegments.find(SegItem->getVTKConnector()) == displayedSegments.end())
-			{
-				segmentShow(SegItem);
-			}
-			else 
-			{
-				segmentHide(SegItem);
+				if(item.child(i).isA(typeid(BinaryImageTreeItem)))
+				{
+					BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item.child(i));
+					segmentShow(SegItem);
+				}
 			}
 		}
 
@@ -250,6 +241,39 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 		//	}
 		}
 }
+//Callback if double click on treeview occurs
+void KardioPerfusion::on_treeView_doubleClicked(const QModelIndex &index) {
+	//check if the index is valid
+	if (index.isValid()) {
+		//get clicked item
+		TreeItem &item = imageModel.getItem( index );
+		if(item.isA(typeid(BinaryImageTreeItem)))
+		{
+			BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item);
+			if(displayedSegments.find(SegItem->getVTKConnector()) == displayedSegments.end())
+			{
+				segmentShow(SegItem);
+			}
+			else 
+			{
+				segmentHide(SegItem);
+			}
+		}
+		else if(item.isA(typeid(RealImageTreeItem)))
+		{
+			RealImageTreeItem *PerfusionItem = dynamic_cast<RealImageTreeItem*>(&item);
+			if(displayedPerfusionMaps.find(PerfusionItem->getVTKConnector()) == displayedPerfusionMaps.end())
+			{
+				perfusionMapShow(PerfusionItem);
+			}
+			else 
+			{
+				perfusionMapHide(PerfusionItem);
+			}
+		}
+	}
+}
+
 //set image to the widget
 void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 	vtkImageData *vtkImage = NULL;
@@ -651,6 +675,26 @@ void KardioPerfusion::segmentShow( const BinaryImageTreeItem *segItem ) {
   }
 }
 
+//show a segment at the mpr widget
+void KardioPerfusion::perfusionMapShow( const RealImageTreeItem *perfItem ) {
+	if (perfItem) {
+		//if (displayedCTImage && displayedCTImage->getBaseItem() != perfItem->parent()) {
+		//	setImage(dynamic_cast<const CTImageTreeItem*>(perfItem->parent()));
+		//}
+
+		//create ITK VTK connector
+		RealImageTreeItem::ConnectorHandle perfusionMapConnector = perfItem->getVTKConnector();
+		//add overlay at the widget
+		this->ui->mprView_ul->addColoredOverlay( perfusionMapConnector->getVTKImageData());
+		this->ui->mprView_ur->addColoredOverlay( perfusionMapConnector->getVTKImageData());
+		this->ui->mprView_lr->addColoredOverlay( perfusionMapConnector->getVTKImageData());
+		
+		//add segment to the list of displayed semgents and set actual segment as active
+		displayedPerfusionMaps.insert( perfusionMapConnector );
+		perfItem->setActive();
+  }
+}
+
 //callback for context menu at specific position
 void KardioPerfusion::treeViewContextMenu(const QPoint &pos) {
 	//get index for position
@@ -741,6 +785,26 @@ void KardioPerfusion::segmentHide( const BinaryImageTreeItem *segItem ) {
 		}
 		//set segment to inactive
 		segItem->setActive(false);
+	}
+}
+
+//hide perfusion map from widget
+void KardioPerfusion::perfusionMapHide( const RealImageTreeItem *perfItem ) {
+	if (perfItem) {
+		// clear pending action
+		clearPendingAction();
+		//find segment in the list of displayed segments
+		DisplayedPerfusionMapContainer::const_iterator it = displayedPerfusionMaps.find( perfItem->getVTKConnector() );
+		//if segment was found
+		if (it != displayedPerfusionMaps.end()) {
+			//remove overlay from widget and erase it from the list of displayed segments
+			this->ui->mprView_ul->removeColoredOverlay( (*it)->getVTKImageData() );
+			this->ui->mprView_ur->removeColoredOverlay( (*it)->getVTKImageData() );
+			this->ui->mprView_lr->removeColoredOverlay( (*it)->getVTKImageData() );
+			displayedPerfusionMaps.erase( it );
+		}
+		//set segment to inactive
+		perfItem->setActive(false);
 	}
 }
 

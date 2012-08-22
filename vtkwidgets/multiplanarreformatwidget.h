@@ -41,6 +41,7 @@ class vtkBinaryImageToColor;
 //class vtkImageActor;
 //class vtkRenderer;
 class vtkMatrix4x4;
+class vtkCornerAnnotation;
 
 
 /*! \class MultiPlanarReformatWidget MultiPlanarReformatWidget.h "MultiPlanarReformatWidget.h"
@@ -143,6 +144,7 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	//vtkImageActor *m_actor; ///< vtkActor which actually displays the resliced volume
 	//vtkRenderer *m_renderer; ///< the used renderer
 	vtkSmartPointer<vtkImageViewer2> m_imageViewer; ///< the uses image viewer
+	vtkSmartPointer<vtkCornerAnnotation> m_annotation;
 	vtkMatrix4x4 *m_reslicePlaneTransform; ///< Tranformation Matrix for the Reslicing Plane
 	vtkSmartPointer<vtkInteractorStyleProjectionView> m_interactorStyle; ///< special InteractorStyle for Projected Volumes
 	int m_orientation;

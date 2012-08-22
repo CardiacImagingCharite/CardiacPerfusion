@@ -33,6 +33,8 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 #include <vtkCallbackCommand.h>
+#include <vtkCornerAnnotation.h>
+#include <vtkTextProperty.h>
 
 #include <algorithm>
 #include <boost/bind.hpp>
@@ -48,6 +50,7 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
   m_reslice(vtkImageReslice::New()),
   m_colormap(vtkImageMapToWindowLevelColors::New()),
   m_imageViewer(vtkSmartPointer<vtkImageViewer2>::New()),
+  m_annotation(vtkSmartPointer<vtkCornerAnnotation>::New()),
   m_reslicePlaneTransform(vtkMatrix4x4::New()),
   m_interactorStyle(vtkSmartPointer<vtkInteractorStyleProjectionView>::New())
 {
@@ -104,6 +107,15 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	m_interactorStyle->SetImageMapToWindowLevelColors( m_colormap );
 	m_interactorStyle->SetOrientationMatrix( m_reslicePlaneTransform );
 	m_interactorStyle->SetImageViewer(m_imageViewer);
+
+	m_annotation->SetLinearFontScaleFactor( 2 );
+	m_annotation->SetNonlinearFontScaleFactor( 1 );
+	m_annotation->SetMaximumFontSize( 12 );
+	//m_annotation->SetText( 0, "Off Image" );
+	m_annotation->SetText( 2, "<window>\n<level>" );
+	m_annotation->GetTextProperty()->SetColor( 1,0,0);
+
+	m_interactorStyle->SetAnnotation(m_annotation);
 
 	//vtkSmartPointer<vtkRenderWindowInteractor> interactor = vtkSmartPointer<vtkRenderWindowInteractor>::New();//this->GetRenderWindow()->GetInteractor();
 	vtkSmartPointer<vtkRenderWindowInteractor> interactor = this->GetRenderWindow()->GetInteractor();
@@ -225,20 +237,20 @@ void MultiPlanarReformatWidget::setOrientation(int orientation)
 	*/
 	static double axialElements[16] = {
 	         1, 0, 0, 0,
-	         0,-1, 0, 0,
+	         0, 1, 0, 0,
 	         0, 0, 1, 0,
 	         0, 0, 0, 1 };
 
 	static double coronalElements[16] = {
 	         1, 0, 0, 0,
-	         0, 0,-1, 0,
-	         0, 1, 0, 0,
+	         0, 0, 1, 0,
+	         0,-1, 0, 0,
 	         0, 0, 0, 1 };
 
 	static double sagittalElements[16] = {
 			0, 0,-1, 0,
 			1, 0, 0, 0,
-			0, 1, 0, 0,
+			0,-1, 0, 0,
 			0, 0, 0, 1 };
 
 	vtkMatrix4x4* axialMatrix = vtkMatrix4x4::New();
@@ -301,19 +313,29 @@ int MultiPlanarReformatWidget::addColoredOverlay(vtkImageData *image, const Acti
     int actionHandle;
     boost::shared_ptr< vtkColoredImageOverlay > overlay(
 		new vtkColoredImageOverlay( m_imageViewer->GetRenderer(), m_interactorStyle, dispatch, image, m_reslicePlaneTransform, actionHandle ) );
-    m_coloredOverlays.insert( ColoredOverlayMapType::value_type( image, overlay ) );
+    
+	m_coloredOverlays.insert( ColoredOverlayMapType::value_type( image, overlay ) );
     overlay->resize( this->size().width(), this->size().height() );
+	//overlay->showLegend();
+
     this->update();
 
 	m_interactorStyle->SetColorMap(overlay->getColorMap());
+	m_interactorStyle->SetOverlayImage(image);
     return actionHandle;
   }
   return -1;
 }
 
 void MultiPlanarReformatWidget::removeColoredOverlay(vtkImageData *image) {
-  m_coloredOverlays.erase(image);
-  this->update();
+	
+	ColoredOverlayMapType::const_iterator it = m_coloredOverlays.find( image );
+		//if segment was found
+	if (it != m_coloredOverlays.end()) {
+		it->second->hideLegend();
+	}
+	m_coloredOverlays.erase(image);
+	this->update();
 }
 
 void MultiPlanarReformatWidget::activateOverlayAction(vtkImageData *image) {

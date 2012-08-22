@@ -64,27 +64,26 @@ vtkColoredImageOverlay::vtkColoredImageOverlay( vtkRenderer *renderer,
 	m_reslice->SetOutputSpacing(1,1,1);
 
 	//create legend for LUT
-	vtkSmartPointer<vtkScalarBarActor> legend =
-		vtkSmartPointer<vtkScalarBarActor>::New();
+	m_legend = vtkSmartPointer<vtkScalarBarActor>::New();
   
 	//create legend for the LUT
-	legend->SetLookupTable(m_colorMap);
-	legend->SetTitle("Values");
-	legend->SetOrientationToHorizontal();
-	legend->GetPositionCoordinate()->SetCoordinateSystemToNormalizedViewport();
-	legend->GetPositionCoordinate()->SetValue(0.614, 0.94);
-	legend->SetWidth(0.3);
-	legend->SetHeight(0.1);
+	m_legend->SetLookupTable(m_colorMap);
+	m_legend->SetTitle("Values");
+	m_legend->SetOrientationToHorizontal();
+	m_legend->GetPositionCoordinate()->SetCoordinateSystemToNormalizedViewport();
+    m_legend->GetPositionCoordinate()->SetValue(0.57, 0.87);
+    m_legend->SetWidth(0.4);
+    m_legend->SetHeight(0.15);
 
 	if (m_renderer)
 	{
-	m_renderer->AddActor(m_actor);
-	m_renderer->AddActor(legend);
+		m_renderer->AddActor(m_actor);
+		m_renderer->AddActor(m_legend);
 	}
 
 	if (action.valid) {
-	action.sig->connect( boost::bind(&vtkImageReslice::Modified, m_reslice) );
-	this->actionHandle = interactorStyle->addAction(action);
+		action.sig->connect( boost::bind(&vtkImageReslice::Modified, m_reslice) );
+		this->actionHandle = interactorStyle->addAction(action);
 	}
 	actionHandle = this->actionHandle;
 }
@@ -114,3 +113,14 @@ void vtkColoredImageOverlay::activateAction() {
 bool vtkColoredImageOverlay::operator<(const vtkColoredImageOverlay &other) const {
   return this->m_image < other.m_image;
 }
+
+void vtkColoredImageOverlay::hideLegend()
+{
+	this->m_renderer->RemoveActor(m_legend);
+}
+
+void vtkColoredImageOverlay::showLegend()
+{
+	this->m_renderer->AddActor(m_legend);
+}
+

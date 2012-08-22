@@ -15,6 +15,7 @@
 #include "mytabwidget.h"
 //#include "mmid4Analyzer.h"
 #include "maxSlopeAnalyzer.h"
+#include "realimagetreeitem.h"
 
 
 #define VTK_CREATE(type, name) \
@@ -65,6 +66,11 @@ class KardioPerfusion : public QMainWindow
 	\param index contains the clicked index.
 	*/
 	void on_treeView_clicked(const QModelIndex &index);
+	///Action for double clicking on treeview.
+	/*!
+	\param index contains the double clicked index.
+	*/
+	void on_treeView_doubleClicked(const QModelIndex &index);
 	///Action for changing the selection of the treeView.
 	/*! 
 	\param selected contains the selected elements.
@@ -148,6 +154,16 @@ private:
 	\param segItem contains a pointer to the BinaryImageTreeItem
 	*/
 	void segmentHide(const BinaryImageTreeItem *segItem );
+	///show a perfusion map
+	/*! 
+	\param perfItem contains a pointer to the BinaryImageTreeItem
+	*/
+	void perfusionMapShow(const RealImageTreeItem *perfItem );
+	///hide a perfusion map
+	/*! 
+	\param perfItem contains a pointer to the BinaryImageTreeItem
+	*/
+	void perfusionMapHide(const RealImageTreeItem *perfItem );
 
 //	void create4DImage(CTImageType4D* image, CTImageType4D::SizeType size);
 
@@ -156,6 +172,10 @@ private:
 
 	typedef std::set< BinaryImageTreeItem::ConnectorHandle > DisplayedSegmentContainer;
     DisplayedSegmentContainer displayedSegments;
+
+	typedef std::set< RealImageTreeItem::ConnectorHandle > DisplayedPerfusionMapContainer;
+    DisplayedPerfusionMapContainer displayedPerfusionMaps;
+
 
 	static const DicomTagList CTModelHeaderFields;
     int pendingAction;

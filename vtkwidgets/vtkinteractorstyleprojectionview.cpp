@@ -30,6 +30,14 @@
 #include <vtkRenderer.h>
 #include <vtkImageViewer2.h>
 #include <vtkLookupTable.h>
+#include <vtkCornerAnnotation.h>
+#include <vtkPropPicker.h>
+#include <vtkSmartPointer.h>
+#include <vtkAssemblyPath.h>
+#include <vtkPointData.h>
+#include <vtkCell.h>
+#include <vtkMath.h>
+#include <vtkInteractorObserver.h>
 
 #include <string>
 #include <iostream>
@@ -38,6 +46,7 @@
 
 #include <vtkRenderWindow.h>
 #include <vtkRendererCollection.h>
+#include "vtkcoloredimageoverlay.h"
 
 using namespace std;
 
@@ -61,7 +70,8 @@ vtkInteractorStyleProjectionView::vtkInteractorStyleProjectionView():
   m_leftMBHint( NULL ),
   m_imageMapToWindowLevelColors(NULL),
   m_orientation(NULL),
-  tempTransform( vtkTransform::New() )
+  tempTransform( vtkTransform::New() ),
+  m_OverlayImage(NULL)
 {
   State = VTKIS_NONE;
   UseTimers = 1;
@@ -82,6 +92,9 @@ void vtkInteractorStyleProjectionView::resetActions() {
   
   ActionWindowLUT = addAction("Window Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::WindowLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   ActionResizeLUT = addAction("Resize Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::ResizeLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
+ 
+  ActionColorPick = addAction("", boost::bind(&vtkInteractorStyleProjectionView::PickColor, this), ActionDispatch::MovingAction, ActionDispatch::Restricted );
+  
   //m_leftButtonAction = ActionSlice;
   m_leftButtonAction = ActionWindowLevel;
   m_interAction = ActionNone;
@@ -161,11 +174,11 @@ void vtkInteractorStyleProjectionView::dipatchActions() {
 	if(!m_stateCtrl)
 	{
 		if ( m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = ActionSpin; return; }
-		if ( m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionRotate; return; }
+		if ( m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
 		if ( m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionZoom; return; }
 		if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = m_leftButtonAction; return; }
 		if (!m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = ActionPan; return; }
-		if (!m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionWindowLevel; return; }
+		if (!m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionRotate; return; }
 		if (!m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionSlice; return; }
 		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
 	}
@@ -173,7 +186,7 @@ void vtkInteractorStyleProjectionView::dipatchActions() {
 	{
 		if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionResizeLUT; return; }
 		if (!m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionWindowLUT; return; }
-		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
+		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionColorPick; return; }
 	}
 }
 
@@ -375,12 +388,14 @@ void vtkInteractorStyleProjectionView::Rotate( int theta/**<[in] angle around ve
 
 /** slice the viewed object */
 void vtkInteractorStyleProjectionView::Slice(int dpos/**<[in] delta in position perpendicular to the viewing direction*/) {
-  if (m_orientation) {
+  
+if (m_orientation) {
     tempTransform->SetMatrix( m_orientation );
     tempTransform->Translate(0, 0, dpos* m_sliceIncrement);
     tempTransform->GetMatrix( m_orientation );
     updateDisplay();
   }
+  
 }
 
 /** change Window and Level */
@@ -529,14 +544,22 @@ void vtkInteractorStyleProjectionView::OnKeyDown()
 {
 	m_stateCtrl = this->GetInteractor()->GetControlKey();
 
-  const char *keySym = this->GetInteractor()->GetKeySym();
-  if (m_stateCtrl) {
-    if (keySymLeft == keySym) { Rotate(90,0); return; }
-    if (keySymRight == keySym) { Rotate(-90,0); return; }
-    if (keySymUp == keySym) { Rotate(0,90); return; }
-    if (keySymDown == keySym) { Rotate(0,-90); return; }
+  //const char *keySym = this->GetInteractor()->GetKeySym();
+	std::string keySym = this->GetInteractor()->GetKeySym();
+
+	if (!m_stateCtrl) {
+		if (keySymLeft.compare(keySym) == 0) { Rotate(90,0); return; }
+		if (keySymRight.compare(keySym) == 0) { Rotate(-90,0); return; }
+		if (keySymUp.compare(keySym) == 0) { Rotate(0,90); return; }
+		if (keySymDown.compare(keySym) == 0) { Rotate(0,-90); return; }
+  
+		if (keySymSpace.compare(keySym) == 0) { CycleLeftButtonAction(); return; }
+  
+		if(keySym.compare("p") == 0)
+			PickColor();
   }
-  if (keySymSpace == keySym) { CycleLeftButtonAction(); return; }
+
+
   cerr << __FILE__ << "[" << __LINE__ << "]:" << __FUNCTION__ << " Code:" << (int)this->GetInteractor()->GetKeyCode() << " Sym:" << this->GetInteractor()->GetKeySym() << endl;
 }
 
@@ -562,4 +585,64 @@ void vtkInteractorStyleProjectionView::OnTimer()
   } else {
     StopAnimate();
   }
+}
+
+void vtkInteractorStyleProjectionView::SetAnnotation(vtkCornerAnnotation* annotation)
+{
+	m_annotation = annotation;
+	if(m_imageViewer)
+	{
+		m_imageViewer->GetRenderer()->AddViewProp(m_annotation);
+	}
+}
+
+void vtkInteractorStyleProjectionView::PickColor()
+{
+	m_picker = vtkSmartPointer<vtkPointPicker>::New();
+	
+	m_picker->SetTolerance(0.0);
+	m_imageViewer->GetRenderWindow()->GetInteractor()->SetPicker(m_picker);
+//	m_picker->AddPickList(m_imageViewer->GetImageActor());
+//	m_picker->PickFromListOn();
+
+	int x,y;
+	double coord[4] = {0};
+	int perfusionIndex;
+	// Pick at the mouse location provided by the interactor
+	if (GetEventPosition(x,y)) 
+	{
+		m_picker->Pick( x, y , 0.0, m_imageViewer->GetRenderer() );
+	
+		vtkRenderer *ren = //this->GetCurrentRenderer();
+		GetInteractor()->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
+		if (ren) {
+		ren->SetDisplayPoint( x, y, 0);// 0.38 );
+		ren->DisplayToWorld();
+		ren->GetWorldPoint( coord );
+		coord[2] = 0.0;
+		m_orientation->MultiplyPoint(coord, coord);
+
+		perfusionIndex = m_OverlayImage->FindPoint(coord);
+      }
+	}
+
+	//i(jk) = (x(yz) - origin) / spacing
+	std::stringstream message;
+	
+    // We have to handle different number of scalar components.
+    switch (m_OverlayImage->GetNumberOfScalarComponents()) {
+        case 1:
+        {
+              // Get a shortcut to the raw pixel data. This should be further
+              // updated to check if your data is signed or not, but for this
+              // example we'll just assume it's unsigned. You should also check
+              // the type of your data too (unsigned char, unsigned short, etc).
+			float* pPix = (float*)m_OverlayImage->GetScalarPointer();
+			float usPix = pPix[perfusionIndex];
+			message << "Perfusion = [" << usPix << "],\nCoordinates(" << coord[0] << "," << coord[1] << "," << coord[2] << ")";
+        }
+        break;
+	}
+
+	m_annotation->SetText( 0, message.str().c_str() );
 }

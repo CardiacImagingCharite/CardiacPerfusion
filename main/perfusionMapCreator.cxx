@@ -1,3 +1,20 @@
+/*
+    This file is part of KardioPerfusion.
+    Copyright 2012 Christian Freye
+
+    KardioPerfusion is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    KardioPerfusion is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with KardioPerfusion.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "perfusionMapCreator.h"
 #include <itkShrinkImageFilter.h>
@@ -122,21 +139,21 @@ RealImageTreeItem::ImageType::Pointer PerfusionMapCreator::getPerfusionMap(CTIma
 	//Get perfusion results
 	//perfusionFilter->Update();
 	
-	typedef itk::ResampleImageFilter<RealImageTreeItem::ImageType, RealImageTreeItem::ImageType> ResampleFilterType;
+/*	typedef itk::ResampleImageFilter<RealImageTreeItem::ImageType, RealImageTreeItem::ImageType> ResampleFilterType;
 	ResampleFilterType::Pointer resizeFilter = ResampleFilterType::New();
 
 	typedef itk::IdentityTransform<double> TransformFilterType;
 	TransformFilterType::Pointer transformFilter = TransformFilterType::New();
 
-	typedef itk::WindowedSincInterpolateImageFunction<RealImageTreeItem::ImageType, 2> InterpolatorType;
-//	typedef itk::BSplineInterpolateImageFunction<RealImageTreeItem::ImageType> InterpolatorType;
+	//typedef itk::WindowedSincInterpolateImageFunction<RealImageTreeItem::ImageType, 2> InterpolatorType;
+	typedef itk::BSplineInterpolateImageFunction<RealImageTreeItem::ImageType> InterpolatorType;
 	//typedef itk::LinearInterpolateImageFunction<RealImageTreeItem::ImageType> InterpolatorType;
 	InterpolatorType::Pointer interpolator = InterpolatorType::New();
 
 	//transformFilter->Scale(0.10);
 	transformFilter->SetIdentity();
 
-	//interpolator->SetSplineOrder(3);
+	interpolator->SetSplineOrder(2);
 	resizeFilter->SetInterpolator(interpolator);
 	resizeFilter->SetDefaultPixelValue(100);
 	
@@ -149,10 +166,10 @@ RealImageTreeItem::ImageType::Pointer PerfusionMapCreator::getPerfusionMap(CTIma
 	resizeFilter->SetInput(perfusionFilter->GetOutput());
 
 	resizeFilter->Update();
-
+	*/
 	//assign them to an image
 	RealImageTreeItem::ImageType::Pointer realImage = RealImageTreeItem::ImageType::New();
-	realImage = resizeFilter->GetOutput();
+	realImage = perfusionFilter->GetOutput();
 
 	//------------------------write image to filesystem---------------------------
 	//Create output image

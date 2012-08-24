@@ -1,11 +1,20 @@
 /*
- * Copyright 2007 Sandia Corporation.
- * Under the terms of Contract DE-AC04-94AL85000, there is a non-exclusive
- * license for use of this work by or on behalf of the
- * U.S. Government. Redistribution and use in source and binary forms, with
- * or without modification, are permitted provided that this Notice and any
- * statement of authorship are reproduced on all copies.
- */
+    This file is part of KardioPerfusion.
+    Copyright 2012 Christian Freye
+
+    KardioPerfusion is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    KardioPerfusion is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with KardioPerfusion.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "ui_KardioPerfusion.h"
 #include "KardioPerfusion.h"
@@ -323,31 +332,6 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 		if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->setActive();
 	}
 }
-
-
-/*void KardioPerfusion::setCustomStyle()
-{
-	// An interactor and a style
-    vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor[4];
-
-	vtkSmartPointer<MyTestInteractorStyle> style[3]; 
-
-	//get the output of the itkKWImage in the VTK format
-	for(int i = 0; i < 3; i++)
-	{
-		renderWindowInteractor[i] = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-		style[i] =  vtkSmartPointer<MyTestInteractorStyle>::New();
-		
-		m_pViewer[i]->SetupInteractor(renderWindowInteractor[i]);
-		style[i]->setImageViewer(m_pViewer[i]);
-
-		renderWindowInteractor[i]->SetInteractorStyle(style[i]);
-		style[i]->SetCurrentRenderer(m_pViewer[i]->GetRenderer());	
-
-	    renderWindowInteractor[i]->Initialize();
-	}
-}
-*/
 
 //callback for draw button
 void KardioPerfusion::on_btn_draw_clicked()

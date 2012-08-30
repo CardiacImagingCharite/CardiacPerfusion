@@ -1,9 +1,8 @@
 /*
-    This file is part of KardioPerfusion.
     Copyright 2012 Christian Freye
+	Copyright 2010 Henning Meyer
 
-	This file was part of perfusionkit (Copyright 2010 Henning Meyer)
-	and was modified and extended to fit the actual needs. 
+	This file is part of KardioPerfusion.
 
     KardioPerfusion is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,6 +16,21 @@
 
     You should have received a copy of the GNU General Public License
     along with KardioPerfusion.  If not, see <http://www.gnu.org/licenses/>.
+
+    Diese Datei ist Teil von KardioPerfusion.
+
+    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    der GNU General Public License, wie von der Free Software Foundation,
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
+    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+
+    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
+    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License für weitere Details.
+
+    Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
+    Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
 */
 
 #ifndef MULTIPLANARREFORMATWIDGET_H
@@ -77,6 +91,13 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	\param dispatch (optional) Contains the associated action. Default creates new action.
 	*/
 	int addColoredOverlay(vtkImageData *image, const ActionDispatch &dispatch = ActionDispatch() );
+	///Adds a colored overlay to the actual image
+	/*!
+	\param overlay Contains a pointer to an overlay.
+	*/
+	int addColoredOverlay(vtkImageData *image, vtkLookupTable* customColorMap, const ActionDispatch &dispatch = ActionDispatch());
+
+
 	///Adds an action to the action list.
 	/*!
 	\param dispatch The action that is to be added.
@@ -124,6 +145,14 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	\param orientation A number that appoints the desired orientation
 	*/
 	void setOrientation(int orientation);
+
+	///Gets the colorMap of the PerfusionMap.
+	/*!
+	\return colormap.
+	*/
+	vtkLookupTable* getOverlayColorMap();
+	///Refresh the view.
+	void refreshView();
 
 	void showCircle(float x, float y, float z, int radius);
   

@@ -1,6 +1,7 @@
 /*
-    This file is part of KardioPerfusion.
     Copyright 2012 Christian Freye
+
+	This file is part of KardioPerfusion.
 
     KardioPerfusion is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,6 +15,21 @@
 
     You should have received a copy of the GNU General Public License
     along with KardioPerfusion.  If not, see <http://www.gnu.org/licenses/>.
+
+    Diese Datei ist Teil von KardioPerfusion.
+
+    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    der GNU General Public License, wie von der Free Software Foundation,
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
+    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+
+    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
+    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License für weitere Details.
+
+    Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
+    Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
 */
 
 #include "ui_KardioPerfusion.h"
@@ -25,7 +41,8 @@
 #include "qmessagebox.h"
 #include <QtGui>
 
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
+#include <vtkLookupTable.h>
 #include <boost/assign.hpp>
 #include <boost/foreach.hpp>
 
@@ -60,6 +77,7 @@ KardioPerfusion::KardioPerfusion():
     ,markerPickerX(new QwtPlotMarker)
     ,markerPickerY(new QwtPlotMarker)
     ,grid(new QwtPlotGrid) 
+	,m_perfusionLUT(vtkLookupTable::New())
 {
 	this->ui = new Ui_KardioPerfusion;
 	this->ui->setupUi(this);
@@ -575,10 +593,12 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 
 			RealImageTreeItem* result = new RealImageTreeItem(root, perfusionMap, "PerfusionMap");
 			root->insertChild(result);
-
+			
 			this->ui->mprView_ur->addColoredOverlay(result->getVTKConnector()->getVTKImageData());
-			this->ui->mprView_ul->addColoredOverlay(result->getVTKConnector()->getVTKImageData());
-			this->ui->mprView_lr->addColoredOverlay(result->getVTKConnector()->getVTKImageData());
+			m_perfusionLUT = this->ui->mprView_ur->getOverlayColorMap();
+			
+			this->ui->mprView_ul->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), m_perfusionLUT);
+			this->ui->mprView_lr->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), m_perfusionLUT);
 
 			
 		}
@@ -691,9 +711,9 @@ void KardioPerfusion::perfusionMapShow( const RealImageTreeItem *perfItem ) {
 		//create ITK VTK connector
 		RealImageTreeItem::ConnectorHandle perfusionMapConnector = perfItem->getVTKConnector();
 		//add overlay at the widget
-		this->ui->mprView_ul->addColoredOverlay( perfusionMapConnector->getVTKImageData());
-		this->ui->mprView_ur->addColoredOverlay( perfusionMapConnector->getVTKImageData());
-		this->ui->mprView_lr->addColoredOverlay( perfusionMapConnector->getVTKImageData());
+		this->ui->mprView_ul->addColoredOverlay( perfusionMapConnector->getVTKImageData(), m_perfusionLUT);
+		this->ui->mprView_ur->addColoredOverlay( perfusionMapConnector->getVTKImageData(), m_perfusionLUT);
+		this->ui->mprView_lr->addColoredOverlay( perfusionMapConnector->getVTKImageData(), m_perfusionLUT);
 		
 		//add segment to the list of displayed semgents and set actual segment as active
 		displayedPerfusionMaps.insert( perfusionMapConnector );
@@ -724,9 +744,13 @@ void KardioPerfusion::treeViewContextMenu(const QPoint &pos) {
 			//if item is a segment
 			} else if (item.isA(typeid(BinaryImageTreeItem))) {
 				//create action for changing the color and connect it to the callback
-				QAction* addSegAction = cm.addAction("&Change Color");
-				connect( addSegAction, SIGNAL( triggered() ),
+				QAction* changeColorAction = cm.addAction("&Change Color");
+				connect( changeColorAction, SIGNAL( triggered() ),
 					this, SLOT( changeColorForSelectedSegment())  );
+
+				QAction* renameSegAction = cm.addAction("&Rename Item");
+				connect(renameSegAction, SIGNAL( triggered() ),
+					this, SLOT( renameTreeviewItem() ));
 		/*	if (item.isA(typeid(WatershedSegmentTreeItem))) {
 			  QAction* setupAction = cm.addAction("&Setup");
 			  connect( setupAction, SIGNAL( triggered() ),
@@ -735,7 +759,13 @@ void KardioPerfusion::treeViewContextMenu(const QPoint &pos) {
 			  connect( updateAction, SIGNAL( triggered() ),
 				this, SLOT( updateSelectedWatershedSegment())  );
 			} */
+			} else if (item.isA(typeid(RealImageTreeItem)) ){
+
+				QAction* renameSegAction = cm.addAction("&Rename Item");
+				connect(renameSegAction, SIGNAL( triggered() ),
+					this, SLOT( renameTreeviewItem() ));
 			}
+			
 		}
 		//create action for deleting the selected images
 		QAction* addSegAction = cm.addAction("&Delete");
@@ -967,4 +997,31 @@ void KardioPerfusion::on_btn_arteryInput_selected(const SegmentInfo *segment) {
   if (indexList.size() == 1) {
     maxSlopeAnalyzer->getSegments()->setArterySegment(indexList.at(0), segment);
   }
+}
+
+void KardioPerfusion::slider_opacity_changed()
+{
+	QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
+	//if index list is not empty
+	//if (indexList.count()>0) {
+		//if one item is selected
+	//	if (indexList.count() == 1) {
+			//get tree item
+		//	TreeItem &item = imageModel.getItem(indexList[0]);
+			//if item is a perfusionmap
+	//		if (item.isA(typeid(RealImageTreeItem))) {				
+				m_perfusionLUT->SetAlpha((double)this->ui->slider_opacity->value()/10);
+				this->ui->mprView_lr->refreshView();
+				this->ui->mprView_ur->refreshView();
+				this->ui->mprView_ul->refreshView();
+
+	//		}
+	//	}
+	//}
+}
+
+void KardioPerfusion::renameTreeviewItem()
+{
+	QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
+	this->ui->treeView->edit(indexList[0]);
 }

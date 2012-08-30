@@ -1,9 +1,8 @@
 /*
-    This file is part of KardioPerfusion.
     Copyright 2012 Christian Freye
+	Copyright 2010 Henning Meyer
 
-	This file was part of perfusionkit (Copyright 2010 Henning Meyer)
-	and was modified and extended to fit the actual needs. 
+	This file is part of KardioPerfusion.
 
     KardioPerfusion is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,6 +16,21 @@
 
     You should have received a copy of the GNU General Public License
     along with KardioPerfusion.  If not, see <http://www.gnu.org/licenses/>.
+
+    Diese Datei ist Teil von KardioPerfusion.
+
+    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    der GNU General Public License, wie von der Free Software Foundation,
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
+    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+
+    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
+    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License für weitere Details.
+
+    Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
+    Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
 */
 
 #include "multiplanarreformatwidget.h"
@@ -330,6 +344,29 @@ int MultiPlanarReformatWidget::addColoredOverlay(vtkImageData *image, const Acti
   return -1;
 }
 
+
+int MultiPlanarReformatWidget::addColoredOverlay(vtkImageData *image, vtkLookupTable* customColorMap, const ActionDispatch &dispatch)
+{
+	if (m_coloredOverlays.find( image ) == m_coloredOverlays.end() ) {
+		int actionHandle;
+		boost::shared_ptr< vtkColoredImageOverlay > overlay(
+			new vtkColoredImageOverlay( m_imageViewer->GetRenderer(), m_interactorStyle, dispatch, image, m_reslicePlaneTransform, actionHandle ) );
+    
+		overlay->setColorMap(customColorMap);
+		m_coloredOverlays.insert( ColoredOverlayMapType::value_type( image, overlay ) );
+		overlay->resize( this->size().width(), this->size().height() );
+		//overlay->showLegend();
+
+		this->update();
+
+		m_interactorStyle->SetColorMap(overlay->getColorMap());
+		m_interactorStyle->SetOverlayImage(image);
+		return actionHandle;
+  }
+  return -1;
+}
+
+
 void MultiPlanarReformatWidget::removeColoredOverlay(vtkImageData *image) {
 	
 	ColoredOverlayMapType::const_iterator it = m_coloredOverlays.find( image );
@@ -401,7 +438,19 @@ void MultiPlanarReformatWidget::mouseDoubleClickEvent( QMouseEvent * e ) {
 
 void MultiPlanarReformatWidget::resetView()
 {
-	std::cout << "Reset View" << std::endl;
+	std::cout << "ButtonTest: Reset View" << std::endl;
+}
+
+vtkLookupTable* MultiPlanarReformatWidget::getOverlayColorMap()
+{
+	ColoredOverlayMapType::iterator it;
+	it = m_coloredOverlays.begin();
+	return it->second->getColorMap();
+}
+
+void MultiPlanarReformatWidget::refreshView()
+{
+	m_imageViewer->GetRenderer()->Render();
 }
 
 /*void MultiPlanarReformatWidget::mouseMoveCallback(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)

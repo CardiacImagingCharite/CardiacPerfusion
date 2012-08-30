@@ -1,9 +1,8 @@
 /*
-    This file is part of KardioPerfusion.
     Copyright 2012 Christian Freye
+	Copyright 2010 Henning Meyer
 
-	This file was part of perfusionkit (Copyright 2010 Henning Meyer)
-	and was modified and extended to fit the actual needs. 
+	This file is part of KardioPerfusion.
 
     KardioPerfusion is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,6 +16,21 @@
 
     You should have received a copy of the GNU General Public License
     along with KardioPerfusion.  If not, see <http://www.gnu.org/licenses/>.
+
+    Diese Datei ist Teil von KardioPerfusion.
+
+    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    der GNU General Public License, wie von der Free Software Foundation,
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
+    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+
+    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
+    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License für weitere Details.
+
+    Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
+    Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
 */
 
 #include "vtkinteractorstyleprojectionview.h"
@@ -94,7 +108,7 @@ void vtkInteractorStyleProjectionView::resetActions() {
   ActionWindowLevel = addAction("Window/Level", boost::bind(&vtkInteractorStyleProjectionView::WindowLevelDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
   ActionWindowLUT = addAction("Window Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::WindowLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
-  ActionResizeLUT = addAction("Resize Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::ResizeLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
+  //ActionResizeLUT = addAction("Resize Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::ResizeLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
  
   ActionColorPick = addAction("", boost::bind(&vtkInteractorStyleProjectionView::PickColor, this), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
@@ -187,9 +201,9 @@ void vtkInteractorStyleProjectionView::dipatchActions() {
 	}
 	else
 	{
-		if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionResizeLUT; return; }
+		//if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionResizeLUT; return; }
 		if (!m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionWindowLUT; return; }
-		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionColorPick; return; }
+		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
 	}
 }
 
@@ -444,8 +458,20 @@ void vtkInteractorStyleProjectionView::WindowLUTDelta( int dw/**<[in] delta wind
 			
 			m_colorMap->SetRange(range);
 			m_colorMap->ForceBuild();
-			m_colorMap->SetTableValue(0,0,0,0,0);
-			m_colorMap->SetTableValue(m_colorMap->GetNumberOfColors()-1,0,0,0,0);
+
+			//create alpha ramp at the borders 
+			for(int i = 0; i < 16; i++)
+			{
+				double rgba[4];
+				m_colorMap->GetTableValue(i,rgba);
+				m_colorMap->SetTableValue(i,rgba[0],rgba[1],rgba[2],1/16*i);
+
+				m_colorMap->GetTableValue(255-i,rgba);
+				m_colorMap->SetTableValue(255-i,rgba[0],rgba[1],rgba[2],1/16*i);
+			}
+
+			//m_colorMap->SetTableValue(0,0,0,0,0);
+			//m_colorMap->SetTableValue(m_colorMap->GetNumberOfColors()-1,0,0,0,0);
 			m_imageViewer->Render();
 
 			std::cout << "range[0]= " << range[0] << "; range[1]= " << range[1] << std::endl;
@@ -484,8 +510,8 @@ void vtkInteractorStyleProjectionView::ResizeLUTDelta( int dw/**<[in] delta wind
 		{
 			m_colorMap->SetAlphaRange(alphaRange);
 			m_colorMap->ForceBuild();
-			m_colorMap->SetTableValue(0,0,0,0,0);
-			m_colorMap->SetTableValue(m_colorMap->GetNumberOfColors()-1,0,0,0,0);
+			//m_colorMap->SetTableValue(0,0,0,0,0);
+			//m_colorMap->SetTableValue(m_colorMap->GetNumberOfColors()-1,0,0,0,0);
 			m_imageViewer->Render();
 
 			std::cout << "alpha range[0]= " << alphaRange[0] << "; alpha range[1]= " << alphaRange[1] << std::endl;
@@ -557,10 +583,10 @@ void vtkInteractorStyleProjectionView::OnKeyDown()
 		if (keySymDown.compare(keySym) == 0) { Rotate(0,-90); return; }
   
 		if (keySymSpace.compare(keySym) == 0) { CycleLeftButtonAction(); return; }
-  
-		if(keySym.compare("p") == 0)
-			PickColor();
-  }
+	} else
+	{
+		m_interAction = ActionColorPick;
+	}
 
 
   cerr << __FILE__ << "[" << __LINE__ << "]:" << __FUNCTION__ << " Code:" << (int)this->GetInteractor()->GetKeyCode() << " Sym:" << this->GetInteractor()->GetKeySym() << endl;
@@ -569,7 +595,13 @@ void vtkInteractorStyleProjectionView::OnKeyDown()
 void vtkInteractorStyleProjectionView::OnKeyUp()
 {
 	if(m_stateCtrl)
+	{
 		m_stateCtrl = false;
+		m_interAction = ActionNone;
+		m_annotation->SetText(0, "");
+		updateDisplay();
+	}
+
 }
 
 /** animate the Left Mouse Button hint*/

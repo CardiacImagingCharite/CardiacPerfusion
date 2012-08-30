@@ -1,6 +1,7 @@
 /*
-    This file is part of KardioPerfusion.
     Copyright 2012 Christian Freye
+
+	This file is part of KardioPerfusion.
 
     KardioPerfusion is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,6 +15,21 @@
 
     You should have received a copy of the GNU General Public License
     along with KardioPerfusion.  If not, see <http://www.gnu.org/licenses/>.
+
+    Diese Datei ist Teil von KardioPerfusion.
+
+    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    der GNU General Public License, wie von der Free Software Foundation,
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
+    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+
+    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
+    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License für weitere Details.
+
+    Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
+    Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
 */
 
 #include "vtkcoloredimageoverlay.h"
@@ -59,13 +75,29 @@ vtkColoredImageOverlay::vtkColoredImageOverlay( vtkRenderer *renderer,
 	m_colorMap->Build();
 	//in order to hide the maximum and minimum values, 
 	//set the alpha of the borders to zero
-	m_colorMap->SetTableValue(0,0,0,0,0);
-	m_colorMap->SetTableValue(99,0,0,0,0);
+	
+	//create alpha ramp at the borders 
+	for(int i = 0; i < 16; i++)
+	{
+		double rgba[4];
+		m_colorMap->GetTableValue(i,rgba);
+		m_colorMap->SetTableValue(i,rgba[0],rgba[1],rgba[2],1/16*i);
+
+		m_colorMap->GetTableValue(255-i,rgba);
+		m_colorMap->SetTableValue(255-i,rgba[0],rgba[1],rgba[2],1/16*i);
+	}
+
+//	m_colorMap->SetTableValue(99,0,0,0,0);
+
+	m_colorMap->SetAlpha(opacity);
+
+	double f[2];
+	m_colorMap->GetAlphaRange(f);
 
 	m_colorMapper->SetInputConnection( m_reslice->GetOutputPort());
 	m_colorMapper->SetLookupTable( m_colorMap );
-
-	m_actor->SetOpacity(opacity);
+	
+	//m_actor->SetOpacity(opacity);
   
 	m_reslice->SetOutputDimensionality(2);
 	m_reslice->SetBackgroundLevel(-1000);
@@ -115,7 +147,7 @@ vtkColoredImageOverlay::~vtkColoredImageOverlay() {
     m_interactorStyle->removeAction( actionHandle );
   if (m_reslice) m_reslice->Delete();
   if (m_colorMap) m_colorMap->Delete();
-  if (m_colorMapper) m_colorMapper->Delete();
+  //if (m_colorMapper) m_colorMapper->Delete();
   if (m_actor) m_actor->Delete();
 }
 
@@ -143,3 +175,10 @@ void vtkColoredImageOverlay::showLegend()
 	this->m_renderer->AddActor(m_legend);
 }
 
+void vtkColoredImageOverlay::setColorMap(vtkLookupTable* cm)
+{
+	m_colorMap = cm; 
+	m_colorMapper->SetLookupTable( m_colorMap );
+	m_legend->SetLookupTable(m_colorMap);
+}
+		

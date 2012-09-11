@@ -59,7 +59,7 @@ class vtkColoredImageOverlay {
     vtkColoredImageOverlay( vtkRenderer *renderer,
 			   vtkInteractorStyleProjectionView *interactorStyle,
 			  const ActionDispatch &action, vtkImageData *image, vtkMatrix4x4 *reslicePlaneTransform,
-			  int &actionHandle, double opacity = 0.6);
+			  int &actionHandle, vtkLookupTable* customColorMap);
     ///Destructor
 	~vtkColoredImageOverlay();
 

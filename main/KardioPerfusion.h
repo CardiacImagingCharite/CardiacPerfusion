@@ -197,7 +197,7 @@ private:
 	/*! 
 	\param perfItem contains a pointer to the BinaryImageTreeItem
 	*/
-	void perfusionMapShow(const RealImageTreeItem *perfItem );
+	void perfusionMapShow( RealImageTreeItem *perfItem );
 	///hide a perfusion map
 	/*! 
 	\param perfItem contains a pointer to the BinaryImageTreeItem
@@ -228,7 +228,7 @@ private:
     QwtPlotMarker *markerPickerX, *markerPickerY;
 	QwtPlotGrid *grid;
 	QwtPlotPicker *picker;
-	vtkLookupTable *m_perfusionLUT;
+	vtkLookupTable *m_perfusionColorMap;
 };
 
 #endif // KardioPerfusion_H

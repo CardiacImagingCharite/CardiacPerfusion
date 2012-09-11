@@ -78,7 +78,7 @@ KardioPerfusion::KardioPerfusion():
     ,markerPickerX(new QwtPlotMarker)
     ,markerPickerY(new QwtPlotMarker)
     ,grid(new QwtPlotGrid) 
-	,m_perfusionLUT(vtkLookupTable::New())
+	,m_perfusionColorMap(vtkLookupTable::New())
 {
 	this->ui = new Ui_KardioPerfusion;
 	this->ui->setupUi(this);
@@ -546,71 +546,83 @@ void KardioPerfusion::on_btn_analyse_clicked()
 
 void KardioPerfusion::on_btn_perfusionMap_clicked()
 {
-	maxSlopeAnalyzer = new MaxSlopeAnalyzer(this);
+	bool ok;
+	//show dialog for segment name
+	QString mapName = QInputDialog::getText(NULL, QObject::tr("Map Name"),
+		QObject::tr("Name:"), QLineEdit::Normal,
+		QObject::tr("Unnamed Map"), &ok);
 
-	//get list of selected items
-	QModelIndexList selectedIndexes = this->ui->treeView->selectionModel()->selectedRows();
-	
-	//test if one element is selected
-	if(selectedIndexes.count() == 1)
-	{
-		//get the item from the image model
-		TreeItem* item = &imageModel.getItem(selectedIndexes[0]);
-		//test if item is a CT image
-		if(item->isA(typeid(BinaryImageTreeItem)))
+	//if name is valid and dialog was closed with OK
+	if (ok && !mapName.isEmpty()) {
+
+		maxSlopeAnalyzer = new MaxSlopeAnalyzer(this);
+
+		//get list of selected items
+		QModelIndexList selectedIndexes = this->ui->treeView->selectionModel()->selectedRows();
+
+		//test if one element is selected
+		if(selectedIndexes.count() == 1)
 		{
-			maxSlopeAnalyzer->addSegment(dynamic_cast<BinaryImageTreeItem*>(item));
-		//	const SegmentInfo arterySegment = maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
-			//const SegmentInfo* arterySegment = reinterpret_cast<const SegmentInfo*>(&maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] ));
-			SegmentInfo* arterySegment = &maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
-			
-			this->ui->treeView->selectAll();
-			//get list of selected items
-			QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
-			//iterate over selected items
-			for(QModelIndexList::Iterator index = selectedIndex.begin(); index != selectedIndex.end(); ++index) {
-				if (index->isValid()) {
-					//get item at specific index
-					TreeItem *item = &imageModel.getItem( *index );
-					//add image to the dialog if it is a CT image
-					if (item->isA(typeid(CTImageTreeItem))) {
-						maxSlopeAnalyzer->addImage( dynamic_cast<CTImageTreeItem*>(item) );
+			//get the item from the image model
+			TreeItem* item = &imageModel.getItem(selectedIndexes[0]);
+			//test if item is a CT image
+			if(item->isA(typeid(BinaryImageTreeItem)))
+			{
+				maxSlopeAnalyzer->addSegment(dynamic_cast<BinaryImageTreeItem*>(item));
+				//	const SegmentInfo arterySegment = maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
+				//const SegmentInfo* arterySegment = reinterpret_cast<const SegmentInfo*>(&maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] ));
+				SegmentInfo* arterySegment = &maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
+
+				this->ui->treeView->selectAll();
+				//get list of selected items
+				QModelIndexList selectedIndex = this->ui->treeView->selectionModel()->selectedRows();
+				//iterate over selected items
+				for(QModelIndexList::Iterator index = selectedIndex.begin(); index != selectedIndex.end(); ++index) {
+					if (index->isValid()) {
+						//get item at specific index
+						TreeItem *item = &imageModel.getItem( *index );
+						//add image to the dialog if it is a CT image
+						if (item->isA(typeid(CTImageTreeItem))) {
+							maxSlopeAnalyzer->addImage( dynamic_cast<CTImageTreeItem*>(item) );
+						}
 					}
 				}
+				this->ui->treeView->selectionModel()->clearSelection();
+
+				//maxSlopeAnalyzer->getSegments()->setArterySegment(selectedIndexes.at(0), arterySegment);
+				maxSlopeAnalyzer->calculateTacValues();
+
+				PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, arterySegment, this->ui->sb_shrinkFactor->value());
+
+				//RealImageType::Pointer perfusionMap = mapCreator->getPerfusionMap(&imageModel);
+				RealImageTreeItem::ImageType::Pointer perfusionMap;
+				perfusionMap = mapCreator->calculatePerfusionMap(&imageModel);
+
+
+				TreeItem* root = &imageModel.getRootItem();
+
+				double opacity = (double)this->ui->slider_opacity->value()/10;
+
+				RealImageTreeItem* result = new RealImageTreeItem(root, perfusionMap, mapName, opacity);
+				root->insertChild(result);
+
+				this->ui->mprView_ur->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
+				//m_perfusionLUT = this->ui->mprView_ur->getOverlayColorMap();
+
+				this->ui->mprView_ul->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
+				this->ui->mprView_lr->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
+
+
 			}
-			this->ui->treeView->selectionModel()->clearSelection();
-
-			//maxSlopeAnalyzer->getSegments()->setArterySegment(selectedIndexes.at(0), arterySegment);
-			maxSlopeAnalyzer->calculateTacValues();
-
-			PerfusionMapCreator* mapCreator = new PerfusionMapCreator(maxSlopeAnalyzer, arterySegment, this->ui->sb_shrinkFactor->value());
-
-			//RealImageType::Pointer perfusionMap = mapCreator->getPerfusionMap(&imageModel);
-			RealImageTreeItem::ImageType::Pointer perfusionMap;
-			perfusionMap = mapCreator->calculatePerfusionMap(&imageModel);
-
-
-			TreeItem* root = &imageModel.getRootItem();
-
-			RealImageTreeItem* result = new RealImageTreeItem(root, perfusionMap, "PerfusionMap");
-			root->insertChild(result);
-			
-			this->ui->mprView_ur->addColoredOverlay(result->getVTKConnector()->getVTKImageData());
-			m_perfusionLUT = this->ui->mprView_ur->getOverlayColorMap();
-			
-			this->ui->mprView_ul->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), m_perfusionLUT);
-			this->ui->mprView_lr->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), m_perfusionLUT);
-
-			
+			else{
+				QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));
+				return;
+			}
 		}
 		else{
 			QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));
 			return;
 		}
-	}
-	else{
-		QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));
-		return;
 	}
 }
 
@@ -703,7 +715,7 @@ void KardioPerfusion::segmentShow( const BinaryImageTreeItem *segItem ) {
 }
 
 //show a segment at the mpr widget
-void KardioPerfusion::perfusionMapShow( const RealImageTreeItem *perfItem ) {
+void KardioPerfusion::perfusionMapShow( RealImageTreeItem *perfItem ) {
 	if (perfItem) {
 		//if (displayedCTImage && displayedCTImage->getBaseItem() != perfItem->parent()) {
 		//	setImage(dynamic_cast<const CTImageTreeItem*>(perfItem->parent()));
@@ -712,9 +724,9 @@ void KardioPerfusion::perfusionMapShow( const RealImageTreeItem *perfItem ) {
 		//create ITK VTK connector
 		RealImageTreeItem::ConnectorHandle perfusionMapConnector = perfItem->getVTKConnector();
 		//add overlay at the widget
-		this->ui->mprView_ul->addColoredOverlay( perfusionMapConnector->getVTKImageData(), m_perfusionLUT);
-		this->ui->mprView_ur->addColoredOverlay( perfusionMapConnector->getVTKImageData(), m_perfusionLUT);
-		this->ui->mprView_lr->addColoredOverlay( perfusionMapConnector->getVTKImageData(), m_perfusionLUT);
+		this->ui->mprView_ul->addColoredOverlay( perfusionMapConnector->getVTKImageData(), perfItem->getColorMap());
+		this->ui->mprView_ur->addColoredOverlay( perfusionMapConnector->getVTKImageData(), perfItem->getColorMap());
+		this->ui->mprView_lr->addColoredOverlay( perfusionMapConnector->getVTKImageData(), perfItem->getColorMap());
 		
 		//add segment to the list of displayed semgents and set actual segment as active
 		displayedPerfusionMaps.insert( perfusionMapConnector );
@@ -1012,15 +1024,19 @@ void KardioPerfusion::slider_opacity_changed()
 		if (item.isA(typeid(RealImageTreeItem))) {
 			//get segment
 			RealImageTreeItem &perfusionMap = dynamic_cast<RealImageTreeItem&>(item);
-			
+			perfusionMap.setOpacity((double)this->ui->slider_opacity->value()/10);
+
+			this->ui->mprView_lr->opacityHasChanged(perfusionMap.getVTKConnector()->getVTKImageData());
+			this->ui->mprView_ul->opacityHasChanged(perfusionMap.getVTKConnector()->getVTKImageData());
+			this->ui->mprView_ur->opacityHasChanged(perfusionMap.getVTKConnector()->getVTKImageData());
 		}
 	}
 
-	m_perfusionLUT->SetAlpha((double)this->ui->slider_opacity->value()/10);
+	//m_perfusionColorMap->SetAlpha((double)this->ui->slider_opacity->value()/10);
 	
-	this->ui->mprView_lr->refreshView();
-	this->ui->mprView_ur->GetRenderWindow()->Render();
-	this->ui->mprView_ul->GetRenderWindow()->GetInteractor()->Render();
+	//this->ui->mprView_lr->refreshView();
+	//this->ui->mprView_ur->GetRenderWindow()->Render();
+	//this->ui->mprView_ul->GetRenderWindow()->GetInteractor()->Render();
 	
 }
 

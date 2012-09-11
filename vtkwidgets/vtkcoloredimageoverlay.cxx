@@ -50,49 +50,16 @@
 vtkColoredImageOverlay::vtkColoredImageOverlay( vtkRenderer *renderer,
 			  vtkInteractorStyleProjectionView *interactorStyle,
 			  const ActionDispatch &action, vtkImageData *image, vtkMatrix4x4 *reslicePlaneTransform,
-			  int &actionHandle, double opacity)
+			  int &actionHandle, vtkLookupTable* customColorMap)
   :m_image(image),
   m_reslice(vtkImageReslice::New()),
   m_colorMapper(vtkImageMapToColors::New()),
-  m_colorMap(vtkLookupTable::New()),
+  m_colorMap(customColorMap),
   m_actor(vtkImageActor::New()),
   m_renderer( renderer ),
   m_interactorStyle(interactorStyle), actionHandle(-1) {
     
-	//Set the shape of the colorMap to linear
-	  m_colorMap->SetRampToLinear();
-	//Set number of created colors
-	m_colorMap->SetNumberOfTableValues(256);
-	//Set the range of the image values
-	m_colorMap->SetTableRange( 0, 10);
-	//Set the range of the available colors
-	m_colorMap->SetHueRange(0.0,0.667);
-	//Set the saturation range of the colors
-	//m_colorMap->SetSaturationRange( 0.7, 1 );
-	//set the brightness of the colors
-	m_colorMap->SetValueRange( 0.8, 1 );
-	//generate LUT
-	m_colorMap->Build();
-	//in order to hide the maximum and minimum values, 
-	//set the alpha of the borders to zero
 	
-	//create alpha ramp at the borders 
-	for(int i = 0; i < 16; i++)
-	{
-		double rgba[4];
-		m_colorMap->GetTableValue(i,rgba);
-		m_colorMap->SetTableValue(i,rgba[0],rgba[1],rgba[2],1/16*i);
-
-		m_colorMap->GetTableValue(255-i,rgba);
-		m_colorMap->SetTableValue(255-i,rgba[0],rgba[1],rgba[2],1/16*i);
-	}
-
-//	m_colorMap->SetTableValue(99,0,0,0,0);
-
-	m_colorMap->SetAlpha(opacity);
-
-	double f[2];
-	m_colorMap->GetAlphaRange(f);
 
 	m_colorMapper->SetInputConnection( m_reslice->GetOutputPort());
 	m_colorMapper->SetLookupTable( m_colorMap );
@@ -181,4 +148,3 @@ void vtkColoredImageOverlay::setColorMap(vtkLookupTable* cm)
 	m_colorMapper->SetLookupTable( m_colorMap );
 	m_legend->SetLookupTable(m_colorMap);
 }
-		

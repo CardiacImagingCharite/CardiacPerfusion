@@ -41,6 +41,7 @@
 #include <QColor>
 #include <boost/function.hpp>
 #include <boost/serialization/access.hpp>
+#include <vtkLookupTable.h>
 
 /*! \class BinaryImageTreeItem BinaryImageTreeItem.h "BinaryImageTreeItem.h"
  *  \brief This is the representation of an image overlay which can be placed in a TreeView.
@@ -54,7 +55,7 @@ class RealImageTreeItem : public ITKVTKTreeItem< RealImageType > {
 	\param itkImage A pointer to the associated itkImage,
 	\param name The name of the segment.
 	*/
-    RealImageTreeItem(TreeItem * parent, ImageType::Pointer itkImage, const QString &name);
+    RealImageTreeItem(TreeItem * parent, ImageType::Pointer itkImage, const QString &name, const double opacity);
 	///Clones an existing TreeItem.
 	/*!
 	\return Pointer to a TreeItem.
@@ -99,6 +100,21 @@ class RealImageTreeItem : public ITKVTKTreeItem< RealImageType > {
 	\param _name Contains the new name of the TreeItem.
 	*/
     void setName(const QString &_name) { name = _name; }
+	///Setter for the colormap of the item
+	/*!
+	\param _name Contains the new colormap of the TreeItem.
+	*/
+    void setColorMap(vtkLookupTable* _colorMap) { m_colorMap = _colorMap; }
+	///Getter for the colormap
+	/*!
+	\return Colormap of the TreeItem.
+	*/
+	vtkLookupTable* getColorMap() { return m_colorMap; }
+	///Setter for the alpha channel of the colormap
+	/*!
+	\param alpha Opacity of the colormap
+	*/
+	void setOpacity(double alpha);
 
 	///Draws or erases a sphere at the overlay 
 	/*!
@@ -117,7 +133,7 @@ class RealImageTreeItem : public ITKVTKTreeItem< RealImageType > {
     
   private:
     QString name; // name of the TreeItem
-
+	vtkLookupTable* m_colorMap;
     
   protected:
 

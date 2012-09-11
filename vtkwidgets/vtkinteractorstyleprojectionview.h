@@ -115,6 +115,9 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   void activateAction(int action);
   void removeAction(int action);
   void resetActions();
+
+  void updateDisplay(void);
+
   protected:
   void processAction();
   void updateRenderer();
@@ -124,7 +127,7 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   bool GetEventPosition( int &x, int &y, bool last=false );
   bool restrictAction();
   void saveDisplayState(void);
-  void updateDisplay(void);
+  
  
 
   struct DisplayState {

@@ -90,7 +90,7 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	\param image Contains a pointer to the image.
 	\param dispatch (optional) Contains the associated action. Default creates new action.
 	*/
-	int addColoredOverlay(vtkImageData *image, const ActionDispatch &dispatch = ActionDispatch() );
+	//int addColoredOverlay(vtkImageData *image, const ActionDispatch &dispatch = ActionDispatch() );
 	///Adds a colored overlay to the actual image
 	/*!
 	\param overlay Contains a pointer to an overlay.
@@ -146,13 +146,8 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	*/
 	void setOrientation(int orientation);
 
-	///Gets the colorMap of the PerfusionMap.
-	/*!
-	\return colormap.
-	*/
-	vtkLookupTable* getOverlayColorMap();
-	///Refresh the view.
-	void refreshView();
+	///Update display if Colormap has changed.
+	void opacityHasChanged(vtkImageData *image);
 
   
 	public slots:

@@ -35,14 +35,45 @@
 #include "realimagetreeitem.h"
 
 // Constructor, which takes its parent, an Image and a name
-RealImageTreeItem::RealImageTreeItem(TreeItem * parent, ImageType::Pointer itkImage, const QString &name)
+RealImageTreeItem::RealImageTreeItem(TreeItem * parent, ImageType::Pointer itkImage, const QString &name, const double opacity)
   :BaseClass(parent, itkImage), name(name){
     imageKeeper = getVTKConnector();
+	m_colorMap = vtkLookupTable::New();
+	
+	//Set the shape of the colorMap to linear
+	m_colorMap->SetRampToLinear();
+	//Set number of created colors
+	m_colorMap->SetNumberOfTableValues(256);
+	//Set the range of the image values
+	m_colorMap->SetTableRange( 0, 10);
+	//Set the range of the available colors
+	m_colorMap->SetHueRange(0.0,0.667);
+	//Set the saturation range of the colors
+	//m_colorMap->SetSaturationRange( 0.7, 1 );
+	//set the brightness of the colors
+	m_colorMap->SetValueRange( 0.8, 1 );
+	//generate LUT
+	m_colorMap->Build();
+	//in order to hide the maximum and minimum values, 
+	//set the alpha of the borders to zero
+	
+	//create alpha ramp at the borders 
+	for(int i = 0; i < 16; i++)
+	{
+		double rgba[4];
+		m_colorMap->GetTableValue(i,rgba);
+		m_colorMap->SetTableValue(i,rgba[0],rgba[1],rgba[2],1/16*i);
+
+		m_colorMap->GetTableValue(255-i,rgba);
+		m_colorMap->SetTableValue(255-i,rgba[0],rgba[1],rgba[2],1/16*i);
+	}
+
+	m_colorMap->SetAlpha(opacity);
 }
 
 //clones an existing TreeItem
 TreeItem *RealImageTreeItem::clone(TreeItem *clonesParent) const {
-	RealImageTreeItem *c = new RealImageTreeItem(clonesParent, peekITKImage(), name );
+	RealImageTreeItem *c = new RealImageTreeItem(clonesParent, peekITKImage(), name, m_colorMap->GetAlpha());
 	cloneChildren(c);
 	return c;
 }
@@ -87,3 +118,20 @@ inline T clip(T min, T val, T max) {
 	return std::max<T>( std::min<T>( val, max), min );
 }
 
+void RealImageTreeItem::setOpacity(double alpha)
+{
+	m_colorMap->SetAlpha(alpha);
+	m_colorMap->ForceBuild();
+	
+	for(int i = 0; i < 16; i++)
+	{
+		double rgba[4];
+		m_colorMap->GetTableValue(i,rgba);
+		m_colorMap->SetTableValue(i,rgba[0],rgba[1],rgba[2],1/16*i);
+
+		m_colorMap->GetTableValue(255-i,rgba);
+		m_colorMap->SetTableValue(255-i,rgba[0],rgba[1],rgba[2],1/16*i);
+	}
+
+	//m_colorMap->Modified();
+}

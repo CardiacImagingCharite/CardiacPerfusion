@@ -323,7 +323,7 @@ void MultiPlanarReformatWidget::removeBinaryOverlay(vtkImageData *image) {
   this->update();
 }
 
-int MultiPlanarReformatWidget::addColoredOverlay(vtkImageData *image, const ActionDispatch &dispatch) {
+/*int MultiPlanarReformatWidget::addColoredOverlay(vtkImageData *image, const ActionDispatch &dispatch) {
   if (m_coloredOverlays.find( image ) == m_coloredOverlays.end() ) {
     int actionHandle;
     boost::shared_ptr< vtkColoredImageOverlay > overlay(
@@ -341,16 +341,16 @@ int MultiPlanarReformatWidget::addColoredOverlay(vtkImageData *image, const Acti
   }
   return -1;
 }
-
+*/
 
 int MultiPlanarReformatWidget::addColoredOverlay(vtkImageData *image, vtkLookupTable* customColorMap, const ActionDispatch &dispatch)
 {
 	if (m_coloredOverlays.find( image ) == m_coloredOverlays.end() ) {
 		int actionHandle;
 		boost::shared_ptr< vtkColoredImageOverlay > overlay(
-			new vtkColoredImageOverlay( m_imageViewer->GetRenderer(), m_interactorStyle, dispatch, image, m_reslicePlaneTransform, actionHandle ) );
+			new vtkColoredImageOverlay( m_imageViewer->GetRenderer(), m_interactorStyle, dispatch, image, m_reslicePlaneTransform, actionHandle, customColorMap ) );
     
-		overlay->setColorMap(customColorMap);
+		//overlay->setColorMap(customColorMap);
 		m_coloredOverlays.insert( ColoredOverlayMapType::value_type( image, overlay ) );
 		overlay->resize( this->size().width(), this->size().height() );
 		//overlay->showLegend();
@@ -418,17 +418,17 @@ void MultiPlanarReformatWidget::resetView()
 	std::cout << "ButtonTest: Reset View" << std::endl;
 }
 
-vtkLookupTable* MultiPlanarReformatWidget::getOverlayColorMap()
-{
-	ColoredOverlayMapType::iterator it;
-	it = m_coloredOverlays.begin();
-	return it->second->getColorMap();
-}
+//vtkLookupTable* MultiPlanarReformatWidget::getOverlayColorMap()
+//{
+//	ColoredOverlayMapType::iterator it;
+//	it = m_coloredOverlays.begin();
+//	return it->second->getColorMap();
+//}
 
-void MultiPlanarReformatWidget::refreshView()
+void MultiPlanarReformatWidget::opacityHasChanged(vtkImageData *image)
 {
-	m_imageViewer->Render();
-	//this->update();
+	this->update();
+	//m_interactorStyle->updateDisplay();	
 }
 
 /*void MultiPlanarReformatWidget::mouseMoveCallback(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)

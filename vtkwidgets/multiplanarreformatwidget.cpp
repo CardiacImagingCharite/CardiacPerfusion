@@ -52,6 +52,7 @@
 #include <vtkCallbackCommand.h>
 #include <vtkCornerAnnotation.h>
 #include <vtkTextProperty.h>
+#include <vtkSphereSource.h>
 
 #include <algorithm>
 #include <boost/bind.hpp>
@@ -65,7 +66,6 @@ Nothing fancy - just basic setup */
 MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags f):
   QVTKWidget(parent, f),
   m_reslice(vtkImageReslice::New()),
-  m_colormap(vtkImageMapToWindowLevelColors::New()),
   m_imageViewer(vtkSmartPointer<vtkImageViewer2>::New()),
   m_annotation(vtkSmartPointer<vtkCornerAnnotation>::New()),
   m_reslicePlaneTransform(vtkMatrix4x4::New()),
@@ -99,14 +99,12 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	m_reslice->SetOutputDimensionality(2);
 	m_reslice->SetBackgroundLevel(-1000);
 	m_reslice->SetInterpolationModeToCubic();
-  
-	m_colormap->SetOutputFormatToRGB();
 
-	m_colormap->SetInputConnection(m_reslice->GetOutputPort());
+	m_imageViewer->SetInput(m_reslice->GetOutput());
 	//m_imageViewer->GetRenderer()->ResetCamera();
-	vtkSmartPointer<vtkImageActor> actor = vtkSmartPointer<vtkImageActor>::New();
-	actor->SetInput(m_colormap->GetOutput());
-	m_imageViewer->GetRenderer()->AddActor(actor);
+	//vtkSmartPointer<vtkImageActor> actor = vtkSmartPointer<vtkImageActor>::New();
+	//actor->SetInput(m_colormap->GetOutput());
+	//m_imageViewer->GetRenderer()->AddActor(actor);
 	//m_imageViewer->GetImageActor()->SetInput(m_colormap->GetOutput());
 	
 	//m_actor->SetInput(m_colormap->GetOutput());
@@ -121,7 +119,7 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	m_reslicePlaneTransform->DeepCopy( transform->GetMatrix() );
 	transform->Delete();
   
-	m_interactorStyle->SetImageMapToWindowLevelColors( m_colormap );
+//	m_interactorStyle->SetImageMapToWindowLevelColors( m_colormap );
 	m_interactorStyle->SetOrientationMatrix( m_reslicePlaneTransform );
 	m_interactorStyle->SetImageViewer(m_imageViewer);
 
@@ -168,7 +166,7 @@ MultiPlanarReformatWidget::~MultiPlanarReformatWidget() {
   //if(m_imageViewer) m_imageViewer->Delete();
   m_binaryOverlays.clear();
   m_coloredOverlays.clear();
-  if (m_colormap) m_colormap->Delete();
+//  if (m_colormap) m_colormap->Delete();
   if (m_reslice) m_reslice->Delete();
   //if (m_actor) m_actor->Delete();
   //if (m_interactorStyle) m_interactorStyle->Delete();
@@ -406,27 +404,6 @@ void MultiPlanarReformatWidget::resetActions(){
 	m_interactorStyle->resetActions();
 }
 
-void MultiPlanarReformatWidget::showCircle(float x, float y, float z, int radius){
-
-/*  vtkSmartPointer<vtkCursor2D> cursor = 
-    vtkSmartPointer<vtkCursor2D>::New();
-
-  cursor->SetModelBounds(-10,10,-10,10,0,0);
-  cursor->AllOn();
-  //cursor->OutlineOff();
-  cursor->Update();
- 
-
-  vtkSmartPointer<vtkPolyDataMapper> cursorMapper = 
-    vtkSmartPointer<vtkPolyDataMapper>::New();
-  cursorMapper->SetInputConnection(cursor->GetOutputPort());
-  vtkSmartPointer<vtkActor> cursorActor = 
-    vtkSmartPointer<vtkActor>::New();
-  cursorActor->GetProperty()->SetColor(1,0,0);
-  cursorActor->SetMapper(cursorMapper);
-  m_imageViewer->GetRenderer()->AddActor(cursorActor);
-  */
-}
 
 void MultiPlanarReformatWidget::mouseDoubleClickEvent( QMouseEvent * e ) {
 	if(e->button() == Qt::LeftButton)
@@ -450,7 +427,8 @@ vtkLookupTable* MultiPlanarReformatWidget::getOverlayColorMap()
 
 void MultiPlanarReformatWidget::refreshView()
 {
-	m_imageViewer->GetRenderer()->Render();
+	m_imageViewer->Render();
+	//this->update();
 }
 
 /*void MultiPlanarReformatWidget::mouseMoveCallback(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)

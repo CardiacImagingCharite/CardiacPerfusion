@@ -50,7 +50,7 @@ class PerfusionMapCreator
 	PerfusionMapCreator(MaxSlopeAnalyzer* analyzer, SegmentInfo* artery, int factor);
 	~PerfusionMapCreator();
 
-	RealImageTreeItem::ImageType::Pointer getPerfusionMap(CTImageTreeModel* model);
+	RealImageTreeItem::ImageType::Pointer calculatePerfusionMap(CTImageTreeModel* model);
 	void setAnalyzer(MaxSlopeAnalyzer* analyzer);
 	void setShrinkFactor(int shrinkFactor);
 	void setArterySegment(SegmentInfo* artery);

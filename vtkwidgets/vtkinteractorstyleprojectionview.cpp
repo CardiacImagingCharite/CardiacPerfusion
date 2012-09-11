@@ -55,6 +55,10 @@
 #include <vtkCell.h>
 #include <vtkMath.h>
 #include <vtkInteractorObserver.h>
+#include <vtkRegularPolygonSource.h>
+#include <vtkProperty.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkSelectEnclosedPoints.h>
 
 #include <string>
 #include <iostream>
@@ -85,17 +89,35 @@ vtkInteractorStyleProjectionView::vtkInteractorStyleProjectionView():
   m_stateCtrl(false),
   m_sliceIncrement(1.0),
   m_leftMBHint( NULL ),
-  m_imageMapToWindowLevelColors(NULL),
   m_orientation(NULL),
   tempTransform( vtkTransform::New() ),
-  m_OverlayImage(NULL)
+  m_perfusionOverlay(NULL),
+  m_circle(vtkRegularPolygonSource::New()),
+  m_circleActor(vtkActor::New())
 {
-  State = VTKIS_NONE;
-  UseTimers = 1;
-  SetLMBHint(0);
-  m_initialState.orientation = vtkMatrix4x4::New();
-  resetActions();
-  tempTransform->PreMultiply();
+	State = VTKIS_NONE;
+	UseTimers = 1;
+	SetLMBHint(0);
+	m_initialState.orientation = vtkMatrix4x4::New();
+	resetActions();
+	tempTransform->PreMultiply();
+
+
+	vtkSmartPointer<vtkPolyDataMapper> circleMapper
+		= vtkSmartPointer<vtkPolyDataMapper>::New();	
+	m_circle->GeneratePolygonOff();
+	//  m_circle->SetNormal(0,0,1);
+	m_circle->SetRadius(10);
+	m_circle->Update();
+	m_circle->SetNumberOfSides(360);
+	
+	circleMapper->SetInputConnection(m_circle->GetOutputPort());
+	
+	m_circleActor->SetMapper(circleMapper);
+	m_circleActor->GetProperty()->SetColor(1.0,0.0,0.0);
+	m_circleActor->GetProperty()->SetOpacity(0.9);
+	m_circleActor->GetProperty()->SetLineWidth(1);
+	
 }
 
 
@@ -175,13 +197,13 @@ bool vtkInteractorStyleProjectionView::GetEventPosition( int &x/**<[out]*/, int 
 
 /** Save the state of the Display in order to enable Restricted Actions and ActionCancles*/
 void vtkInteractorStyleProjectionView::saveDisplayState(void) {
-  restriction = None;
-  if (m_imageMapToWindowLevelColors) {
-    m_initialState.window = m_imageMapToWindowLevelColors->GetWindow();
-    m_initialState.level = m_imageMapToWindowLevelColors->GetLevel();
-  }
-  GetEventPosition( m_initialState.mousePosition[0], m_initialState.mousePosition[1]);
-  if (m_orientation) m_initialState.orientation->DeepCopy( m_orientation );
+	restriction = None;
+	if (m_imageViewer) {
+		m_initialState.window = m_imageViewer->GetWindowLevel()->GetWindow();
+		m_initialState.level = m_imageViewer->GetWindowLevel()->GetLevel();
+	}
+	GetEventPosition( m_initialState.mousePosition[0], m_initialState.mousePosition[1]);
+	if (m_orientation) m_initialState.orientation->DeepCopy( m_orientation );
 }
 
 
@@ -319,12 +341,24 @@ void vtkInteractorStyleProjectionView::processAction() {
 
 /** Slice forward */
 void vtkInteractorStyleProjectionView::OnMouseWheelForward() {
-  Slice(1);
+	if(!m_stateCtrl)
+		Slice(1);
+	else
+	{
+		m_circle->SetRadius(m_circle->GetRadius()+1);
+		updateDisplay();
+	}
 }
 
 /** Slice backward */
 void vtkInteractorStyleProjectionView::OnMouseWheelBackward() {
-  Slice(-1);
+	if(!m_stateCtrl)
+		Slice(-1);
+	else if(m_stateCtrl && m_circle->GetRadius() > 1)
+	{
+		m_circle->SetRadius(m_circle->GetRadius()-1);
+		updateDisplay();
+	}
 }
 
 /** Pan the viewed Object */
@@ -417,18 +451,16 @@ if (m_orientation) {
 
 /** change Window and Level */
 void vtkInteractorStyleProjectionView::WindowLevelDelta( int dw/**<[in] delta window*/, int dl/**<[in] delta level*/) {
-	if (m_imageMapToWindowLevelColors && m_imageViewer && (dw || dl)) 
+	if (m_imageViewer && (dw || dl)) 
 	{
-		dw += m_imageMapToWindowLevelColors->GetWindow();
-		dl += m_imageMapToWindowLevelColors->GetLevel();
+		dw += m_imageViewer->GetWindowLevel()->GetWindow();
+		dl += m_imageViewer->GetWindowLevel()->GetLevel();;
 		if (dw) 
 		{
-			m_imageMapToWindowLevelColors->SetWindow(dw);
 			m_imageViewer->SetColorWindow(dw);
 		}
 		if (dl) 
 		{
-			m_imageMapToWindowLevelColors->SetLevel(dl);
 			m_imageViewer->SetColorLevel(dl);
 		}
 		updateDisplay();
@@ -479,51 +511,6 @@ void vtkInteractorStyleProjectionView::WindowLUTDelta( int dw/**<[in] delta wind
 
 		updateDisplay();
 	}
-}
-
-
-void vtkInteractorStyleProjectionView::ResizeLUTDelta( int dw/**<[in] delta window*/, int dl/**<[in] delta level*/) {
-	if (m_colorMap && m_imageViewer && (dw || dl)) 
-	{
-		double *alphaRange = m_colorMap->GetAlphaRange();
-		double ddw, ddl;
-		int *size = m_imageViewer->GetSize();
-		ddw = (double)dw / (double)size[0];
-		ddl = (double)dl / (double)size[1];
-
-		//if(alphaRange[0] - ddw > 0)
-			alphaRange[0] -= ddw;
-		//if(alphaRange[1] + ddw < 1)
-			alphaRange[1] += ddw;
-		
-		//if(alphaRange[0] + ddl > 0 && alphaRange[0] + ddl < 1
-		//	&& alphaRange[1] + ddl > 0 && alphaRange[1] + ddl < 1)
-		//{
-			alphaRange[0] += ddl;
-			alphaRange[1] += ddl;
-			
-		//}
-			alphaRange[0] = modulus(alphaRange[0],1);
-			alphaRange[1] = modulus(alphaRange[1],1);
-
-		if(alphaRange)
-		{
-			m_colorMap->SetAlphaRange(alphaRange);
-			m_colorMap->ForceBuild();
-			//m_colorMap->SetTableValue(0,0,0,0,0);
-			//m_colorMap->SetTableValue(m_colorMap->GetNumberOfColors()-1,0,0,0,0);
-			m_imageViewer->Render();
-
-			std::cout << "alpha range[0]= " << alphaRange[0] << "; alpha range[1]= " << alphaRange[1] << std::endl;
-		}
-		updateDisplay();
-	}
-}
-
-double vtkInteractorStyleProjectionView::modulus(double a, double b)
-{
-int result = static_cast<int>( a / b );
-return a - static_cast<double>( result ) * b;
 }
 
 void vtkInteractorStyleProjectionView::OnLeftButtonDown()
@@ -585,6 +572,7 @@ void vtkInteractorStyleProjectionView::OnKeyDown()
 		if (keySymSpace.compare(keySym) == 0) { CycleLeftButtonAction(); return; }
 	} else
 	{
+		m_imageViewer->GetRenderer()->AddActor(m_circleActor);
 		m_interAction = ActionColorPick;
 	}
 
@@ -599,6 +587,7 @@ void vtkInteractorStyleProjectionView::OnKeyUp()
 		m_stateCtrl = false;
 		m_interAction = ActionNone;
 		m_annotation->SetText(0, "");
+			m_imageViewer->GetRenderer()->RemoveActor(m_circleActor);
 		updateDisplay();
 	}
 
@@ -633,51 +622,97 @@ void vtkInteractorStyleProjectionView::SetAnnotation(vtkCornerAnnotation* annota
 
 void vtkInteractorStyleProjectionView::PickColor()
 {
-	m_picker = vtkSmartPointer<vtkPointPicker>::New();
+
+	/*m_picker = vtkSmartPointer<vtkPointPicker>::New();
 	
 	m_picker->SetTolerance(0.0);
 	m_imageViewer->GetRenderWindow()->GetInteractor()->SetPicker(m_picker);
-//	m_picker->AddPickList(m_imageViewer->GetImageActor());
-//	m_picker->PickFromListOn();
+*/
+	int x_display, y_display;
 
-	int x,y;
-	double coord[4] = {0};
 	int perfusionIndex;
 	// Pick at the mouse location provided by the interactor
-	if (GetEventPosition(x,y)) 
+	double pos_world[4];
+	double pos_perfusion[4] = {0};
+
+	if (GetEventPosition( x_display, y_display )) 
 	{
-		m_picker->Pick( x, y , 0.0, m_imageViewer->GetRenderer() );
-	
+	//	m_picker->Pick( x_display, y_display , 0.0, m_imageViewer->GetRenderer() );
+	//	pos_world = m_picker->GetPickPosition();
 		vtkRenderer *ren = //this->GetCurrentRenderer();
-		GetInteractor()->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
+			GetInteractor()->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
 		if (ren) {
-		ren->SetDisplayPoint( x, y, 0);// 0.38 );
-		ren->DisplayToWorld();
-		ren->GetWorldPoint( coord );
-		coord[2] = 0.0;
-		m_orientation->MultiplyPoint(coord, coord);
+			ren->SetDisplayPoint( x_display, y_display, 0);// 0.38 );
+			ren->DisplayToWorld();
+			ren->GetWorldPoint( pos_world );
+			pos_world[2] = 0.0;
+			m_orientation->MultiplyPoint(pos_world, pos_perfusion);
 
-		perfusionIndex = m_OverlayImage->FindPoint(coord);
-      }
+			std::cout << "Pick position (world coordinates) is: "
+                << pos_world[0] << " " << pos_world[1]
+                << " " << pos_world[2] << std::endl;
+
+			perfusionIndex = m_perfusionOverlay->FindPoint(pos_perfusion);
+
+			m_circle->SetCenter(pos_world[0], pos_world[1], pos_world[2]);
+			double* bounds_world = m_circleActor->GetBounds();
+
+			double start[2] = {0};
+			double end[2] = {0};
+
+			start[0] = bounds_world[0]; start[1] = bounds_world[2];
+			end[0] = bounds_world[1]; end[1] = bounds_world[3];
+
+
+			vtkSmartPointer<vtkSelectEnclosedPoints> selectEnclosedPoints = 
+				vtkSmartPointer<vtkSelectEnclosedPoints>::New();
+
+			selectEnclosedPoints->Initialize(m_circle->GetOutput());
+			selectEnclosedPoints->SetTolerance(0.1);
+
+			double mean = 0;
+			int count = 0;
+
+			float* perfusionValues;
+
+			switch (m_perfusionOverlay->GetNumberOfScalarComponents()) {
+				case 1:
+				{
+					perfusionValues = (float*)m_perfusionOverlay->GetScalarPointer();
+					//float usPix = pPix[perfusionIndex];
+					//message << "Perfusion = [" << usPix << "],\nCoordinates(" << pos_perfusion[0] << "," << pos_perfusion[1] << "," << pos_perfusion[2] << ")";
+				}
+				break;
+			}
+
+			for(double y = start[1]; y < end[1];y++)
+				for(double x = start[0]; x < end[0];x++)
+				{
+					if(selectEnclosedPoints->IsInsideSurface(x,y,0)) 
+					{
+						pos_world[0] = x;
+						pos_world[1] = y;
+						m_orientation->MultiplyPoint(pos_world, pos_perfusion);
+						int idx = m_perfusionOverlay->FindPoint(pos_perfusion);
+						
+						if(idx >= 0)
+						{
+							float p = perfusionValues[idx];
+							mean += p;
+							count++;
+						}
+						std::cout << x << ", " << y << ", " << "0" << std::endl;
+					}
+					
+				}
+
+			updateDisplay();
+			std::stringstream message;
+			
+			message << "Perfusion = [" << mean/(double)count << "]";
+			
+
+			m_annotation->SetText( 0, message.str().c_str() );
+		}
 	}
-
-	//i(jk) = (x(yz) - origin) / spacing
-	std::stringstream message;
-	
-    // We have to handle different number of scalar components.
-    switch (m_OverlayImage->GetNumberOfScalarComponents()) {
-        case 1:
-        {
-              // Get a shortcut to the raw pixel data. This should be further
-              // updated to check if your data is signed or not, but for this
-              // example we'll just assume it's unsigned. You should also check
-              // the type of your data too (unsigned char, unsigned short, etc).
-			float* pPix = (float*)m_OverlayImage->GetScalarPointer();
-			float usPix = pPix[perfusionIndex];
-			message << "Perfusion = [" << usPix << "],\nCoordinates(" << coord[0] << "," << coord[1] << "," << coord[2] << ")";
-        }
-        break;
-	}
-
-	m_annotation->SetText( 0, message.str().c_str() );
 }

@@ -51,6 +51,7 @@ class vtkTransform;
 class vtkLookupTable;
 class vtkCornerAnnotation;
 class vtkImageData;
+class vtkRegularPolygonSource;
 
 /// Interactor Style specific for Projection Views.
 /** This class should be used as interaction style for projection views.
@@ -90,12 +91,11 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   /** @name Attribute Setters
       in order to give vtkInteractorStyleProjectionView needed access to the displayed entities */
   ///@{
-  void SetImageMapToWindowLevelColors(vtkImageMapToWindowLevelColors *map/**<[in]*/) { m_imageMapToWindowLevelColors = map; }
   void SetOrientationMatrix(vtkMatrix4x4 *orientation/**<[in]*/) { m_orientation = orientation; }
   void SetImageViewer(vtkImageViewer2 * viewer) { m_imageViewer = viewer;}
   void SetColorMap(vtkLookupTable* lut) { m_colorMap = lut; }
   void SetAnnotation(vtkCornerAnnotation* annotation);
-  void SetOverlayImage(vtkImageData* overlay) { m_OverlayImage = overlay; }
+  void SetOverlayImage(vtkImageData* overlay) { m_perfusionOverlay = overlay; }
 //  void Set
   ///@}
   void CycleLeftButtonAction();
@@ -125,7 +125,6 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   bool restrictAction();
   void saveDisplayState(void);
   void updateDisplay(void);
-  double modulus(double a, double b);
  
 
   struct DisplayState {
@@ -159,14 +158,15 @@ class vtkInteractorStyleProjectionView : public vtkInteractorStyle
   float m_sliceIncrement; ///< Value to Increment the Viewers Z-Position when slicing
   vtkTextActor *m_leftMBHint; ///< Hint actor for showing the Action associated with the Left Mouse Button
   float m_leftMBHintAlpha; ///< alpha value for #m_leftMBHint
-  vtkImageMapToWindowLevelColors *m_imageMapToWindowLevelColors; ///< Mapper (set external via SetImageMapToWindowLevelColors()) for Window and Level (changed via vtkInteractorStyleProjectionView::ActionWindowLevel)
   vtkImageViewer2 *m_imageViewer;
   vtkLookupTable *m_colorMap; 
-  vtkImageData* m_OverlayImage;
+  vtkImageData* m_perfusionOverlay;
   vtkCornerAnnotation* m_annotation;
   vtkSmartPointer<vtkPointPicker> m_picker;
   vtkMatrix4x4 *m_orientation; ///< the Transformation Matrix of the displayed Data
   DisplayState m_initialState; ///< Display state at the beginning of an action
+  vtkRegularPolygonSource* m_circle;
+  vtkActor* m_circleActor;
   private:
   vtkTransform *tempTransform;
 };

@@ -77,7 +77,7 @@ void PerfusionMapCreator::setArterySegment(SegmentInfo* artery)
 	m_arterySegment = artery;
 }
 
-RealImageTreeItem::ImageType::Pointer PerfusionMapCreator::getPerfusionMap(CTImageTreeModel* model)
+RealImageTreeItem::ImageType::Pointer PerfusionMapCreator::calculatePerfusionMap(CTImageTreeModel* model)
 {
 	typedef itk::NaryPerfusionImageFilter<CTImageType, RealImageType> PerfusionFilterType;
 

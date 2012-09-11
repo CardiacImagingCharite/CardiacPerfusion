@@ -117,6 +117,7 @@ class RealImageTreeItem : public ITKVTKTreeItem< RealImageType > {
     
   private:
     QString name; // name of the TreeItem
+
     
   protected:
 

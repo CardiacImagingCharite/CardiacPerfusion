@@ -43,6 +43,7 @@
 
 #include <vtkSmartPointer.h>
 #include <vtkLookupTable.h>
+#include <vtkRenderWindow.h>
 #include <boost/assign.hpp>
 #include <boost/foreach.hpp>
 
@@ -586,7 +587,7 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 
 			//RealImageType::Pointer perfusionMap = mapCreator->getPerfusionMap(&imageModel);
 			RealImageTreeItem::ImageType::Pointer perfusionMap;
-			perfusionMap = mapCreator->getPerfusionMap(&imageModel);
+			perfusionMap = mapCreator->calculatePerfusionMap(&imageModel);
 
 
 			TreeItem* root = &imageModel.getRootItem();
@@ -1000,24 +1001,27 @@ void KardioPerfusion::on_btn_arteryInput_selected(const SegmentInfo *segment) {
 }
 
 void KardioPerfusion::slider_opacity_changed()
-{
+{		
+	//get list of selected items
 	QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
-	//if index list is not empty
-	//if (indexList.count()>0) {
-		//if one item is selected
-	//	if (indexList.count() == 1) {
-			//get tree item
-		//	TreeItem &item = imageModel.getItem(indexList[0]);
-			//if item is a perfusionmap
-	//		if (item.isA(typeid(RealImageTreeItem))) {				
-				m_perfusionLUT->SetAlpha((double)this->ui->slider_opacity->value()/10);
-				this->ui->mprView_lr->refreshView();
-				this->ui->mprView_ur->refreshView();
-				this->ui->mprView_ul->refreshView();
+	//if one item is selected
+	if (indexList.count() == 1) {
+		//get selected item
+		TreeItem &item = imageModel.getItem(indexList[0]);
+		//if item is a segment
+		if (item.isA(typeid(RealImageTreeItem))) {
+			//get segment
+			RealImageTreeItem &perfusionMap = dynamic_cast<RealImageTreeItem&>(item);
+			
+		}
+	}
 
-	//		}
-	//	}
-	//}
+	m_perfusionLUT->SetAlpha((double)this->ui->slider_opacity->value()/10);
+	
+	this->ui->mprView_lr->refreshView();
+	this->ui->mprView_ur->GetRenderWindow()->Render();
+	this->ui->mprView_ul->GetRenderWindow()->GetInteractor()->Render();
+	
 }
 
 void KardioPerfusion::renameTreeviewItem()

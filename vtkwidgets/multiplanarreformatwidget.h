@@ -154,7 +154,6 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	///Refresh the view.
 	void refreshView();
 
-	void showCircle(float x, float y, float z, int radius);
   
 	public slots:
 	///Resets the view.
@@ -172,7 +171,7 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	BinaryOverlayMapType m_binaryOverlays;
 	vtkImageData *m_image; ///< volume image data to be displayed - set by setImage()
 	vtkImageReslice *m_reslice; ///< vtkImageAlgorithm to reslice the image
-	vtkImageMapToWindowLevelColors *m_colormap; ///< used to apply Window and Level
+	//vtkImageMapToWindowLevelColors *m_colormap; ///< used to apply Window and Level
 	//vtkImageActor *m_actor; ///< vtkActor which actually displays the resliced volume
 	//vtkRenderer *m_renderer; ///< the used renderer
 	vtkSmartPointer<vtkImageViewer2> m_imageViewer; ///< the uses image viewer

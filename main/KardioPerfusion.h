@@ -205,14 +205,7 @@ private:
 	void perfusionMapHide(const RealImageTreeItem *perfItem );
 	
 	///Callback to update the widgets
-	void updateFunc(vtkObject* caller, long unsigned int eventId, void* clientData, void* callData );
-
-	static void KeypressCallbackFunction (
-  vtkObject* caller,
-  long unsigned int eventId,
-  void* clientData,
-  void* callData );
-
+	static void updateFunc(vtkObject* caller, long unsigned int eventId, void* clientData, void* callData );
 
 	CTImageTreeModel imageModel;
 	CTImageTreeItem::ConnectorHandle displayedCTImage;

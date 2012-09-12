@@ -42,7 +42,7 @@
 #include <vtkImageViewer2.h>
 #include <vtkSmartPointer.h>
 #include "vtkinteractoractiondispatch.h"
-
+#include <QObject>
 
 class vtkImageMapToWindowLevelColors;
 class vtkMatrix4x4;
@@ -59,117 +59,121 @@ It features mouse interaction with combination of Mouse Button presses
 as well as selection of interaction mode by pressing Space.
 */
 
-class vtkInteractorStyleProjectionView : public vtkInteractorStyle
+class vtkInteractorStyleProjectionView : public QObject, public vtkInteractorStyle
 {
-  vtkTypeRevisionMacro(vtkInteractorStyleProjectionView,vtkInteractorStyle);
-  public:
-  /// Default Construction Method filled by vtkStandardNewMacro
-  static vtkInteractorStyleProjectionView *New();
+	Q_OBJECT
 
-  vtkInteractorStyleProjectionView();
+	vtkTypeRevisionMacro(vtkInteractorStyleProjectionView,vtkInteractorStyle);
+public:
+	/// Default Construction Method filled by vtkStandardNewMacro
+	static vtkInteractorStyleProjectionView *New();
 
-  ~vtkInteractorStyleProjectionView();
+	vtkInteractorStyleProjectionView();
+
+	~vtkInteractorStyleProjectionView();
   
-  /** @name Overidden Event Handlers
-      inherited from vtkInteractorStyle */
-  ///@{
-  virtual void OnMouseMove();
-  virtual void OnLeftButtonDown();
-  virtual void OnLeftButtonUp();
-  virtual void OnMiddleButtonDown();
-  virtual void OnMiddleButtonUp();
-  virtual void OnRightButtonDown();
-  virtual void OnRightButtonUp();
-  virtual void OnKeyDown();
-  virtual void OnKeyUp();
-  virtual void OnMouseWheelForward();
-  virtual void OnMouseWheelBackward();
-  virtual void OnTimer();
-  ///@}
+	/** @name Overidden Event Handlers
+		inherited from vtkInteractorStyle */
+	///@{
+	virtual void OnMouseMove();
+	virtual void OnLeftButtonDown();
+	virtual void OnLeftButtonUp();
+	virtual void OnMiddleButtonDown();
+	virtual void OnMiddleButtonUp();
+	virtual void OnRightButtonDown();
+	virtual void OnRightButtonUp();
+	virtual void OnKeyDown();
+	virtual void OnKeyUp();
+	virtual void OnMouseWheelForward();
+	virtual void OnMouseWheelBackward();
+	virtual void OnTimer();
+	///@}
   
   
-  /** @name Attribute Setters
-      in order to give vtkInteractorStyleProjectionView needed access to the displayed entities */
-  ///@{
-  void SetOrientationMatrix(vtkMatrix4x4 *orientation/**<[in]*/) { m_orientation = orientation; }
-  void SetImageViewer(vtkImageViewer2 * viewer) { m_imageViewer = viewer;}
-  void SetColorMap(vtkLookupTable* lut) { m_colorMap = lut; }
-  void SetAnnotation(vtkCornerAnnotation* annotation);
-  void SetOverlayImage(vtkImageData* overlay) { m_perfusionOverlay = overlay; }
-//  void Set
-  ///@}
-  void CycleLeftButtonAction();
-  void WindowLevelDelta( int dw, int dl );
-  void Slice( int dpos );
-  void Rotate( int theta, int phi );
-  void Spin( int alpha );
-  void Zoom( int delta );
-  void Pan( int dx, int dy );
-  void WindowLUTDelta(int dx, int dy);
-  void ResizeLUTDelta(int dx, int dy);
-  void PickColor(); 
+	/** @name Attribute Setters
+		in order to give vtkInteractorStyleProjectionView needed access to the displayed entities */
+	///@{
+	void SetOrientationMatrix(vtkMatrix4x4 *orientation/**<[in]*/) { m_orientation = orientation; }
+	void SetImageViewer(vtkImageViewer2 * viewer) { m_imageViewer = viewer;}
+	void SetColorMap(vtkLookupTable* lut) { m_colorMap = lut; }
+	void SetAnnotation(vtkCornerAnnotation* annotation);
+	void SetOverlayImage(vtkImageData* overlay) { m_perfusionOverlay = overlay; }
+	//  void Set
+	///@}
+	void CycleLeftButtonAction();
+	void WindowLevelDelta( int dw, int dl );
+	void Slice( int dpos );
+	void Rotate( int theta, int phi );
+	void Spin( int alpha );
+	void Zoom( int delta );
+	void Pan( int dx, int dy );
+	void WindowLUTDelta(int dx, int dy);
+	void PickColor(); 
 
-  int addAction(const std::string &label, const ActionSignal::slot_type &slot,
-    ActionDispatch::ActionType atype, ActionDispatch::RestrictionType restrict);
-  int addAction(const ActionDispatch &action);
-  void activateAction(int action);
-  void removeAction(int action);
-  void resetActions();
+	int addAction(const std::string &label, const ActionSignal::slot_type &slot,
+	ActionDispatch::ActionType atype, ActionDispatch::RestrictionType restrict);
+	int addAction(const ActionDispatch &action);
+	void activateAction(int action);
+	void removeAction(int action);
+	void resetActions();
 
-  protected:
-  void processAction();
-  void updateRenderer();
-  void dipatchActions();
-  void updateLMBHint();
-  void SetLMBHint( float alpha, const std::string &text = std::string() );
-  bool GetEventPosition( int &x, int &y, bool last=false );
-  bool restrictAction();
-  void saveDisplayState(void);
-  void updateDisplay(void);
+signals:
+	void ColorTableChanged();
+
+protected:
+	void processAction();
+	void updateRenderer();
+	void dipatchActions();
+	void updateLMBHint();
+	void SetLMBHint( float alpha, const std::string &text = std::string() );
+	bool GetEventPosition( int &x, int &y, bool last=false );
+	bool restrictAction();
+	void saveDisplayState(void);
+	void updateDisplay(void);
  
 
-  struct DisplayState {
-    int window;
-    int level;
-    int mousePosition[2];
-    vtkMatrix4x4 *orientation;
-  };
+	struct DisplayState {
+		int window;
+		int level;
+		int mousePosition[2];
+		vtkMatrix4x4 *orientation;
+	};
   
-  enum Restriction {
-    XOnly,
-    YOnly,
-    None
-  };
-  Restriction restriction;
-  typedef std::map< int, ActionDispatch > ActionListType;
-  ActionListType m_actionList;
-  int m_interAction; ///< selected interaction due to mouse button presses - determined by dipatchActions()
-  int m_leftButtonAction; ///< selected interaction for the left mouse button - changed by pressing Space in CycleLeftButtonAction()
-  int ActionFirst, ActionSpin, ActionRotate, ActionZoom, ActionPan, ActionWindowLevel, ActionSlice, ActionNone, ActionResizeLUT, ActionWindowLUT, ActionColorPick;
-  
-  /** @name Mouse Button Flags
-      State of the Mouse Buttons (Pressed?) */
-  //@{
-  bool m_stateRButton; 
-  bool m_stateLButton;
-  bool m_stateMButton;
-  //@}
+	enum Restriction {
+		XOnly,
+		YOnly,
+		None
+	};
+	Restriction restriction;
+	typedef std::map< int, ActionDispatch > ActionListType;
+	ActionListType m_actionList;
+	int m_interAction; ///< selected interaction due to mouse button presses - determined by dipatchActions()
+	int m_leftButtonAction; ///< selected interaction for the left mouse button - changed by pressing Space in CycleLeftButtonAction()
+	int ActionFirst, ActionSpin, ActionRotate, ActionZoom, ActionPan, ActionWindowLevel, ActionSlice, ActionNone, ActionWindowLUT, ActionColorPick;
 
-  bool m_stateCtrl;///< State of the CTRL-Key
-  float m_sliceIncrement; ///< Value to Increment the Viewers Z-Position when slicing
-  vtkTextActor *m_leftMBHint; ///< Hint actor for showing the Action associated with the Left Mouse Button
-  float m_leftMBHintAlpha; ///< alpha value for #m_leftMBHint
-  vtkImageViewer2 *m_imageViewer;
-  vtkLookupTable *m_colorMap; 
-  vtkImageData* m_perfusionOverlay;
-  vtkCornerAnnotation* m_annotation;
-  vtkSmartPointer<vtkPointPicker> m_picker;
-  vtkMatrix4x4 *m_orientation; ///< the Transformation Matrix of the displayed Data
-  DisplayState m_initialState; ///< Display state at the beginning of an action
-  vtkRegularPolygonSource* m_circle;
-  vtkActor* m_circleActor;
-  private:
-  vtkTransform *tempTransform;
+	/** @name Mouse Button Flags
+	State of the Mouse Buttons (Pressed?) */
+	//@{
+	bool m_stateRButton; 
+	bool m_stateLButton;
+	bool m_stateMButton;
+	//@}
+
+	bool m_stateCtrl;///< State of the CTRL-Key
+	float m_sliceIncrement; ///< Value to Increment the Viewers Z-Position when slicing
+	vtkTextActor *m_leftMBHint; ///< Hint actor for showing the Action associated with the Left Mouse Button
+	float m_leftMBHintAlpha; ///< alpha value for #m_leftMBHint
+	vtkImageViewer2 *m_imageViewer;
+	vtkLookupTable *m_colorMap; 
+	vtkImageData* m_perfusionOverlay;
+	vtkCornerAnnotation* m_annotation;
+	vtkSmartPointer<vtkPointPicker> m_picker;
+	vtkMatrix4x4 *m_orientation; ///< the Transformation Matrix of the displayed Data
+	DisplayState m_initialState; ///< Display state at the beginning of an action
+	vtkRegularPolygonSource* m_circle;
+	vtkActor* m_circleActor;
+private:
+	vtkTransform *tempTransform;
 };
 
 #endif // VTKINTERACTORSTYLEPROJECTIONVIEW_H

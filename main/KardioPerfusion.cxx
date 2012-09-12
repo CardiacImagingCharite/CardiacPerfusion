@@ -158,6 +158,18 @@ KardioPerfusion::KardioPerfusion():
 		this, SLOT(mprWidget_doubleClicked(MultiPlanarReformatWidget &)));
 	connect(this->ui->tw_results, SIGNAL(doubleClicked(MyTabWidget &)),
 		this, SLOT(tabWidget_doubleClicked(MyTabWidget &)));
+
+
+	connect(this->ui->mprView_lr->GetInteractorStyle() , SIGNAL( ColorTableChanged() ), this->ui->mprView_ur, SLOT(updateWidget()));
+	connect(this->ui->mprView_lr->GetInteractorStyle() , SIGNAL( ColorTableChanged() ), this->ui->mprView_ul, SLOT(updateWidget()));
+
+	connect(this->ui->mprView_ur->GetInteractorStyle() , SIGNAL( ColorTableChanged() ), this->ui->mprView_lr, SLOT(updateWidget()));
+	connect(this->ui->mprView_ur->GetInteractorStyle() , SIGNAL( ColorTableChanged() ), this->ui->mprView_ul, SLOT(updateWidget()));
+
+	connect(this->ui->mprView_ul->GetInteractorStyle() , SIGNAL( ColorTableChanged() ), this->ui->mprView_ur, SLOT(updateWidget()));
+	connect(this->ui->mprView_ul->GetInteractorStyle() , SIGNAL( ColorTableChanged() ), this->ui->mprView_lr, SLOT(updateWidget()));
+
+
 };
 
 KardioPerfusion::~KardioPerfusion()
@@ -608,22 +620,17 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 				RealImageTreeItem* result = new RealImageTreeItem(root, perfusionMap, mapName, opacity);
 				root->insertChild(result);
 
-				vtkSmartPointer<vtkCallbackCommand> keypressCallback = 
+			/*	vtkSmartPointer<vtkCallbackCommand> updateCallback = 
 					vtkSmartPointer<vtkCallbackCommand>::New();
-				keypressCallback->SetCallback ( KeypressCallbackFunction );
-  
-				keypressCallback->SetClientData(this);
-				result->getColorMap()->AddObserver(vtkCommand::ModifiedEvent, keypressCallback);
-				result->getColorMap()->AddObserver(vtkCommand::ModifiedEvent, keypressCallback);
-				result->getColorMap()->AddObserver(vtkCommand::ModifiedEvent, keypressCallback);
 
+				updateCallback->SetCallback( updateFunc );
+				updateCallback->SetClientData( this );
+
+				result->getColorMap()->AddObserver(vtkCommand::UserEvent + 1, updateCallback);
+				*/
 				this->ui->mprView_ur->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
-				//m_perfusionLUT = this->ui->mprView_ur->getOverlayColorMap();
-
 				this->ui->mprView_ul->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
 				this->ui->mprView_lr->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
-
-
 			}
 			else{
 				QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));
@@ -1057,23 +1064,11 @@ void KardioPerfusion::renameTreeviewItem()
 	this->ui->treeView->edit(indexList[0]);
 }
 
-void KardioPerfusion::updateFunc(vtkObject* caller, long unsigned int vtkNotUsed(eventId), void* vtkNotUsed(clientData), void* vtkNotUsed(callData))
-{
-	this->ui->mprView_lr->update();
-	this->ui->mprView_ul->update();
-	this->ui->mprView_ur->update();
-}
-
-void KardioPerfusion::KeypressCallbackFunction (
-  vtkObject* caller,
-  long unsigned int eventId,
-  void* clientData,
-  void* callData )
+void KardioPerfusion::updateFunc(vtkObject* caller, long unsigned int eventId, void* clientData, void* callData)
 {
 	KardioPerfusion* self = reinterpret_cast<KardioPerfusion*>( clientData);
-	
-	self->ui->mprView_lr->update();
-	self->ui->mprView_ur->update();
-	self->ui->mprView_ul->update();
 
+	self->ui->mprView_lr->update();
+	self->ui->mprView_ul->update();
+	self->ui->mprView_ur->update();
 }

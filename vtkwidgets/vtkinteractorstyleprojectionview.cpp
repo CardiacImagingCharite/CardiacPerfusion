@@ -59,6 +59,7 @@
 #include <vtkProperty.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkSelectEnclosedPoints.h>
+#include <vtkCommand.h>
 
 #include <string>
 #include <iostream>
@@ -107,7 +108,7 @@ vtkInteractorStyleProjectionView::vtkInteractorStyleProjectionView():
 		= vtkSmartPointer<vtkPolyDataMapper>::New();	
 	m_circle->GeneratePolygonOff();
 	//  m_circle->SetNormal(0,0,1);
-	m_circle->SetRadius(10);
+	m_circle->SetRadius(2);
 	m_circle->Update();
 	m_circle->SetNumberOfSides(360);
 	
@@ -118,6 +119,7 @@ vtkInteractorStyleProjectionView::vtkInteractorStyleProjectionView():
 	m_circleActor->GetProperty()->SetOpacity(0.9);
 	m_circleActor->GetProperty()->SetLineWidth(1);
 	
+//	m_updateEvent = vtkCommand::UserEvent + 1;
 }
 
 
@@ -130,8 +132,7 @@ void vtkInteractorStyleProjectionView::resetActions() {
   ActionWindowLevel = addAction("Window/Level", boost::bind(&vtkInteractorStyleProjectionView::WindowLevelDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
   ActionWindowLUT = addAction("Window Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::WindowLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
-  //ActionResizeLUT = addAction("Resize Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::ResizeLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
- 
+  
   ActionColorPick = addAction("", boost::bind(&vtkInteractorStyleProjectionView::PickColor, this), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
   //m_leftButtonAction = ActionSlice;
@@ -223,7 +224,6 @@ void vtkInteractorStyleProjectionView::dipatchActions() {
 	}
 	else
 	{
-		//if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionResizeLUT; return; }
 		if (!m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionWindowLUT; return; }
 		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
 	}
@@ -505,6 +505,8 @@ void vtkInteractorStyleProjectionView::WindowLUTDelta( int dw/**<[in] delta wind
 
 			//std::cout << "range[0]= " << range[0] << "; range[1]= " << range[1] << std::endl;
 		}
+
+		emit ColorTableChanged();
 
 		updateDisplay();
 	}

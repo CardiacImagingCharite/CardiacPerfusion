@@ -68,7 +68,7 @@ class MultiPlanarReformatWidget : public QVTKWidget
 {
 	Q_OBJECT
 
-	public:
+public:
 	///Constructor of the widget.
 	MultiPlanarReformatWidget(QWidget* parent = NULL, Qt::WFlags f = 0);
 	///Deconstructor of the widget.
@@ -146,15 +146,17 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	*/
 	void setOrientation(int orientation);
 
-  
-	public slots:
+	vtkSmartPointer<vtkInteractorStyleProjectionView> GetInteractorStyle() { return this->m_interactorStyle; }
+
+public slots:
 	///Resets the view.
 	void resetView();
+	void updateWidget();
 
-	signals:
+signals:
 	void doubleClicked(MultiPlanarReformatWidget &); ///< double click with LMB
 
-	protected:
+protected:
 	///double click event
 	void mouseDoubleClickEvent ( QMouseEvent * e );
 	typedef std::map< vtkImageData *, boost::shared_ptr< vtkBinaryImageOverlay > > BinaryOverlayMapType;
@@ -163,9 +165,6 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	BinaryOverlayMapType m_binaryOverlays;
 	vtkImageData *m_image; ///< volume image data to be displayed - set by setImage()
 	vtkImageReslice *m_reslice; ///< vtkImageAlgorithm to reslice the image
-	//vtkImageMapToWindowLevelColors *m_colormap; ///< used to apply Window and Level
-	//vtkImageActor *m_actor; ///< vtkActor which actually displays the resliced volume
-	//vtkRenderer *m_renderer; ///< the used renderer
 	vtkSmartPointer<vtkImageViewer2> m_imageViewer; ///< the uses image viewer
 	vtkSmartPointer<vtkCornerAnnotation> m_annotation;
 	vtkMatrix4x4 *m_reslicePlaneTransform; ///< Tranformation Matrix for the Reslicing Plane
@@ -173,7 +172,7 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	int m_orientation;
 	QPushButton *m_menuButton;
 
-	private:
+private:
 	static void mouseMoveCallback(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);
 };
 

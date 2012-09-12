@@ -203,8 +203,16 @@ private:
 	\param perfItem contains a pointer to the BinaryImageTreeItem
 	*/
 	void perfusionMapHide(const RealImageTreeItem *perfItem );
+	
+	///Callback to update the widgets
+	void updateFunc(vtkObject* caller, long unsigned int eventId, void* clientData, void* callData );
 
-//	void create4DImage(CTImageType4D* image, CTImageType4D::SizeType size);
+	static void KeypressCallbackFunction (
+  vtkObject* caller,
+  long unsigned int eventId,
+  void* clientData,
+  void* callData );
+
 
 	CTImageTreeModel imageModel;
 	CTImageTreeItem::ConnectorHandle displayedCTImage;

@@ -44,6 +44,9 @@
 #include <vtkSmartPointer.h>
 #include <vtkLookupTable.h>
 #include <vtkRenderWindow.h>
+#include <vtkCallbackCommand.h>
+#include <vtkCommand.h>
+
 #include <boost/assign.hpp>
 #include <boost/foreach.hpp>
 
@@ -61,7 +64,6 @@
 
 #include "itkShrinkImageFilter.h"
 #include "perfusionmapcreator.h"
-
 
 
 const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
@@ -180,7 +182,7 @@ void KardioPerfusion::slotOpenFile()
 	QStringList fnames = QFileDialog::getOpenFileNames(
     this,
     tr("Select one or more files to open"),
-    ".",
+    "F:/data",
     "", 0, QFileDialog::ReadOnly|QFileDialog::HideNameFilterDetails);
   setFiles( fnames );
 }
@@ -606,6 +608,15 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 				RealImageTreeItem* result = new RealImageTreeItem(root, perfusionMap, mapName, opacity);
 				root->insertChild(result);
 
+				vtkSmartPointer<vtkCallbackCommand> keypressCallback = 
+					vtkSmartPointer<vtkCallbackCommand>::New();
+				keypressCallback->SetCallback ( KeypressCallbackFunction );
+  
+				keypressCallback->SetClientData(this);
+				result->getColorMap()->AddObserver(vtkCommand::ModifiedEvent, keypressCallback);
+				result->getColorMap()->AddObserver(vtkCommand::ModifiedEvent, keypressCallback);
+				result->getColorMap()->AddObserver(vtkCommand::ModifiedEvent, keypressCallback);
+
 				this->ui->mprView_ur->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
 				//m_perfusionLUT = this->ui->mprView_ur->getOverlayColorMap();
 
@@ -1026,9 +1037,9 @@ void KardioPerfusion::slider_opacity_changed()
 			RealImageTreeItem &perfusionMap = dynamic_cast<RealImageTreeItem&>(item);
 			perfusionMap.setOpacity((double)this->ui->slider_opacity->value()/10);
 
-			this->ui->mprView_lr->opacityHasChanged(perfusionMap.getVTKConnector()->getVTKImageData());
-			this->ui->mprView_ul->opacityHasChanged(perfusionMap.getVTKConnector()->getVTKImageData());
-			this->ui->mprView_ur->opacityHasChanged(perfusionMap.getVTKConnector()->getVTKImageData());
+			this->ui->mprView_lr->update();
+			this->ui->mprView_ul->update();
+			this->ui->mprView_ur->update();
 		}
 	}
 
@@ -1044,4 +1055,25 @@ void KardioPerfusion::renameTreeviewItem()
 {
 	QModelIndexList indexList = this->ui->treeView->selectionModel()->selectedRows();
 	this->ui->treeView->edit(indexList[0]);
+}
+
+void KardioPerfusion::updateFunc(vtkObject* caller, long unsigned int vtkNotUsed(eventId), void* vtkNotUsed(clientData), void* vtkNotUsed(callData))
+{
+	this->ui->mprView_lr->update();
+	this->ui->mprView_ul->update();
+	this->ui->mprView_ur->update();
+}
+
+void KardioPerfusion::KeypressCallbackFunction (
+  vtkObject* caller,
+  long unsigned int eventId,
+  void* clientData,
+  void* callData )
+{
+	KardioPerfusion* self = reinterpret_cast<KardioPerfusion*>( clientData);
+	
+	self->ui->mprView_lr->update();
+	self->ui->mprView_ur->update();
+	self->ui->mprView_ul->update();
+
 }

@@ -146,9 +146,6 @@ class MultiPlanarReformatWidget : public QVTKWidget
 	*/
 	void setOrientation(int orientation);
 
-	///Update display if Colormap has changed.
-	void opacityHasChanged(vtkImageData *image);
-
   
 	public slots:
 	///Resets the view.

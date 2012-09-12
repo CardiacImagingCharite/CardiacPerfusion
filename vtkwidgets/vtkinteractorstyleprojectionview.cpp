@@ -487,7 +487,6 @@ void vtkInteractorStyleProjectionView::WindowLUTDelta( int dw/**<[in] delta wind
 
 		if(range)
 		{
-			
 			m_colorMap->SetRange(range);
 			m_colorMap->ForceBuild();
 
@@ -502,11 +501,9 @@ void vtkInteractorStyleProjectionView::WindowLUTDelta( int dw/**<[in] delta wind
 				m_colorMap->SetTableValue(255-i,rgba[0],rgba[1],rgba[2],1/16*i);
 			}
 
-			//m_colorMap->SetTableValue(0,0,0,0,0);
-			//m_colorMap->SetTableValue(m_colorMap->GetNumberOfColors()-1,0,0,0,0);
-			m_imageViewer->Render();
+			//m_imageViewer->Render();
 
-			std::cout << "range[0]= " << range[0] << "; range[1]= " << range[1] << std::endl;
+			//std::cout << "range[0]= " << range[0] << "; range[1]= " << range[1] << std::endl;
 		}
 
 		updateDisplay();
@@ -715,4 +712,5 @@ void vtkInteractorStyleProjectionView::PickColor()
 			m_annotation->SetText( 0, message.str().c_str() );
 		}
 	}
+	
 }

@@ -132,6 +132,4 @@ void RealImageTreeItem::setOpacity(double alpha)
 		m_colorMap->GetTableValue(255-i,rgba);
 		m_colorMap->SetTableValue(255-i,rgba[0],rgba[1],rgba[2],1/16*i);
 	}
-
-	//m_colorMap->Modified();
 }

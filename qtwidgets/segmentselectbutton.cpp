@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Christian Freye
+    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.

@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Christian Freye
+    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -54,7 +54,7 @@ CTImageTreeModel::CTImageTreeModel(const DicomTagList &header, QObject *parent)
 
 void CTImageTreeModel::initMaxMemoryUsage() {
     QSettings settings;
-    unsigned defaultMaxUsage = 2048UL * 1024UL * 1024UL;
+    unsigned defaultMaxUsage = 8192UL * 1024UL * 1024UL;
     maxImageMemoryUsage = settings.value(MaxImageMemoryUsageSettingName, defaultMaxUsage ).toULongLong();
 }
 

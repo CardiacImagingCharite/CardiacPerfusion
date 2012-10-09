@@ -60,7 +60,16 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkSelectEnclosedPoints.h>
 #include <vtkCommand.h>
-
+#include <vtkImageReslice.h>
+//
+#include <vtkPNGWriter.h>
+#include <vtkImageShiftScale.h>
+#include <vtkPolyDataToImageStencil.h>
+#include <vtkImageStencil.h>
+#include <vtkMetaImageWriter.h>
+#include <vtkLinearExtrusionFilter.h>
+#include <vtkXMLPolyDataWriter.h>
+//
 #include <string>
 #include <iostream>
 #include <boost/bind.hpp>
@@ -133,7 +142,8 @@ void vtkInteractorStyleProjectionView::resetActions() {
   
   ActionWindowLUT = addAction("Window Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::WindowLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
-  ActionColorPick = addAction("", boost::bind(&vtkInteractorStyleProjectionView::PickColor, this), ActionDispatch::MovingAction, ActionDispatch::Restricted );
+  ActionColorPick = addAction("", boost::bind(&vtkInteractorStyleProjectionView::PickColor, this), ActionDispatch::ClickingAction, ActionDispatch::Restricted );
+  ActionShowCircle = addAction("", boost::bind(&vtkInteractorStyleProjectionView::ShowCircle, this), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
   //m_leftButtonAction = ActionSlice;
   m_leftButtonAction = ActionWindowLevel;
@@ -225,7 +235,8 @@ void vtkInteractorStyleProjectionView::dipatchActions() {
 	else
 	{
 		if (!m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionWindowLUT; return; }
-		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
+		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionShowCircle; return; }
+		if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = ActionColorPick; return; }
 	}
 }
 
@@ -572,7 +583,7 @@ void vtkInteractorStyleProjectionView::OnKeyDown()
 	} else
 	{
 		m_imageViewer->GetRenderer()->AddActor(m_circleActor);
-		m_interAction = ActionColorPick;
+		dipatchActions();
 	}
 
 
@@ -619,25 +630,16 @@ void vtkInteractorStyleProjectionView::SetAnnotation(vtkCornerAnnotation* annota
 	}
 }
 
-void vtkInteractorStyleProjectionView::PickColor()
+void vtkInteractorStyleProjectionView::ShowCircle()
 {
-
-	/*m_picker = vtkSmartPointer<vtkPointPicker>::New();
-	
-	m_picker->SetTolerance(0.0);
-	m_imageViewer->GetRenderWindow()->GetInteractor()->SetPicker(m_picker);
-*/
 	int x_display, y_display;
 
-	int perfusionIndex;
 	// Pick at the mouse location provided by the interactor
 	double pos_world[4];
 	double pos_perfusion[4] = {0};
 
 	if (GetEventPosition( x_display, y_display )) 
 	{
-	//	m_picker->Pick( x_display, y_display , 0.0, m_imageViewer->GetRenderer() );
-	//	pos_world = m_picker->GetPickPosition();
 		vtkRenderer *ren = //this->GetCurrentRenderer();
 			GetInteractor()->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
 		if (ren) {
@@ -650,8 +652,52 @@ void vtkInteractorStyleProjectionView::PickColor()
 			std::cout << "Pick position (world coordinates) is: "
                 << pos_world[0] << " " << pos_world[1]
                 << " " << pos_world[2] << std::endl;
+		
+			m_circle->SetCenter(pos_world[0], pos_world[1], pos_world[2]);
+		}
+	}
+}
 
-			perfusionIndex = m_perfusionOverlay->FindPoint(pos_perfusion);
+void vtkInteractorStyleProjectionView::PickColor()
+{
+	vtkSmartPointer<vtkPNGWriter> writer =
+			vtkSmartPointer<vtkPNGWriter>::New();
+
+	vtkSmartPointer<vtkImageShiftScale> scale = 
+			vtkSmartPointer<vtkImageShiftScale>::New();
+
+	if(m_Overlay)
+	{
+		
+		scale->SetInput(m_Overlay->getReslice()->GetOutput());
+		scale->SetOutputScalarTypeToUnsignedShort();
+
+		writer->SetFileName("resliceTest.png");
+		writer->SetInput(scale->GetOutput());
+		writer->Write();
+	}
+
+	int x_display, y_display;
+
+	int perfusionIndex;
+	// Pick at the mouse location provided by the interactor
+	double pos_world[4];
+	double pos_perfusion[4] = {0};
+	
+	if (GetEventPosition( x_display, y_display )) 
+	{
+		vtkRenderer *ren = GetInteractor()->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
+
+		if (ren) {
+			ren->SetDisplayPoint( x_display, y_display, 0);// 0.38 );
+			ren->DisplayToWorld();
+			ren->GetWorldPoint( pos_world );
+			pos_world[2] = 0.0;
+			m_orientation->MultiplyPoint(pos_world, pos_perfusion);
+
+			std::cout << "Pick position (world coordinates) is: "
+                << pos_world[0] << " " << pos_world[1]
+                << " " << pos_world[2] << std::endl;
 
 			m_circle->SetCenter(pos_world[0], pos_world[1], pos_world[2]);
 			double* bounds_world = m_circleActor->GetBounds();
@@ -674,26 +720,30 @@ void vtkInteractorStyleProjectionView::PickColor()
 
 			float* perfusionValues;
 
-			switch (m_perfusionOverlay->GetNumberOfScalarComponents()) {
+			switch (m_Overlay->getReslice()->GetOutput()->GetNumberOfScalarComponents()) {
 				case 1:
-				{
-					perfusionValues = (float*)m_perfusionOverlay->GetScalarPointer();
+				{ 
+					perfusionValues = (float*)m_Overlay->getReslice()->GetOutput()->GetScalarPointer();
+					
 					//float usPix = pPix[perfusionIndex];
 					//message << "Perfusion = [" << usPix << "],\nCoordinates(" << pos_perfusion[0] << "," << pos_perfusion[1] << "," << pos_perfusion[2] << ")";
 				}
 				break;
 			}
+			//iterate over ROI
 
-			for(double y = start[1]; y < end[1];y++)
-				for(double x = start[0]; x < end[0];x++)
+			double* spac = m_Overlay->getReslice()->GetOutput()->GetSpacing();
+
+			for(double y = start[1]; y < end[1];y+=spac[1])
+				for(double x = start[0]; x < end[0];x+=spac[0])
 				{
 					if(selectEnclosedPoints->IsInsideSurface(x,y,0)) 
 					{
 						pos_world[0] = x;
 						pos_world[1] = y;
-						m_orientation->MultiplyPoint(pos_world, pos_perfusion);
-						int idx = m_perfusionOverlay->FindPoint(pos_perfusion);
-						
+	
+						int idx = m_Overlay->getReslice()->GetOutput()->FindPoint(pos_world);
+
 						if(idx >= 0)
 						{
 							float p = perfusionValues[idx];

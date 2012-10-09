@@ -52,6 +52,7 @@ class vtkLookupTable;
 class vtkCornerAnnotation;
 class vtkImageData;
 class vtkRegularPolygonSource;
+class vtkColoredImageOverlay;
 
 /// Interactor Style specific for Projection Views.
 /** This class should be used as interaction style for projection views.
@@ -98,6 +99,7 @@ public:
 	void SetColorMap(vtkLookupTable* lut) { m_colorMap = lut; }
 	void SetAnnotation(vtkCornerAnnotation* annotation);
 	void SetOverlayImage(vtkImageData* overlay) { m_perfusionOverlay = overlay; }
+	void SetPerfusionOverlay(boost::shared_ptr< vtkColoredImageOverlay > overlay) { m_Overlay = overlay; }
 	//  void Set
 	///@}
 	void CycleLeftButtonAction();
@@ -109,6 +111,7 @@ public:
 	void Pan( int dx, int dy );
 	void WindowLUTDelta(int dx, int dy);
 	void PickColor(); 
+	void ShowCircle();
 
 	int addAction(const std::string &label, const ActionSignal::slot_type &slot,
 	ActionDispatch::ActionType atype, ActionDispatch::RestrictionType restrict);
@@ -149,7 +152,7 @@ protected:
 	ActionListType m_actionList;
 	int m_interAction; ///< selected interaction due to mouse button presses - determined by dipatchActions()
 	int m_leftButtonAction; ///< selected interaction for the left mouse button - changed by pressing Space in CycleLeftButtonAction()
-	int ActionFirst, ActionSpin, ActionRotate, ActionZoom, ActionPan, ActionWindowLevel, ActionSlice, ActionNone, ActionWindowLUT, ActionColorPick;
+	int ActionFirst, ActionSpin, ActionRotate, ActionZoom, ActionPan, ActionWindowLevel, ActionSlice, ActionNone, ActionWindowLUT, ActionColorPick, ActionShowCircle;
 
 	/** @name Mouse Button Flags
 	State of the Mouse Buttons (Pressed?) */
@@ -166,6 +169,7 @@ protected:
 	vtkImageViewer2 *m_imageViewer;
 	vtkLookupTable *m_colorMap; 
 	vtkImageData* m_perfusionOverlay;
+	boost::shared_ptr< vtkColoredImageOverlay > m_Overlay;
 	vtkCornerAnnotation* m_annotation;
 	vtkSmartPointer<vtkPointPicker> m_picker;
 	vtkMatrix4x4 *m_orientation; ///< the Transformation Matrix of the displayed Data

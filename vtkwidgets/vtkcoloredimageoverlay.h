@@ -72,9 +72,14 @@ class vtkColoredImageOverlay {
     void activateAction();
 	///Gets the ColorMap
 	/*!
-	\return Return the color map.
+	\return Returns the color map.
 	*/
 	vtkLookupTable* getColorMap() {return m_colorMap; }
+	///Gets the image reslice
+	/*!
+	\return Returns the image reslice.
+	*/
+	vtkImageReslice* getReslice() { return m_reslice; }
 	///Sets the ColorMap
 	/*!
 	\param The color map.

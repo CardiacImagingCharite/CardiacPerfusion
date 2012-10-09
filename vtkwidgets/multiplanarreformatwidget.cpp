@@ -298,6 +298,7 @@ int MultiPlanarReformatWidget::addColoredOverlay(vtkImageData *image, vtkLookupT
 
 		m_interactorStyle->SetColorMap(overlay->getColorMap());
 		m_interactorStyle->SetOverlayImage(image);
+		m_interactorStyle->SetPerfusionOverlay(overlay);
 		return actionHandle;
   }
   return -1;

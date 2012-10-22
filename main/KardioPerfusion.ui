@@ -378,20 +378,14 @@
             </item>
            </layout>
           </item>
-          <item>
-           <widget class="Line" name="line_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
          </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -419,7 +413,7 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Analyze</string>
+             <string>Show TACs</string>
             </property>
             <property name="checkable">
              <bool>false</bool>

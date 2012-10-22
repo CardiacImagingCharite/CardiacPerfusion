@@ -1,37 +1,37 @@
 #####################################################################################
-#										                                            #
-#    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie		#
-#										                                            #
-#	 This file is part of KardioPerfusion.					                        #
-#										                                            #
-#    KardioPerfusion is free software: you can redistribute it and/or modify	    #
-#    it under the terms of the GNU General Public License as published by	        #
-#    the Free Software Foundation, either version 3 of the License, or		        #
-#    (at your option) any later version.					                        #
-#										                                            #
-#    KardioPerfusion is distributed in the hope that it will be useful,	            #
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of	                #
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		            #
-#    GNU General Public License for more details.				                    #
-#										                                            #
-#    You should have received a copy of the GNU General Public License		        #
-#    along with KardioPerfusion.  If not, see <http://www.gnu.org/licenses/>.	    #
-#										                                            #
-#    Diese Datei ist Teil von KardioPerfusion.					                    #
-#										                                            #
-#    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen	    #
-#    der GNU General Public License, wie von der Free Software Foundation,	        #
-#    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren		            #
-#    veröffentlichten Version, weiterverbreiten und/oder modifizieren.		        #
-#										                                            #
-#    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber	        #
-#    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite		        #
-#    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.	    #
-#    Siehe die GNU General Public License für weitere Details.			            #
-#										                                            #
-#    Sie sollten eine Kopie der GNU General Public License zusammen mit diesem	    #
-#    Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.	    #
-#										                                            #
+#										    #
+#    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie	    #
+#                                                                                   #
+#	 This file is part of KardioPerfusion.                                      #
+#                                                                                   #
+#    KardioPerfusion is free software: you can redistribute it and/or modify        #
+#    it under the terms of the GNU General Public License as published by           #
+#    the Free Software Foundation, either version 3 of the License, or              #
+#    (at your option) any later version.                                            #
+#                                                                                   #
+#    KardioPerfusion is distributed in the hope that it will be useful,             #
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of                 #
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  #
+#    GNU General Public License for more details.                                   #
+#                                                                                   #
+#    You should have received a copy of the GNU General Public License              #
+#    along with KardioPerfusion.  If not, see <http://www.gnu.org/licenses/>.       #
+#                                                                                   #
+#    Diese Datei ist Teil von KardioPerfusion.                                      #
+#                                                                                   #
+#    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen        #
+#    der GNU General Public License, wie von der Free Software Foundation,          #
+#    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren                   #
+#    veröffentlichten Version, weiterverbreiten und/oder modifizieren.              #
+#                                                                                   #
+#    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber         #
+#    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite             #
+#    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.     #
+#    Siehe die GNU General Public License für weitere Details.                      #
+#                                                                                   #
+#    Sie sollten eine Kopie der GNU General Public License zusammen mit diesem      #
+#    Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.     #
+#                                                                                   #
 #                                                                                   #
 #####################################################################################
 
@@ -63,8 +63,8 @@ SET( KardioPerfusionSrcs
 	analyse/mmid4Analyzer.h
 	analyse/maxSlopeAnalyzer.cxx
 	analyse/maxSlopeAnalyzer.h
-	analyse/tacdialog.cpp
-	analyse/tacdialog.h
+#	analyse/tacdialog.cpp
+#	analyse/tacdialog.h
 	analyse/timedensitydata.cpp
 	analyse/timedensitydata.h	
 	analyse/timedensitydatapicker.cpp
@@ -86,23 +86,35 @@ SET( KardioPerfusionSrcs
 #	analyse/SamplePoint.h
 
 	imagetree/ctimagetreemodel.cpp
+	imagetree/ctimagetreemodel.h
 	imagetree/dicomtagtype.cpp
+	imagetree/dicomtagtype.h
 	imagetree/vtkconnectordatabase.cpp
+	imagetree/vtkconnectordatabase.h
 	imagetree/treeitem.cpp
+	imagetree/treeitem.h
 	imagetree/ctimagetreeitem.cpp 
-	imagetree/binaryimagetreeitem.cpp 
-	imagetree/itkvtktreeitem.cpp 
+	imagetree/ctimagetreeitem.h
+	imagetree/binaryimagetreeitem.cpp
+	imagetree/binaryimagetreeitem.h 
+	imagetree/itkvtktreeitem.cpp  
+	imagetree/itkvtktreeitem.h
 	imagetree/segmentationvalues.cpp
+	imagetree/segmentationvalues.h
 	imagetree/realimagetreeitem.cxx
 	imagetree/realimagetreeitem.h
 
 	vtkwidgets/vtkbinaryimagetocolor.cpp 
-	vtkwidgets/vtkbinaryimageoverlay.cpp 
+	vtkwidgets/vtkbinaryimagetocolor.h
+	vtkwidgets/vtkbinaryimageoverlay.cpp
+	vtkwidgets/vtkbinaryimageoverlay.h 
 	vtkwidgets/vtkcoloredimageoverlay.h
 	vtkwidgets/vtkcoloredimageoverlay.cxx
 #	vtkwidgets/interactorstylevolumeview.cpp 
 	vtkwidgets/multiplanarreformatwidget.cpp 
+	vtkwidgets/multiplanarreformatwidget.h
 	vtkwidgets/vtkinteractorstyleprojectionview.cpp 
+	vtkwidgets/vtkinteractorstyleprojectionview.h
 #	vtkwidgets/volumeprojectionwidget.cpp 
 	vtkwidgets/vtkinteractoractiondispatch.h
 #	serialization/ctimagetreemodel_serializer.cpp 

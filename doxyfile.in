@@ -2,7 +2,7 @@
 #                                                                                   #
 #    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie     #
 #                                                                                   #
-#	 This file is part of KardioPerfusion.                                          #
+#	 This file is part of KardioPerfusion.                                      #
 #                                                                                   #
 #    KardioPerfusion is free software: you can redistribute it and/or modify        #
 #    it under the terms of the GNU General Public License as published by           #
@@ -89,7 +89,7 @@ PROJECT_LOGO           =
 # If a relative path is entered, it will be relative to the location 
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = T:/Projekte/MIP/KardioPerfusion/documentation
+OUTPUT_DIRECTORY       = ./documentation
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 
 # 4096 sub-directories (in 2 levels) under the output directory of each output 

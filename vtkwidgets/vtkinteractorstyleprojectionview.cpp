@@ -752,7 +752,6 @@ void vtkInteractorStyleProjectionView::PickColor()
 						}
 						std::cout << x << ", " << y << ", " << "0" << std::endl;
 					}
-					
 				}
 
 			updateDisplay();

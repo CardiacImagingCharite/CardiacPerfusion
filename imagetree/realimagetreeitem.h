@@ -137,6 +137,8 @@ class RealImageTreeItem : public ITKVTKTreeItem< RealImageType > {
     
   protected:
 
+	  RealImageTreeItem::RealImageTreeItem(){}
+
   private:
     ConnectorHandle imageKeeper;
     friend class boost::serialization::access;

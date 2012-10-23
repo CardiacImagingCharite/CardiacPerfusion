@@ -66,6 +66,7 @@
 #include "perfusionmapcreator.h"
 
 
+
 const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
   (DicomTagType("Patient Name", "0010|0010"))
   (DicomTagType("#Slices",CTImageTreeItem::getNumberOfFramesTag()))
@@ -615,10 +616,13 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 
 				TreeItem* root = &imageModel.getRootItem();
 
+			
 				double opacity = (double)this->ui->slider_opacity->value()/10;
 
 				RealImageTreeItem* result = new RealImageTreeItem(root, perfusionMap, mapName, opacity);
 				root->insertChild(result);
+
+				perfusionMapShow(result);
 
 			/*	vtkSmartPointer<vtkCallbackCommand> updateCallback = 
 					vtkSmartPointer<vtkCallbackCommand>::New();
@@ -628,9 +632,9 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 
 				result->getColorMap()->AddObserver(vtkCommand::UserEvent + 1, updateCallback);
 				*/
-				this->ui->mprView_ur->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
-				this->ui->mprView_ul->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
-				this->ui->mprView_lr->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
+			//	this->ui->mprView_ur->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
+			//	this->ui->mprView_ul->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
+			//	this->ui->mprView_lr->addColoredOverlay(result->getVTKConnector()->getVTKImageData(), result->getColorMap());
 			}
 			else{
 				QMessageBox::warning(this,tr("Selection Error"),tr("Please select an image with one AIF segment"));
@@ -1027,6 +1031,29 @@ void KardioPerfusion::on_btn_arteryInput_selected(const SegmentInfo *segment) {
   QModelIndexList indexList = this->ui->tbl_gammaFit->selectionModel()->selectedRows();
   if (indexList.size() == 1) {
     maxSlopeAnalyzer->getSegments()->setArterySegment(indexList.at(0), segment);
+  }
+}
+
+void KardioPerfusion::on_actionSave_Project_triggered() {
+  QString pname( QString::fromStdString( imageModel.getSerializationPath() ) );
+  if (pname.isEmpty()) pname = "./unnamed.perfproj";
+  pname = QFileDialog::getSaveFileName( this,
+    tr("Save Project"),
+    pname,
+    tr("Project Files (*.perfproj)"));
+  if (!pname.isEmpty()) {
+    imageModel.saveModelToFile(pname.toAscii().data());
+  }
+}
+
+void KardioPerfusion::on_actionOpen_Project_triggered() {
+  QString pname = QFileDialog::getOpenFileName( this,
+    tr("Open Project"),
+    "./unnamed.perfproj",
+    tr("Project Files (*.perfproj)"));
+  if (!pname.isEmpty()) {
+    setImage(NULL);
+    imageModel.openModelFromFile(pname.toAscii().data());
   }
 }
 

@@ -114,3 +114,7 @@ Ankh.NoLoad
 
 #class diagram
 *.cd
+
+#misc
+*.csv
+*.png

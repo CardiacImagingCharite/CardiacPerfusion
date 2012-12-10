@@ -43,16 +43,27 @@
 namespace itk{
 
 namespace Functor{
-
+/*! \class Perfusion1 
+ *  \brief This calss represents the Functor, which is used by the PerfusionFilter.
+			It calculates the perfusion values of a given time series.
+ */
 template<class TInput, class TOutput>
 	class Perfusion1
 {
 public:
 	typedef typename NumericTraits< TOutput >::ValueType OutputValueType;
-
+	
+	///Constructor
 	Perfusion1(){}
+	///Destructor
 	~Perfusion1(){}
 
+	///Operator (). 
+	/*!
+	\param B An input vector of HU-Values.
+
+	\return Perfusion value.
+	*/
 	inline TOutput operator()(const std::vector< TInput > & B) const
 	{
 		GammaFunctions::GammaVariate gamma;
@@ -83,22 +94,38 @@ public:
 	{
 		return false;
 	}
-	
+	///Sets the time points. 
+	/*!
+	\param _times Vector of time points.
+	*/
 	inline void setTimePoints(const std::vector< double > &_times)
 	{
 		times = _times;
 	}
-
+	///Sets the artery segment.
+	/*!
+	\param gamma A gamma variate of the artery segment.
+	*/
 	inline void setArteryGammaFunction(const GammaFunctions::GammaVariate &gamma)
 	{
 		arteryGamma = gamma;
 	}
+	///Checks, if the value is a number. 
+	/*!
+	\param x Test value.
 
+	\return Returns true od false.
+	*/
 	inline bool isNumber(const TOutput x) const 
 	{
 		return (x == x);
 	}
+	///Checks, if the value is a finite Number.
+	/*!
+	\param x Test value.
 
+	\return Returns true or false.
+	*/
 	inline bool isFiniteNumber(const TOutput x) const
 	{
 		return (x <= DBL_MAX && x >= -DBL_MAX); 
@@ -111,7 +138,10 @@ private:
 
 };
 }
-
+/*! \class NaryPerfusionImageFilter NaryPerfusionImageFilter.h "NaryPerfusionImageFilter.h" 
+ *  \brief This class represents an ITK filter. 
+			It iterates over an image and calculates the perfusion. Therefor it uses an Functor, which is defined above.
+ */
 template< class TInputImage, class TOutputImage >
 class ITK_EXPORT NaryPerfusionImageFilter:
 	public
@@ -147,7 +177,9 @@ public:
 #endif
 
 protected:
+	///Constructor
 	NaryPerfusionImageFilter() {}
+	///Destructor
 	virtual ~NaryPerfusionImageFilter() {}
 private:
 	NaryPerfusionImageFilter(const Self &); //purposely not implemented

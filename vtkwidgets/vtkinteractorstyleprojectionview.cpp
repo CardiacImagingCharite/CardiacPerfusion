@@ -79,6 +79,20 @@
 #include <vtkRendererCollection.h>
 #include "vtkcoloredimageoverlay.h"
 
+#include <itkCastImageFilter.h>
+#include "ctimagetreeitem.h"
+#include "binaryimagetreeitem.h"
+#include <itkVTKImageToImageFilter.h>
+#include "maxSlopeAnalyzer.h"
+#include "ctimagetreemodel.h"
+#include <qtreeview.h>
+#include <qwt_plot.h>
+#include <qwt_legend.h>
+
+
+#include <boost/assign.hpp>
+#include <boost/foreach.hpp>
+
 using namespace std;
 
 const string keySymLeft = "Left";
@@ -142,7 +156,7 @@ void vtkInteractorStyleProjectionView::resetActions() {
   
   ActionWindowLUT = addAction("Window Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::WindowLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
-  ActionColorPick = addAction("", boost::bind(&vtkInteractorStyleProjectionView::PickColor, this), ActionDispatch::ClickingAction, ActionDispatch::Restricted );
+  ActionColorPick = addAction("", boost::bind(&vtkInteractorStyleProjectionView::PickPerfusionValues, this), ActionDispatch::ClickingAction, ActionDispatch::Restricted );
   ActionShowCircle = addAction("", boost::bind(&vtkInteractorStyleProjectionView::ShowCircle, this), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
   //m_leftButtonAction = ActionSlice;
@@ -658,17 +672,18 @@ void vtkInteractorStyleProjectionView::ShowCircle()
 	}
 }
 
-void vtkInteractorStyleProjectionView::PickColor()
+void vtkInteractorStyleProjectionView::PickPerfusionValues()
 {
+
 	vtkSmartPointer<vtkPNGWriter> writer =
-			vtkSmartPointer<vtkPNGWriter>::New();
+		vtkSmartPointer<vtkPNGWriter>::New();
 
 	vtkSmartPointer<vtkImageShiftScale> scale = 
-			vtkSmartPointer<vtkImageShiftScale>::New();
+		vtkSmartPointer<vtkImageShiftScale>::New();
 
 	if(m_Overlay)
 	{
-		
+
 		scale->SetInput(m_Overlay->getReslice()->GetOutput());
 		scale->SetOutputScalarTypeToUnsignedShort();
 
@@ -683,7 +698,7 @@ void vtkInteractorStyleProjectionView::PickColor()
 	// Pick at the mouse location provided by the interactor
 	double pos_world[4];
 	double pos_perfusion[4] = {0};
-	
+
 	if (GetEventPosition( x_display, y_display )) 
 	{
 		vtkRenderer *ren = GetInteractor()->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
@@ -696,8 +711,8 @@ void vtkInteractorStyleProjectionView::PickColor()
 			m_orientation->MultiplyPoint(pos_world, pos_perfusion);
 
 			std::cout << "Pick position (world coordinates) is: "
-                << pos_world[0] << " " << pos_world[1]
-                << " " << pos_world[2] << std::endl;
+				<< pos_world[0] << " " << pos_world[1]
+			<< " " << pos_world[2] << std::endl;
 
 			m_circle->SetCenter(pos_world[0], pos_world[1], pos_world[2]);
 			double* bounds_world = m_circleActor->GetBounds();
@@ -721,18 +736,109 @@ void vtkInteractorStyleProjectionView::PickColor()
 			float* perfusionValues;
 
 			switch (m_Overlay->getReslice()->GetOutput()->GetNumberOfScalarComponents()) {
-				case 1:
+			case 1:
 				{ 
 					perfusionValues = (float*)m_Overlay->getReslice()->GetOutput()->GetScalarPointer();
-					
-					//float usPix = pPix[perfusionIndex];
-					//message << "Perfusion = [" << usPix << "],\nCoordinates(" << pos_perfusion[0] << "," << pos_perfusion[1] << "," << pos_perfusion[2] << ")";
 				}
 				break;
 			}
+
+			//create binary overlay
+
+			MaxSlopeAnalyzer* maxSlopeAnalyzer = new MaxSlopeAnalyzer(NULL);
+
+			int childCount = m_rootItem->childCount();
+			CTImageTreeItem* castItem = new CTImageTreeItem();
+
+			bool cast = false;
+			for (int i = 0; i < childCount; i++)
+			{
+				TreeItem* currentItem = &m_rootItem->child(i);
+				if(currentItem->isA(typeid(CTImageTreeItem)))
+				{
+					maxSlopeAnalyzer->addImage( dynamic_cast<CTImageTreeItem*>(currentItem) );
+					if(!cast)
+					{
+						castItem = dynamic_cast<CTImageTreeItem*>(currentItem);
+						cast = true;
+					}
+
+					int n = currentItem->childCount();
+
+					for( int j = 0; j < n; j++)
+					{
+						TreeItem* currentChild = &currentItem->child(j);
+						if(currentChild->isA(typeid(BinaryImageTreeItem)))
+						{
+							m_arterySegment = dynamic_cast<BinaryImageTreeItem*>(currentChild);
+						}
+					}
+				}
+			}
+
+			BinaryImageTreeItem::ImageType::Pointer seg;
+			typedef itk::CastImageFilter< CTImageType, BinaryImageType> CastFilterType;
+
+			CastFilterType::Pointer caster = CastFilterType::New();
+			caster->SetInput( castItem->getITKImage() );
+			caster->Update();
+			seg = caster->GetOutput();
+			//fills the segment with zeros
+			seg->FillBuffer(BinaryPixelOff);
+
+			BinaryImageTreeItem *result = new BinaryImageTreeItem(m_rootItem, seg, "ROI");
+			result->drawSphere(m_circle->GetRadius(), pos_perfusion[0], pos_perfusion[1], pos_perfusion[2], false);
+			
+			//result->drawPlate(m_circle->GetRadius(),pos_perfusion[0], pos_perfusion[1], pos_perfusion[2], m_orientation,false);
+
+			maxSlopeAnalyzer->addSegment(result);
+			maxSlopeAnalyzer->addSegment(m_arterySegment);
+			
+			maxSlopeAnalyzer->calculateTacValues();
+			SegmentListModel *segments = maxSlopeAnalyzer->getSegments();
+
+			//picker = new TimeDensityDataPicker(markerPickerX, markerPickerY, segments, this->ui->qwtPlot_tac->canvas());
+
+			double perfusion = 0;
+
+
+			//iterate over the list of segments
+			BOOST_FOREACH( SegmentInfo &currentSegment, *segments) {
+				
+				currentSegment.setEnableGamma(true);
+				currentSegment.setGammaStartIndex(0);
+				currentSegment.setGammaEndIndex(childCount);
+					//attach the curves for the actual segment to the plot
+				//currentSegment.attachSampleCurves(m_plot);
+				currentSegment.setArterySegment(&maxSlopeAnalyzer->getSegments()->getSegment(1));
+				maxSlopeAnalyzer->recalculateGamma(currentSegment);
+			}
+
+			maxSlopeAnalyzer->getSegments()->getSegment(0).attachSampleCurves(m_plot);
+
+			m_plot->legend()->contentsWidget()->setVisible(false);
+			m_plot->replot();
+
+			//maxSlopeAnalyzer->popBackSegment();
+	//		m_arterySegment->setEnableGamma(true);
+	//		m_arterySegment->setGammaStartIndex(0);
+	//		m_arterySegment->setGammaEndIndex(childCount);
+	//		maxSlopeAnalyzer->recalculateGamma(*m_arterySegment);
+
+			perfusion = 60 * maxSlopeAnalyzer->getSegments()->getSegment(0).getGammaMaxSlope() / maxSlopeAnalyzer->getSegments()->getSegment(0).getArterySegment()->getGammaMaximum();
+
+			ofstream resultFile;
+			resultFile.open ("tempMeasuredResults.csv");
+			resultFile << maxSlopeAnalyzer->getTacValuesAsString() << std::endl;
+			resultFile << "Perfusion;" << perfusion << std::endl;
+			resultFile << "Max Slope;" << maxSlopeAnalyzer->getSegments()->getSegment(0).getGammaMaxSlope() << std::endl;
+			resultFile << "Max Gamma;" << maxSlopeAnalyzer->getSegments()->getSegment(0).getArterySegment()->getGammaMaximum() << std::endl;
+			
+			resultFile.close();
+
 			//iterate over ROI
 
-			double* spac = m_Overlay->getReslice()->GetOutput()->GetSpacing();
+/*			double* spac = m_Overlay->getReslice()->GetOutput()->GetSpacing();
 
 			for(double y = start[1]; y < end[1];y+=spac[1])
 				for(double x = start[0]; x < end[0];x+=spac[0])
@@ -741,7 +847,7 @@ void vtkInteractorStyleProjectionView::PickColor()
 					{
 						pos_world[0] = x;
 						pos_world[1] = y;
-	
+
 						int idx = m_Overlay->getReslice()->GetOutput()->FindPoint(pos_world);
 
 						if(idx >= 0)
@@ -753,15 +859,22 @@ void vtkInteractorStyleProjectionView::PickColor()
 						std::cout << x << ", " << y << ", " << "0" << std::endl;
 					}
 				}
+*/
+				updateDisplay();
+				std::stringstream message;
 
-			updateDisplay();
-			std::stringstream message;
-			
-			message << "Perfusion = [" << mean/(double)count << "]";
-			
+				message << "Perfusion = [" << perfusion << "]"; //mean/(double)count << "]";
 
-			m_annotation->SetText( 0, message.str().c_str() );
+
+				m_annotation->SetText( 0, message.str().c_str() );
 		}
 	}
-	
+
+	m_interAction = ActionNone;
+	//m_annotation->SetText(0, "");
+	m_imageViewer->GetRenderer()->RemoveActor(m_circleActor);
+	updateDisplay();
+	m_stateLButton = false;
+	m_stateCtrl = false;
+	dipatchActions();
 }

@@ -48,7 +48,9 @@ class GammaCostFunction;
 namespace GammaFunctions {
 
 
-
+/*! \class GammaVariate GammaVariate.h "GammaVariate.h"
+ *  \brief This is the representation of a gamma variate.
+ */
 class GammaVariate {
   public:
     typedef std::pair< double, double > Sample;
@@ -56,25 +58,67 @@ class GammaVariate {
     typedef SampleSetType::const_iterator SampleIt;
     typedef boost::shared_ptr< const SampleSetType > SampleSetConstPtrType;
     GammaVariate():nonConstSamples(new SampleSetType), samples(nonConstSamples) {};
+	///Sets a sample set.
+	/*!
+	\param sset Sample set.
+	*/
     void setSamples(SampleSetConstPtrType sset) { samples = sset; nonConstSamples.reset();}
+	///Adds a sample to the set. 
+	/*!
+	\param t time
+	\param y value
+	*/
     void addSample(double t, double y);
+	///Clears the sample set.
     void clearSamples();
+	///Cómputes y value.
+	/*!
+	\param t time
+
+	\return Returns the y value.
+	*/
     double computeY( double t ) const;
+	///Computes the maximum slope.
+	/*!
+	\return Returns the maximum slope.
+	*/
     double getMaxSlope( void ) const;
+	///Returns the calculated baseline. 
+	/*!
+	\return Returns the baseline.
+	*/
     double getBaseline( void ) const;
+	///Returns the center of gravity.
+	/*!
+	\return Returns the CoG.
+	*/
     double getCenterOfGravity() const;
+	///Returns the area under the curve.
+	/*!
+	\return Returns the AuC.
+	*/
     double getAUC() const;
+	///Returns the maximum.
+	/*!
+	\return Returns the maximum.
+	*/
     double getMaximum( void ) const;
-    
+    ///Finds the gamma variate from the given samples.
     void findFromSamples();
+	///Getter for all relevant parameter.
     void getParameters( double &t0_, double &tmax_, double &y0_, double &ymax_, double &alpha_ ) {
       t0_ = t0; tmax_ = t0max; y0_ = y0; ymax_ = y0max; alpha_ = alpha;
     }
+	///Setter for all relevant parameter.
     void setParameters( double t0_, double tmax_, double y0_, double ymax_, double alpha_ );
-
+	///Tries to find the alpha of the gamma variate.
     double findAlpha();
 
   protected:
+	  ///Calculates the distance to the samples.
+	  /*!
+	\return Returns the distance.
+	*/
     double distanceToSamples() const;
     friend class itk::GammaCostFunction;
 

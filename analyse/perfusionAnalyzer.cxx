@@ -64,6 +64,11 @@ void PerfusionAnalyzer::addSegment(BinaryImageTreeItem *segment)
 	segments->addSegment(segment);
 }
 
+void PerfusionAnalyzer::popBackSegment()
+{
+	segments->popBackSegment();
+}
+
 SegmentListModel* PerfusionAnalyzer::getSegments()
 {
 	//calculateTacValues();
@@ -96,6 +101,9 @@ std::string PerfusionAnalyzer::getTacValuesAsString()
 	BOOST_FOREACH( SegmentInfo &currentSegment, *segments) {
 		//attach the curves for the actual segment to the plot
 		TimeDensityData* data = currentSegment.getSampleData();
+
+		tacValueStream << &currentSegment.getName() << ";";
+
 		for(int i = 0; i < data->size(); i++)
 		{
 			tacValueStream << data->y(i) << ";";

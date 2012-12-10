@@ -117,3 +117,8 @@ void SegmentListModel::addSegment( const BinaryImageTreeItem *seg ) {
   segments.push_back(new SegmentInfo(const_cast<BinaryImageTreeItem*>(seg)));
   endInsertRows();
 }
+
+void SegmentListModel::popBackSegment() {
+
+	segments.pop_back();
+}

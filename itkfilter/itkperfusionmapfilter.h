@@ -41,7 +41,9 @@
 namespace itk{
 
 	class SegmentInfo;
-	//class PerfusionAnalyzer;
+	/*! \class PerfusionMapFilter PerfusionMapFilter.h "PerfusionMapFilter.h"
+ *  \brief This class creates a perfusion map from a 4D dataset.
+ */
 	
 	template <class TInputImage, class TOutputImage>
 	class ITK_EXPORT PerfusionMapFilter : public ImageToImageFilter< TInputImage, TOutputImage>
@@ -84,13 +86,6 @@ namespace itk{
 			* method is below.
 			* \sa ProcessObject::GenerateOutputInformaton() */
 			virtual void GenerateOutputInformation();
-			
-			/** PerfusionMapFilter needs a larger input requested region than the output
-			* requested region.  As such, ShrinkImageFilter needs to provide an
-			* implementation for GenerateInputRequestedRegion() in order to inform the
-			* pipeline execution model.
-			* \sa ProcessObject::GenerateInputRequestedRegion() */
-//			virtual void GenerateInputRequestedRegion();
 
 			/** Sets the artery segment, which is needed for perfusion analysis.
 			*/
@@ -110,18 +105,6 @@ namespace itk{
 			* \sa ImageToImageFilter::ThreadedGenerateData(),
 			*     ImageToImageFilter::GenerateData()  */
 			void GenerateData(void);
-
-			/** PerfusionMapFilter can be implemented as a multithreaded filter.
-			* Therefore, this implementation provides a ThreadedGenerateData()
-			* routine which is called for each processing thread. The output
-			* image data is allocated automatically by the superclass prior to
-			* calling ThreadedGenerateData().  ThreadedGenerateData can only
-			* write to the portion of the output image specified by the
-			* parameter "outputRegionForThread"
-			* \sa ImageToImageFilter::ThreadedGenerateData(),
-			*     ImageToImageFilter::GenerateData()  */
- // void ThreadedGenerateData(const OutputImageRegionType& outputRegionForThread,
- //                           int threadId );
 
 		private:
 			PerfusionMapFilter(const Self&); //purposely not implemented

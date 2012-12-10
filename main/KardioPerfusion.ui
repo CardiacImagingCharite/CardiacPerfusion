@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1128</width>
+    <width>1131</width>
     <height>899</height>
    </rect>
   </property>
@@ -156,11 +156,11 @@
                <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Maximum</enum>
+               <enum>QSizePolicy::Fixed</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>133</width>
+                <width>140</width>
                 <height>20</height>
                </size>
               </property>
@@ -195,7 +195,7 @@
                <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Maximum</enum>
+               <enum>QSizePolicy::Fixed</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -267,11 +267,11 @@
                <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Preferred</enum>
+               <enum>QSizePolicy::Fixed</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>162</width>
+                <width>160</width>
                 <height>17</height>
                </size>
               </property>
@@ -300,7 +300,7 @@
                <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Maximum</enum>
+               <enum>QSizePolicy::Fixed</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -366,7 +366,7 @@
                <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Maximum</enum>
+               <enum>QSizePolicy::Fixed</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -433,16 +433,23 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="btn_clearPlot">
+            <property name="text">
+             <string>Clear Plot</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_6">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Maximum</enum>
+             <enum>QSizePolicy::Fixed</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>190</width>
+              <width>110</width>
               <height>20</height>
              </size>
             </property>
@@ -465,11 +472,11 @@
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Maximum</enum>
+             <enum>QSizePolicy::Fixed</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>110</width>
+              <width>40</width>
               <height>20</height>
              </size>
             </property>
@@ -621,6 +628,12 @@
       </item>
       <item row="1" column="0">
        <widget class="MyTabWidget" name="tw_results">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
           <width>400</width>
@@ -854,6 +867,13 @@
             </property>
            </spacer>
           </item>
+          <item>
+           <widget class="QPushButton" name="btn_writeResults">
+            <property name="text">
+             <string>Write Results to File</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
         <widget class="QWidget" name="tab_log">
@@ -877,7 +897,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1128</width>
+     <width>1131</width>
      <height>21</height>
     </rect>
    </property>

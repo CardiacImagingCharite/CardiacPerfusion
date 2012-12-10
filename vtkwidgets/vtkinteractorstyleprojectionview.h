@@ -43,6 +43,7 @@
 #include <vtkSmartPointer.h>
 #include "vtkinteractoractiondispatch.h"
 #include <QObject>
+#include "segmentinfo.h"
 
 class vtkImageMapToWindowLevelColors;
 class vtkMatrix4x4;
@@ -53,6 +54,8 @@ class vtkCornerAnnotation;
 class vtkImageData;
 class vtkRegularPolygonSource;
 class vtkColoredImageOverlay;
+class QwtPlot;
+class TreeItem;
 
 /// Interactor Style specific for Projection Views.
 /** This class should be used as interaction style for projection views.
@@ -100,6 +103,9 @@ public:
 	void SetAnnotation(vtkCornerAnnotation* annotation);
 	void SetOverlayImage(vtkImageData* overlay) { m_perfusionOverlay = overlay; }
 	void SetPerfusionOverlay(boost::shared_ptr< vtkColoredImageOverlay > overlay) { m_Overlay = overlay; }
+	void SetRootItem(TreeItem* root) {m_rootItem = root; }
+	void SetPlot(QwtPlot* plot) {m_plot = plot; }
+	void SetArterySegment(BinaryImageTreeItem* seg) { m_arterySegment = seg; }
 	//  void Set
 	///@}
 	void CycleLeftButtonAction();
@@ -110,7 +116,7 @@ public:
 	void Zoom( int delta );
 	void Pan( int dx, int dy );
 	void WindowLUTDelta(int dx, int dy);
-	void PickColor(); 
+	void PickPerfusionValues(); 
 	void ShowCircle();
 
 	int addAction(const std::string &label, const ActionSignal::slot_type &slot,
@@ -176,6 +182,10 @@ protected:
 	DisplayState m_initialState; ///< Display state at the beginning of an action
 	vtkRegularPolygonSource* m_circle;
 	vtkActor* m_circleActor;
+
+	TreeItem* m_rootItem;
+	QwtPlot* m_plot;
+	BinaryImageTreeItem* m_arterySegment;
 private:
 	vtkTransform *tempTransform;
 };

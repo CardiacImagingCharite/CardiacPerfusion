@@ -1,5 +1,5 @@
 
-:wq#####################################################################################
+#####################################################################################
 #										    #
 #    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie	    #
 #                                                                                   #
@@ -41,9 +41,15 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT(KardioPerfusion)
 
-IF (NOT CMAKE_CXX_FLAGS MATCHES "/MP")
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") 
-ENDIF ()
+IF(WIN32)
+  IF (NOT CMAKE_CXX_FLAGS MATCHES "/MP")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") 
+  ENDIF ()
+ENDIF(WIN32)
+
+IF(UNIX)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x -fpermissive")
+ENDIF(UNIX)
 
 # Set your files and resources here  
 
@@ -64,12 +70,12 @@ SET( KardioPerfusionSrcs
 	analyse/mmid4Analyzer.h
 	analyse/maxSlopeAnalyzer.cxx
 	analyse/maxSlopeAnalyzer.h
-#	analyse/tacdialog.cpp
-#	analyse/tacdialog.h
+	analyse/tacdialog.cpp
+	analyse/tacdialog.h
 	analyse/timedensitydata.cpp
 	analyse/timedensitydata.h	
-	analyse/timedensitydatapicker.cpp
-	analyse/timedensitydatapicker.h
+#	analyse/timedensitydatapicker.cpp
+#	analyse/timedensitydatapicker.h
 	analyse/segmentlistmodel.cpp
 	analyse/segmentlistmodel.h
 	analyse/segmentinfo.cpp
@@ -193,14 +199,14 @@ ELSE(ITK_FOUND)
 ENDIF( ITK_FOUND )
 
 #Find GDCM directory
-FIND_PACKAGE ( GDCM REQUIRED )
-INCLUDE( ${GDCM_USE_FILE} )
+#FIND_PACKAGE ( GDCM REQUIRED )
+#INCLUDE( ${GDCM_USE_FILE} )
 
 IF(WIN32)
   SET(GDCM_LIBRARY_DIRS "${GDCM_DIR}/bin")
-  SET(GDCM_LIBRARIES gdcmcharls.lib gdcmCommon.lib gdcmDICT.lib
-    gdcmDSED.lib gdcmexpat.lib gdcmgetopt.lib gdcmIOD.lib gdcmjpeg8.lib 
-	gdcmjpeg12.lib gdcmjpeg16.lib gdcmMSFF.lib gdcmopenjpeg.lib gdcmzlib.lib)
+#  SET(GDCM_LIBRARIES gdcmcharls.lib gdcmCommon.lib gdcmDICT.lib
+#    gdcmDSED.lib gdcmexpat.lib gdcmgetopt.lib gdcmIOD.lib gdcmjpeg8.lib 
+#	gdcmjpeg12.lib gdcmjpeg16.lib gdcmMSFF.lib gdcmopenjpeg.lib gdcmzlib.lib)
 ELSE(WIN32)
 ENDIF(WIN32)
 
@@ -219,8 +225,8 @@ INCLUDE(${QT_USE_FILE})
 FIND_PATH(ITK_APPS FindInsightApplications.cmake
 		HINTS ITK_DIR/../)
 
-FIND_PATH(ITK_APPS_LIB VolviewPlugIns
-		HINTS ITK_DIR/../)
+#FIND_PATH(ITK_APPS_LIB VolviewPlugIns
+#		HINTS ITK_DIR/../)
 
 
 # Use the include path and library for Qt that is used by VTK and for the ITK-VTK-Filter
@@ -278,7 +284,8 @@ ADD_EXECUTABLE( KardioPerfusion MACOSX_BUNDLE ${KardioPerfusionSrcs} ${UISrcs} $
 TARGET_LINK_LIBRARIES( KardioPerfusion
   QVTK
   ${QT_LIBRARIES}
-  ITKBasicFilters ITKCommon ITKAlgorithms ITKIO
+#  ITKBasicFilters ITKCommon ITKAlgorithms ITKIO
+  ${ITK_LIBRARIES}
   vtkRendering
   vtkGraphics
   vtkIO
@@ -292,7 +299,7 @@ TARGET_LINK_LIBRARIES( KardioPerfusion
   vtkImaging 
   vtkFiltering
   vtkVolumeRendering
-  ITKVTKIntegration
+#  ITKVTKIntegration
 )
 
 # add a target to generate API documentation with Doxygen

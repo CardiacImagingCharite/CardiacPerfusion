@@ -144,7 +144,7 @@ void DicomSelectorDialog::exec() {
 	for(unsigned int t=0; t < HeaderFields.size(); t++) treeView->resizeColumnToContents(t);
 	
 	treeView->setSortingEnabled(true);
-	treeView->sortByColumn(2,Qt::SortOrder::AscendingOrder);
+	treeView->sortByColumn(2,Qt::AscendingOrder);
 	
 	QDialog::exec();
 }

@@ -39,6 +39,7 @@
 #include "itkNumericTraits.h"
 
 #include "gammaVariate.h"
+#include <float.h>
 
 namespace itk{
 

@@ -50,7 +50,7 @@
 #include <boost/assign.hpp>
 #include <boost/foreach.hpp>
 
-#include "QFileDialog.h"
+#include "qfiledialog.h"
 #include "qstring.h"
 
 #include "qwt_plot.h"
@@ -63,7 +63,7 @@
 #include "timedensitydatapicker.h"
 
 #include "itkShrinkImageFilter.h"
-#include "perfusionmapcreator.h"
+#include "perfusionMapCreator.h"
 
 
 

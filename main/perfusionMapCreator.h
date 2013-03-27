@@ -36,7 +36,7 @@
 #define PerfusionMapCreator_H
 
 #include "segmentinfo.h"
-#include "maxslopeanalyzer.h"
+#include "maxSlopeAnalyzer.h"
 #include "ctimagetreemodel.h"
 #include "imagedefinitions.h"
 #include "itkSmartPointer.h"

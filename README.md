@@ -22,6 +22,7 @@ This code has been tested with
 You may have to install libxrender-dev first
 
     sudo apt-get install libxrender-dev
+    sudo apt-get install libxext-dev
 
 Download and extract the Qt 4.7.4 source and change to this directory
     
@@ -75,7 +76,7 @@ Create a build directory
 
 You have do delete `zconf.h`, which will be created by cmake:
 
-    rm zconf.h
+    rm ../zlib-1.2.5/zconf.h
 
 Run CMake configuration tool
 
@@ -83,14 +84,17 @@ Run CMake configuration tool
 
 Press "c" to configure and "g" for generate the Makefiles.
 
-    make sudo make install
+    make 
+    sudo make install
 
     
 #### VTK
 
-You may have to install `libosmesa6-dev`
+You may have to install `libosmesa6-dev`, `libgl1-mesa-dev` and `libst-dev`
     
     sudo apt-get install libosmesa6-dev
+    sudo apt-get install libgl1-mesa-dev
+    sudo apt-get install libxt-dev 
 
 Download and extract vtk 5.8. source.
 Create a build directory
@@ -118,7 +122,7 @@ configure ("c") and generate ("g") Makefiles.
 Download and extract InsightToolkit 4.2.0 source.
 Create a build directory
 
-    mdir binITK
+    mkdir binITK
     cd binITK
 
 Run CMake configuration tool
@@ -147,7 +151,7 @@ necessary.
 Create a build directory
 
     cd ..
-    mkdir binKardioPerfufions
+    mkdir binKardioPerfufion
     cd binKardioPerfusion
 
 Run Cmake configuration tool

@@ -19,8 +19,10 @@
 #include "ctimagetreemodel_serializer.h"
 
 #include <fstream>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
+// #include <boost/archive/binary_oarchive.hpp>
+// #include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
 
@@ -45,7 +47,7 @@ void deserializeCTImageTreeModelFromFile(CTImageTreeModel &model, const std::str
   filtering_stream<input> inStreamFilter;
   inStreamFilter.push(zlib_decompressor());
   inStreamFilter.push(inFileStream);
-  boost::archive::binary_iarchive ia( inStreamFilter );
+  boost::archive::text_iarchive ia( inStreamFilter );
   model.setSerializationPath( fname );
   ia >> model;
 }
@@ -57,7 +59,7 @@ void serializeCTImageTreeModelToFile(CTImageTreeModel &model, const std::string 
   filtering_stream<output> outStreamFilter;
   outStreamFilter.push(zlib_compressor());
   outStreamFilter.push(outFileStream);
-  boost::archive::binary_oarchive oa( outStreamFilter );
+  boost::archive::text_oarchive oa( outStreamFilter );
   model.setSerializationPath( fname );
   oa << model;
 }

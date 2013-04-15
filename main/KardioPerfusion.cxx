@@ -254,21 +254,21 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 //callback if click on treeview occurs
 void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 	if (index.isValid()) {
-		//get clicked item
-		TreeItem &item = imageModel.getItem( index );
-		//check if item is a CT image
-		if (item.isA(typeid(CTImageTreeItem))) {
+  		//get clicked item
+  		TreeItem &item = imageModel.getItem( index );
+  		//check if item is a CT image
+  		if (item.isA(typeid(CTImageTreeItem))) {
 			
-			setImage(dynamic_cast<CTImageTreeItem*>(&item));
-			for(int i = 0; i < item.childCount(); i++)
-			{
-				if(item.child(i).isA(typeid(BinaryImageTreeItem)))
-				{
-					BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item.child(i));
-					segmentShow(SegItem);
-				}
-			}
-		}
+  			setImage(dynamic_cast<CTImageTreeItem*>(&item));
+  			for(int i = 0; i < item.childCount(); i++)
+  			{
+  				if(item.child(i).isA(typeid(BinaryImageTreeItem)))
+  				{
+  					BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item.child(i));
+  					segmentShow(SegItem);
+  				}
+  			}
+  		}
 
 				/*for(int i = 0; i < item.childCount(); i++)
 				{
@@ -306,6 +306,7 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 		//	}
 		}
 }
+
 //Callback if double click on treeview occurs
 void KardioPerfusion::on_treeView_doubleClicked(const QModelIndex &index) {
 	//check if the index is valid
@@ -359,7 +360,6 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 		this->ui->mprView_ul->setImage( vtkImage );
 		this->ui->mprView_ur->setImage(vtkImage);
 		this->ui->mprView_lr->setImage(vtkImage);
-
 
 		if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->clearActiveDown();
 		displayedCTImage = connectorPtr;

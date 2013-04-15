@@ -56,30 +56,31 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 			template<class Archive>
 			void load(Archive & ar, itk::MetaDataDictionary &d, const unsigned int version)
 			{
-				std::vector< std::string >::size_type keyNum;
-				ar & keyNum;
-				while(keyNum) {
-					std::string key, value;
-					ar & key;
-					ar & value;
-					itk::EncapsulateMetaData(d, key, value);
-					--keyNum;
-				}  
+			  uint64_t ikeyNum;
+			  ar & ikeyNum;
+			  std::vector< std::string >::size_type keyNum(ikeyNum);
+			  while(keyNum) {
+			    std::string key, value;
+			    ar & key;
+			    ar & value;
+			    itk::EncapsulateMetaData(d, key, value);
+			    --keyNum;
+			  }  
 			}
 
 			template<class Archive>
 			void save(Archive & ar, const itk::MetaDataDictionary &d, const unsigned int version)
 			{
-				typedef std::vector< std::string > KeyContainer;
-				KeyContainer keys = d.GetKeys();
-				KeyContainer::size_type keyNum = keys.size();
-				ar & keyNum;
-				for(KeyContainer::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-					std::string val;
-					itk::ExposeMetaData(d, *it, val);
-					ar & *it;
-					ar & val;
-				}
+			  typedef std::vector< std::string > KeyContainer;
+			  KeyContainer keys = d.GetKeys();
+			  uint64_t ikeyNum = keys.size();
+			  ar & ikeyNum;
+			  for(KeyContainer::const_iterator it = keys.begin(); it != keys.end(); ++it) {
+			    std::string val;
+			    itk::ExposeMetaData(d, *it, val);
+			    ar & *it;
+			    ar & val;
+			  }
 			}
 
 
@@ -102,13 +103,14 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 			template<class Archive, class U>
 			void load(Archive & ar, boost::ptr_vector<U> &v, const unsigned int version)
 			{
-				typename boost::ptr_vector<U>::size_type size;
-				ar & size;
+			        uint64_t isize;
+				ar & isize;
+			        typename boost::ptr_vector<U>::size_type size(isize);
 				while(size) {
 					TreeItem *child;
 					ar & child;
-					v.push_back(child);
-					--size;
+					v.push_back(child);	
+				--size;
 				}
 			}
 
@@ -116,7 +118,8 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 			void save(Archive & ar, const boost::ptr_vector<U> &v, const unsigned int version)
 			{
 				typename boost::ptr_vector<U>::size_type size = v.size();
-				ar & size;
+				uint64_t isize(size);
+				ar & isize;
 				for(typename boost::ptr_vector<U>::const_iterator it = v.begin(); it != v.end(); ++it) {
 					const U *obj = &(*it);
 					ar & obj;
@@ -129,7 +132,7 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 				boost::serialization::split_free(ar, v, version);
 			}
 
-			typedef unsigned long long BitSetStorageType;
+			typedef uint64_t BitSetStorageType;
 			typedef std::bitset< 8 * sizeof( BitSetStorageType ) > BitSetType;
 
 			typedef float RealStorageType;
@@ -143,11 +146,14 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 				typename ImageType::SizeType size;
 				typename ImageType::IndexType index;
 				typename ImageType::PointType origin;
+				uint64_t t;
 				for(unsigned d = 0; d < Dimension; d++) {
-					ar & size[d];
-					ar & index[d];
-					ar & spacing[d];
-					ar & origin[d];
+				  ar & t;
+				  size[d] = t;
+				  ar & t;
+				  index[d] = t;
+				  ar & spacing[d];
+				  ar & origin[d];
 				}
 				typename ImageType::RegionType region;
 				region.SetIndex( index );
@@ -184,11 +190,14 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 				typename ImageType::SizeType size = region.GetSize();
 				typename ImageType::IndexType index = region.GetIndex();
 				typename ImageType::PointType origin = i->GetOrigin();
+				uint64_t t;
 				for(unsigned d = 0; d < Dimension; d++) {
-					ar & size[d];
-					ar & index[d];
-					ar & spacing[d];
-					ar & origin[d];
+				  t = size[d];
+				  ar & t;
+				  t = index[d];
+				  ar & t;
+				  ar & spacing[d];
+				  ar & origin[d];
 				}
 				itk::ImageRegionConstIterator<ImageType> it(i,region);
 				BitSetStorageType ulongVal;
@@ -225,11 +234,14 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 				typename ImageType::SizeType size;
 				typename ImageType::IndexType index;
 				typename ImageType::PointType origin;
+				uint64_t t;
 				for(unsigned d = 0; d < Dimension; d++) {
-					ar & size[d];
-					ar & index[d];
-					ar & spacing[d];
-					ar & origin[d];
+				  ar & t;
+				  size[d] = t;
+				  ar & t;
+				  index[d] = t;
+				  ar & spacing[d];
+				  ar & origin[d];
 				}
 				typename ImageType::RegionType region;
 				region.SetIndex( index );
@@ -278,12 +290,14 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 				typename ImageType::SizeType size = region.GetSize();
 				typename ImageType::IndexType index = region.GetIndex();
 				typename ImageType::PointType origin = i->GetOrigin();
-				
+				uint64_t t;
 				for(unsigned d = 0; d < Dimension; d++) {
-					ar & size[d];
-					ar & index[d];
-					ar & spacing[d];
-					ar & origin[d];
+				  t = size[d];
+				  ar & t;
+				  t = index[d];
+				  ar & t;
+				  ar & spacing[d];
+				  ar & origin[d];
 				}
 				itk::ImageRegionConstIterator<ImageType> it(i,region);
 				it.GoToBegin();
@@ -325,20 +339,20 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 			template<class Archive>
 			inline void load(Archive & ar, CTImageTreeItem::SegmentationValueMap &svm, const unsigned int version)
 			{
-				size_t s;
-				ar & s;
-				while(s) {
-					SegmentationValues sv;
-					ar & sv;
-					svm.insert(CTImageTreeItem::SegmentationValueMap::value_type(sv.segment, sv));
-					--s;
-				}
+			  uint64_t s;
+			  ar & s;
+			  while(s) {
+			    SegmentationValues sv;
+			    ar & sv;
+			    svm.insert(CTImageTreeItem::SegmentationValueMap::value_type(sv.segment, sv));
+			    --s;
+			  }
 			}
 
 			template<class Archive>
 			inline void save(Archive & ar, const CTImageTreeItem::SegmentationValueMap &svm, const unsigned int version)
 			{
-				size_t s = svm.size();
+				uint64_t s = svm.size();
 				ar & s;
 				BOOST_FOREACH( const CTImageTreeItem::SegmentationValueMap::value_type &svm_value, svm ) {
 					const SegmentationValues &sv = svm_value.second;
@@ -348,7 +362,7 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 
 			template<class Archive>
 			void serialize(Archive & ar, QColor &color, const unsigned int version) {
-				unsigned char t;
+				uint8_t t;
 				t = color.red(); ar & t; color.setRed(t);
 				t = color.green(); ar & t; color.setGreen(t);
 				t = color.blue(); ar & t; color.setBlue(t);
@@ -454,6 +468,7 @@ void RealImageTreeItem::serialize(Archive & ar, const unsigned int version) {
 
 boost::filesystem::path normalize( const boost::filesystem::path &p_) {
 	boost::filesystem::path p = p_;
+	bool out = false;
 	p = p.normalize();
 	if (p.root_directory().empty()) return p;
 	boost::filesystem::path result;
@@ -482,6 +497,13 @@ boost::filesystem::path absoluteDirectory( const boost::filesystem::path &p_) {
 	return normalize(p).branch_path();
 }
 
+// TEST
+boost::filesystem::path relativeDirectory( const boost::filesystem::path &p_) {
+  boost::filesystem::path p = p_;
+  if (!p.is_complete()) p = boost::filesystem::current_path() / p;
+  return normalize(p).branch_path();
+}
+
 boost::filesystem::path fromAtoB( const boost::filesystem::path &a, const boost::filesystem::path &b) {
 	if (a.root_path() != b.root_path()) return boost::filesystem::path();
 	boost::filesystem::path::const_iterator ia = a.begin();  
@@ -505,7 +527,7 @@ boost::filesystem::path fromAtoB( const boost::filesystem::path &a, const boost:
 template<class Archive>
 void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 	ar & itemUID;
-	size_t fnListLength;
+	uint64_t fnListLength;
 	ar & fnListLength;
 	std::string fn;
 	std::string serPathString;
@@ -528,9 +550,8 @@ void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 template<class Archive>
 void CTImageTreeItem::save(Archive & ar, const unsigned int version) const {
 	ar & itemUID;
-	const size_t fnListLength = fnList.size();
+	const uint64_t fnListLength = fnList.size();
 	ar & fnListLength;
-	boost::filesystem::path serPath( absoluteDirectory( model->getSerializationPath() ) );
 	std::string serPathString = serPath.string();
 	ar & serPathString;
 	BOOST_FOREACH( const std::string &name, fnList ) {
@@ -552,7 +573,10 @@ void SegmentationValues::serialize(Archive & ar, const unsigned int version) {
 	ITKVTKTreeItem<BinaryImageType> *nonconstseg = const_cast<ITKVTKTreeItem<BinaryImageType> *>(segment);
 	ar & nonconstseg;
 	segment = nonconstseg;
-	ar & mean; ar & stddev; ar & min; ar & max; ar & sampleCount; ar & accuracy;
+	uint64_t imin(min), imax(max), isampleCount(sampleCount);
+        uint64_t iaccuracy = static_cast<uint64_t>(accuracy);
+	ar & mean; ar & stddev; ar & imin; ar & imax; ar & isampleCount; ar & iaccuracy;
+	min = imin; max = imax; sampleCount = isampleCount; accuracy = static_cast<Accuracy>(iaccuracy);
 	bool matchingMtime = mtime == segment->getITKMTime(); 
 	ar & matchingMtime;
 	if (matchingMtime)

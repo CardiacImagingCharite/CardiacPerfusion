@@ -26,7 +26,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_7">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0">
+     <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0">
       <property name="sizeConstraint">
        <enum>QLayout::SetMaximumSize</enum>
       </property>
@@ -527,6 +527,13 @@
        </layout>
       </item>
       <item>
+       <widget class="QPushButton" name="btn_autoAlignHeart">
+        <property name="text">
+         <string>Auto Align Heart</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -878,7 +885,7 @@
      <x>0</x>
      <y>0</y>
      <width>1128</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -997,6 +1004,28 @@
    <header>segmentselectbutton.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>treeView</tabstop>
+  <tabstop>sb_size</tabstop>
+  <tabstop>cb_erase</tabstop>
+  <tabstop>btn_draw</tabstop>
+  <tabstop>sb_regionGrowThreshold</tabstop>
+  <tabstop>btn_regionGrow</tabstop>
+  <tabstop>btn_erode</tabstop>
+  <tabstop>btn_dilate</tabstop>
+  <tabstop>btn_analyse</tabstop>
+  <tabstop>btn_perfusionMap</tabstop>
+  <tabstop>sb_shrinkFactor</tabstop>
+  <tabstop>slider_opacity</tabstop>
+  <tabstop>btn_autoAlignHeart</tabstop>
+  <tabstop>tw_results</tabstop>
+  <tabstop>tbl_gammaFit</tabstop>
+  <tabstop>cb_enableGamma</tabstop>
+  <tabstop>slider_startTime</tabstop>
+  <tabstop>slider_endTime</tabstop>
+  <tabstop>btn_arteryInput</tabstop>
+  <tabstop>textEdit_2</tabstop>
+ </tabstops>
  <resources>
   <include location="../Icons/icons.qrc"/>
  </resources>
@@ -1040,8 +1069,8 @@
    <slot>tableGamma_clicked(QModelIndex)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>698</x>
-     <y>685</y>
+     <x>700</x>
+     <y>684</y>
     </hint>
     <hint type="destinationlabel">
      <x>225</x>
@@ -1073,7 +1102,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>150</x>
-     <y>523</y>
+     <y>507</y>
     </hint>
     <hint type="destinationlabel">
      <x>168</x>

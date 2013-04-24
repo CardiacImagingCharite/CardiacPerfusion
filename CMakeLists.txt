@@ -138,6 +138,9 @@ SET( KardioPerfusionSrcs
 	itkfilter/itkperfusionmapfilter.h
 
 	itkfilter/itkNaryPerfusionImageFilter.h
+	itkfilter/autoAlignHeart.cxx
+	itkfilter/autoAlignHeart.h
+
 )
 
 SET( KardioPerfusionUI 

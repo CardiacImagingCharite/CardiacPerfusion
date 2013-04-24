@@ -22,6 +22,8 @@
  
  ===========================================================================*/
 
+#include "autoAlignHeart.h"
+
 #include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
@@ -44,118 +46,61 @@
 #include <algorithm>
 #include <vector>
 
-//******************************
-// Global type definitions
-//******************************
-// Image Types
-const unsigned int InputDimension = 3;
 
-typedef itk::Image< signed short, 2 > SignedShortImageType2D;
-typedef itk::Image< signed short, 3 > SignedShortImageType3D;
-typedef itk::Image< unsigned char, 2 > UnsignedCharImageType2D;
-typedef itk::Image< unsigned char, 3 > UnsignedCharImageType3D;
-typedef itk::Image< itk::Vector< unsigned char , 3>, 2> ColorImageType2D;
-typedef itk::Image< itk::Vector< unsigned char , 3>, 3> ColorImageType3D;
-	
-// Further type definitions
-typedef itk::LinearInterpolateImageFunction< SignedShortImageType3D, double > InterpolatorType;
-typedef itk::LinearInterpolateImageFunction< UnsignedCharImageType3D, double > InterpolatorBWType;
-typedef itk::AffineTransform< double, InputDimension > AffineTransformType;
 
-typedef itk::ResampleImageFilter< SignedShortImageType3D, SignedShortImageType3D > ResampleFilterType;
-typedef itk::ResampleImageFilter< UnsignedCharImageType3D, UnsignedCharImageType3D > ResampleFilterBWType;
 
-typedef itk::BinaryBallStructuringElement< unsigned char, 3 > StructuringElementType;
-typedef itk::BinaryErodeImageFilter< UnsignedCharImageType3D, UnsignedCharImageType3D, StructuringElementType > ErodeFilterType;
-typedef itk::BinaryDilateImageFilter< UnsignedCharImageType3D,	UnsignedCharImageType3D, StructuringElementType > DilateFilterType;
-
-typedef itk::LabelMap< itk::ShapeLabelObject< itk::SizeValueType, 2> > LabelMapType2D;
-typedef itk::LabelMap< itk::ShapeLabelObject< itk::SizeValueType, 3> > LabelMapType3D;
-
-// function prototypes
-SignedShortImageType3D::Pointer resampleImage( SignedShortImageType3D::Pointer image, AffineTransformType* transform, InterpolatorType* interpolator, SignedShortImageType3D::SpacingType& outputSpacing, bool enlargeImage = false);
-UnsignedCharImageType3D::Pointer resampleImage( UnsignedCharImageType3D::Pointer image, AffineTransformType* transform, InterpolatorBWType* interpolator, UnsignedCharImageType3D::SpacingType& outputSpacing, bool enlargeImage = false);
-
-UnsignedCharImageType3D::Pointer binaryThreshold( SignedShortImageType3D::Pointer image, SignedShortImageType3D::PixelType lowerThreshold, SignedShortImageType3D::PixelType upperThreshold, unsigned char insideValue, unsigned char outsideValue); 
-UnsignedCharImageType2D::Pointer binaryThreshold2D( SignedShortImageType2D::Pointer image, SignedShortImageType2D::PixelType lowerThreshold, SignedShortImageType2D::PixelType upperThreshold, unsigned char insideValue, unsigned char outsideValue);
-
-LabelMapType2D::Pointer createLabelMap2D( UnsignedCharImageType3D::Pointer BWImage2D );
-LabelMapType3D::Pointer createLabelMap( UnsignedCharImageType3D::Pointer BWImage );
-
-SignedShortImageType3D::Pointer createImageFromLabelMap( LabelMapType3D::Pointer labelMap );
-UnsignedCharImageType3D::Pointer createBWImageFromLabelMap2D( LabelMapType2D::Pointer labelMap );
-
-double getDistanceOfLargestBlobs ( SignedShortImageType3D::Pointer image, int sliceNumber );
-LabelMapType2D::Pointer getBlobs( SignedShortImageType3D::Pointer image, int sliceNumber );
-
-double median( std::vector<double> vec );
-std::vector<double> medianFilterVector( std::vector<double> vec, int radius);
 
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
+
 //******************************
 // Main program
 //******************************
-int main( int argc, char **argv )
-{
-	// Validate input parameters
-	if( argc < 7 )
-	{
-		std::cerr << "\nInvalid Number of Arguments. \n\n Usage: " 
-			<< argv[0]
-		<< " InputFilename OutputFilename lowerThreshold upperThreshold openingKernelSize selectOutput"
-			<< std::endl;
-		return EXIT_FAILURE;
-	}
 
+autoAlignHeart::autoAlignHeart() {
+
+}
+
+//_______________________________________________________________________________
+
+autoAlignHeart::~autoAlignHeart() {
+
+}
+
+//_______________________________________________________________________________
+
+autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageType* InputImage, int ThresholdLow, int ThresholdUp, int KernelSize, int OutputSelector)
+{
+  
 	itk::TimeProbe clock;
 	clock.Start();
 
 	//***********************************  
 	// 1. Read the input image
 	//***********************************
-	typedef itk::ImageFileReader< SignedShortImageType3D > ReaderType;
-  ReaderType::Pointer reader = ReaderType::New();
 
 	typedef itk::GDCMImageIO           ImageIOType;
-  ImageIOType::Pointer gdcmImageIO = ImageIOType::New();
+	ImageIOType::Pointer gdcmImageIO = ImageIOType::New();
   
-	reader->SetImageIO( gdcmImageIO );
-	reader->SetFileName( argv[1] );
-  
-	std::cout << "\nReading image... ";
-	try
-	{
-		reader->Update();
-		clock.Stop();
-		std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
-		clock.Start();
-	}
-	catch (itk::ExceptionObject &excp)
-	{
-		std::cerr << "Exception thrown while reading the input image" << std::endl;
-		std::cerr << excp << std::endl;
-		return EXIT_FAILURE;
-	}
 
 	//**************************************
 	// 2. Downsample the image to save time
 	//**************************************
-  InterpolatorType::Pointer interpolator = InterpolatorType::New();
- 
-  const SignedShortImageType3D::SpacingType& inputSpacing = reader->GetOutput()->GetSpacing();
-  const SignedShortImageType3D::RegionType& inputRegion = reader->GetOutput()->GetLargestPossibleRegion();
-  const SignedShortImageType3D::SizeType& inputSize = inputRegion.GetSize();
- 
+	InterpolatorType::Pointer interpolator = InterpolatorType::New();
+	
+	const SignedShortImageType3D::SpacingType& inputSpacing = InputImage->GetSpacing();
+	const SignedShortImageType3D::RegionType& inputRegion = InputImage->GetLargestPossibleRegion();
+	const SignedShortImageType3D::SizeType& inputSize = inputRegion.GetSize();
+
 	std::cout << "Input image Information: " << std::endl;
-	std::cout << "Origin:  " << reader->GetOutput()->GetOrigin() << std::endl;
+	std::cout << "Origin:  " << InputImage->GetOrigin() << std::endl;
 	std::cout << "Size: " << inputSize << std::endl;
 	std::cout << "Spacing: " << inputSpacing << std::endl;
 
 	// Change image spacing to 1.5mm for downsampling
-  SignedShortImageType3D::SpacingType outputSpacing;
+	SignedShortImageType3D::SpacingType outputSpacing;
 	outputSpacing[0] = 1.5 * sgn(inputSpacing[0]);
 	outputSpacing[1] = 1.5 * sgn(inputSpacing[1]);
 	outputSpacing[2] = 1.5 * sgn(inputSpacing[2]);
@@ -164,10 +109,9 @@ int main( int argc, char **argv )
 	std::cout << "\nDownsampling image... ";
 
 	AffineTransformType::Pointer identityTransform = AffineTransformType::New();
-  identityTransform->SetIdentity();
+	identityTransform->SetIdentity();
 
-	SignedShortImageType3D::Pointer image = resampleImage(reader->GetOutput(), identityTransform, interpolator, outputSpacing, true);
-
+	SignedShortImageType3D::Pointer image = resampleImage(InputImage, identityTransform, interpolator, outputSpacing, true);
 	clock.Stop();
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
 	clock.Start();
@@ -192,8 +136,8 @@ int main( int argc, char **argv )
 	SignedShortImageType3D::PixelType lowerThreshold, upperThreshold;
 	outsideValue = 0;
 	insideValue = 255;
-	lowerThreshold = ::atoi(argv[3]);
-	upperThreshold = ::atoi(argv[4]);
+	lowerThreshold = ThresholdLow;
+	upperThreshold = ThresholdUp;
 
 	UnsignedCharImageType3D::Pointer thresholdImage = binaryThreshold(image, lowerThreshold, upperThreshold, insideValue, outsideValue);
 
@@ -210,7 +154,7 @@ int main( int argc, char **argv )
 	DilateFilterType::Pointer binaryDilate = DilateFilterType::New();
 
 	StructuringElementType structuringElement;
-	structuringElement.SetRadius( atoi(argv[5]) ); // 3x3 structuring element for radius 1
+	structuringElement.SetRadius( KernelSize ); // 3x3 structuring element for radius 1
 	structuringElement.CreateStructuringElement();
 
 	binaryErode->SetKernel( structuringElement );
@@ -493,51 +437,22 @@ int main( int argc, char **argv )
 
 	trafo2->SetMatrix( rotationMatrix );
 	
+	std::cout << "trafo only matrix = " << trafo2->GetParameters() << std::endl;
+	
 	itk::Vector< double, 3 > axis;
 	axis.Fill( 0 );
 	axis[1] = 1;
 	trafo2->Rotate3D( axis, 1.57, true );
 
+	std::cout << "trafo after Rotate3D = " << trafo2->GetParameters() << std::endl;
 
-	//********************************************************************
-	//	12. Transform the input image using the calculated transformation
-	//********************************************************************
-	SignedShortImageType3D::Pointer resultingImage = resampleImage( image, trafo2, interpolator, outputSpacing);
+	return trafo2;
 
-  //**********************
-	// 13. Write output image
-	//**********************
-	std::cout << "\nWriting output image... ";
-	typedef itk::ImageFileWriter< SignedShortImageType3D > WriterType;
-	WriterType::Pointer writer = WriterType::New();
-		writer->SetFileName( argv[2] );
-		writer->SetImageIO( gdcmImageIO );
-	if( std::atoi( argv[6] ) == 1 )
-		writer->SetInput( extractImageFilter->GetOutput() );
-	else if( std::atoi( argv[6] ) == 2 )
-		writer->SetInput( resampler2->GetOutput() );
-	else
-		writer->SetInput( resultingImage );
-  try
-  {
-	  writer->Update();
-		clock.Stop();
-		std::cout << "\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
-	  std::cout << "Transformation successful" << std::endl;
-		std::cout << "Total time: " << clock.GetTotal() << "s" << std::endl;
-  }
-  catch( itk::ExceptionObject & err )
-  {
-	  std::cerr << "ExceptionObject caught !" << std::endl;
-	  std::cerr << err << std::endl;
-	  return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
 }
 
+//_______________________________________________________________________________
 
-UnsignedCharImageType3D::Pointer resampleImage( UnsignedCharImageType3D::Pointer image, AffineTransformType* transform, InterpolatorBWType* interpolator, UnsignedCharImageType3D::SpacingType& outputSpacing, bool enlargeImage )
+autoAlignHeart::UnsignedCharImageType3D::Pointer autoAlignHeart::resampleImage( UnsignedCharImageType3D::Pointer image, AffineTransformType* transform, InterpolatorBWType* interpolator, UnsignedCharImageType3D::SpacingType& outputSpacing, bool enlargeImage)
 {
 	//calculate the output size according to the desired output spacing
 	const UnsignedCharImageType3D::SizeType& inputSize = image->GetLargestPossibleRegion().GetSize();
@@ -581,8 +496,10 @@ UnsignedCharImageType3D::Pointer resampleImage( UnsignedCharImageType3D::Pointer
 	return resampler->GetOutput();
 }
 
+//_______________________________________________________________________________
+
 // Image resampling function
-SignedShortImageType3D::Pointer resampleImage( SignedShortImageType3D::Pointer image, AffineTransformType* transform, InterpolatorType* interpolator, SignedShortImageType3D::SpacingType& outputSpacing, bool enlargeImage ) 
+autoAlignHeart::SignedShortImageType3D::Pointer autoAlignHeart::resampleImage( SignedShortImageType3D::Pointer image, AffineTransformType* transform, InterpolatorType* interpolator, SignedShortImageType3D::SpacingType& outputSpacing, bool enlargeImage) 
 {
 	//calculate the output size according to the desired output spacing
 	const SignedShortImageType3D::SizeType& inputSize = image->GetLargestPossibleRegion().GetSize();
@@ -626,8 +543,10 @@ SignedShortImageType3D::Pointer resampleImage( SignedShortImageType3D::Pointer i
 	return resampler->GetOutput();
 }
 
+//_______________________________________________________________________________
+
 // Thresholding function
-UnsignedCharImageType3D::Pointer binaryThreshold( SignedShortImageType3D::Pointer image, SignedShortImageType3D::PixelType lowerThreshold, SignedShortImageType3D::PixelType upperThreshold, unsigned char insideValue, unsigned char outsideValue)
+autoAlignHeart::UnsignedCharImageType3D::Pointer autoAlignHeart::binaryThreshold( SignedShortImageType3D::Pointer image, SignedShortImageType3D::PixelType lowerThreshold, SignedShortImageType3D::PixelType upperThreshold, unsigned char insideValue, unsigned char outsideValue)
 {
 	typedef itk::BinaryThresholdImageFilter<SignedShortImageType3D, UnsignedCharImageType3D> BinaryThresholdFilterType;
 
@@ -642,7 +561,9 @@ UnsignedCharImageType3D::Pointer binaryThreshold( SignedShortImageType3D::Pointe
 	return binaryThresholdFilter->GetOutput();
 }
 
-UnsignedCharImageType2D::Pointer binaryThreshold2D( SignedShortImageType2D::Pointer image, SignedShortImageType2D::PixelType lowerThreshold, SignedShortImageType2D::PixelType upperThreshold, unsigned char insideValue, unsigned char outsideValue)
+//_______________________________________________________________________________
+
+autoAlignHeart::UnsignedCharImageType2D::Pointer autoAlignHeart::binaryThreshold2D( SignedShortImageType2D::Pointer image, SignedShortImageType2D::PixelType lowerThreshold, SignedShortImageType2D::PixelType upperThreshold, unsigned char insideValue, unsigned char outsideValue)
 {
 	typedef itk::BinaryThresholdImageFilter<SignedShortImageType2D, UnsignedCharImageType2D> BinaryThresholdFilterType;
 
@@ -657,8 +578,10 @@ UnsignedCharImageType2D::Pointer binaryThreshold2D( SignedShortImageType2D::Poin
 	return binaryThresholdFilter->GetOutput();
 }
 
+//_______________________________________________________________________________
+
 // Function to create a label map from a binary image
-LabelMapType3D::Pointer createLabelMap( UnsignedCharImageType3D::Pointer BWImage )
+autoAlignHeart::LabelMapType3D::Pointer autoAlignHeart::createLabelMap( UnsignedCharImageType3D::Pointer BWImage )
 {
 	typedef itk::BinaryImageToShapeLabelMapFilter< UnsignedCharImageType3D > BinaryImageToShapeLabelMapFilterType;
 	BinaryImageToShapeLabelMapFilterType::Pointer binaryImageToShapeLabelMapFilter = BinaryImageToShapeLabelMapFilterType::New();
@@ -668,8 +591,10 @@ LabelMapType3D::Pointer createLabelMap( UnsignedCharImageType3D::Pointer BWImage
 	return binaryImageToShapeLabelMapFilter->GetOutput();
 }
 
+//_______________________________________________________________________________
+
 // Function to create a label map from a binary image
-LabelMapType2D::Pointer createLabelMap2D( UnsignedCharImageType2D::Pointer BWImage )
+autoAlignHeart::LabelMapType2D::Pointer autoAlignHeart::createLabelMap2D( UnsignedCharImageType2D::Pointer BWImage )
 {
 	typedef itk::BinaryImageToShapeLabelMapFilter< UnsignedCharImageType2D > BinaryImageToShapeLabelMapFilterType;
 	BinaryImageToShapeLabelMapFilterType::Pointer binaryImageToShapeLabelMapFilter = BinaryImageToShapeLabelMapFilterType::New();
@@ -679,7 +604,9 @@ LabelMapType2D::Pointer createLabelMap2D( UnsignedCharImageType2D::Pointer BWIma
 	return binaryImageToShapeLabelMapFilter->GetOutput();
 }
 
-SignedShortImageType3D::Pointer createImageFromLabelMap( LabelMapType3D::Pointer labelMap )
+//_______________________________________________________________________________
+
+autoAlignHeart::SignedShortImageType3D::Pointer autoAlignHeart::createImageFromLabelMap( LabelMapType3D::Pointer labelMap )
 {
 	typedef itk::LabelMapToLabelImageFilter<LabelMapType3D, SignedShortImageType3D> LabelMapToLabelImageFilterType;
 	LabelMapToLabelImageFilterType::Pointer labelMapToLabelImageFilter = LabelMapToLabelImageFilterType::New();
@@ -689,7 +616,9 @@ SignedShortImageType3D::Pointer createImageFromLabelMap( LabelMapType3D::Pointer
 	return labelMapToLabelImageFilter->GetOutput();
 }
 
-UnsignedCharImageType3D::Pointer createBWImageFromLabelMap( LabelMapType3D::Pointer labelMap )
+//_______________________________________________________________________________
+
+autoAlignHeart::UnsignedCharImageType3D::Pointer autoAlignHeart::createBWImageFromLabelMap( LabelMapType3D::Pointer labelMap )
 {
 	typedef itk::LabelMapToLabelImageFilter<LabelMapType3D, UnsignedCharImageType3D> LabelMapToLabelImageFilterType;
 	LabelMapToLabelImageFilterType::Pointer labelMapToLabelImageFilter = LabelMapToLabelImageFilterType::New();
@@ -699,7 +628,9 @@ UnsignedCharImageType3D::Pointer createBWImageFromLabelMap( LabelMapType3D::Poin
 	return labelMapToLabelImageFilter->GetOutput();
 }
 
-double getDistanceOfLargestBlobs ( SignedShortImageType3D::Pointer image, int sliceNumber )
+//_______________________________________________________________________________
+
+double autoAlignHeart::getDistanceOfLargestBlobs ( SignedShortImageType3D::Pointer image, int sliceNumber )
 {
 	typedef itk::ExtractImageFilter< SignedShortImageType3D, SignedShortImageType2D > ExtractImageFilterType;
 	UnsignedCharImageType3D::IndexType desiredStart;
@@ -755,7 +686,9 @@ double getDistanceOfLargestBlobs ( SignedShortImageType3D::Pointer image, int sl
 	return distance;
 }
 
-LabelMapType2D::Pointer getBlobs( SignedShortImageType3D::Pointer image, int sliceNumber ) 
+//_______________________________________________________________________________
+
+autoAlignHeart::LabelMapType2D::Pointer autoAlignHeart::getBlobs( SignedShortImageType3D::Pointer image, int sliceNumber ) 
 {
 	typedef itk::ExtractImageFilter< SignedShortImageType3D, SignedShortImageType2D > ExtractImageFilterType;
 	UnsignedCharImageType3D::IndexType desiredStart;
@@ -795,8 +728,10 @@ LabelMapType2D::Pointer getBlobs( SignedShortImageType3D::Pointer image, int sli
 	return labelMap;
 }
 
+//_______________________________________________________________________________
+
 // returns the median of a vector
-double median( std::vector<double> vec )
+double autoAlignHeart::median( std::vector<double> vec )
 {
 	typedef std::vector<double>::size_type vec_sz;
 
@@ -819,7 +754,9 @@ double median( std::vector<double> vec )
 	}
 }
 
-std::vector<double> medianFilterVector( std::vector<double> vec, int radius)
+//_______________________________________________________________________________
+
+std::vector<double> autoAlignHeart::medianFilterVector( std::vector<double> vec, int radius)
 {
 	std::vector<double> filteredVector( vec.size() );
 	// copy entries at end and beginning which are not filtered

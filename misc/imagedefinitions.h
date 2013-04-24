@@ -42,7 +42,7 @@
 const unsigned int ImageDimension = 3;
 
 typedef float RealPixelType;
-typedef itk::Image< RealPixelType, ImageDimension> RealImageType;
+typedef itk::Image< RealPixelType, ImageDimension> RealImageType;///< for perfusion map images
 
 typedef unsigned char LabelPixelType;
 typedef itk::Image< LabelPixelType, ImageDimension> LabelImageType;
@@ -53,7 +53,8 @@ const BinaryPixelType BinaryPixelOn = 255;
 typedef itk::Image< BinaryPixelType, ImageDimension> BinaryImageType;
 
 typedef signed short CTPixelType;
-typedef itk::Image< CTPixelType, ImageDimension> CTImageType;
+
+typedef itk::Image< CTPixelType, ImageDimension> CTImageType;///< for original dicom CT images
 
 typedef boost::array< unsigned char, 3 > RGBType;
 

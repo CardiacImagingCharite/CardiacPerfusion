@@ -468,7 +468,6 @@ void RealImageTreeItem::serialize(Archive & ar, const unsigned int version) {
 
 boost::filesystem::path normalize( const boost::filesystem::path &p_) {
 	boost::filesystem::path p = p_;
-	bool out = false;
 	p = p.normalize();
 	if (p.root_directory().empty()) return p;
 	boost::filesystem::path result;
@@ -552,6 +551,7 @@ void CTImageTreeItem::save(Archive & ar, const unsigned int version) const {
 	ar & itemUID;
 	const uint64_t fnListLength = fnList.size();
 	ar & fnListLength;
+	boost::filesystem::path serPath( absoluteDirectory( model->getSerializationPath() ) );
 	std::string serPathString = serPath.string();
 	ar & serPathString;
 	BOOST_FOREACH( const std::string &name, fnList ) {

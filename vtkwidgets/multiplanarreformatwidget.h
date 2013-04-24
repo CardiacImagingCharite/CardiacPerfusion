@@ -49,6 +49,7 @@
 #include "vtkImageViewer2.h"
 #include <QMouseEvent>
 
+#include "vtkMatrix4x4.h"
 
 class vtkImageData;
 class vtkImageReslice;
@@ -147,6 +148,18 @@ public:
 	void setOrientation(int orientation);
 
 	vtkSmartPointer<vtkInteractorStyleProjectionView> GetInteractorStyle() { return this->m_interactorStyle; }
+	///Rotates the image by changing m_reslicePlaneTransform, e.g. after autoAlignHeart
+	/*!
+	\param RotationTrafoElements Elements of a 3x3-rotation matrix
+	*/
+        void rotateImage(const double RotationTrafoElements[]);
+	///Multiplies only the top left 3x3 submatrices of 4x4 matrices
+	/*!
+	\param a4 Left 4x4 matrix of Multiplication
+	\param a4 Right 4x4 matrix of Multiplication
+	\param a4 Resulting 4x4 matrix of Multiplication
+	*/
+        void Multiply3x3of4x4Matrix(vtkMatrix4x4 *a4, vtkMatrix4x4 *b4, vtkMatrix4x4 *c4);
 
 public slots:
 	///Resets the view.

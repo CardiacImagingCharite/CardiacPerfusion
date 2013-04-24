@@ -35,6 +35,7 @@
 
 #include "multiplanarreformatwidget.h"
 #include <vtkMatrix4x4.h>
+#include <vtkMatrix3x3.h>
 #include <vtkinteractorstyleprojectionview.h>
 #include <vtkCommand.h>
 #include <vtkImageReslice.h>
@@ -87,12 +88,17 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 
 	m_menuButton->setMenu(menu);
 
+	// Set up reslice
 	m_reslice->SetOutputDimensionality(2);
 	m_reslice->SetBackgroundLevel(-1000);
 	m_reslice->SetInterpolationModeToCubic();
 
-	m_imageViewer->SetInput(m_reslice->GetOutput());
-	
+	// why this line ????
+	// m_reslice didn't get input yet
+	// creates Error when starting KardioPerfusion
+	// m_imageViewer->SetInput(m_reslice->GetOutput());
+
+	// bind vtkRenderWindow to Qt window
 	this->SetRenderWindow(m_imageViewer->GetRenderWindow());
 
 	// Set up the interaction
@@ -106,6 +112,7 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	m_interactorStyle->SetOrientationMatrix( m_reslicePlaneTransform );
 	m_interactorStyle->SetImageViewer(m_imageViewer);
 
+	// Set up annotation (Window/Level)
 	m_annotation->SetLinearFontScaleFactor( 2 );
 	m_annotation->SetNonlinearFontScaleFactor( 1 );
 	m_annotation->SetMaximumFontSize( 12 );
@@ -117,25 +124,30 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 
 	vtkSmartPointer<vtkRenderWindowInteractor> interactor = this->GetRenderWindow()->GetInteractor();
   
-
+	// what's this ????
+	// with the line before
+	// and this->SetRenderWindow(m_imageViewer->GetRenderWindow()); (above)
+	// this means: m_imageViewer->SetupInteractor(m_imageViewer->GetRenderWindow()->GetInteractor())
 	m_imageViewer->SetupInteractor(interactor);
   
 	interactor->SetInteractorStyle(m_interactorStyle);
 	m_interactorStyle->SetCurrentRenderer(m_imageViewer->GetRenderer());
 
 	m_reslice->SetResliceAxes(m_reslicePlaneTransform);
+	// why ???
+	// already done above
 	m_reslice->SetOutputDimensionality(2);
-
+	
 
 	//init widget with a black image to supress error messages (input is 0)
 	vtkImageData* blank = vtkImageData::New();
 	blank->SetDimensions(100, 100, 1);
 	blank->AllocateScalars();
 	for (int i = 0; i < 100; i++)
-      for (int j = 0; j < 100; j++)
-          blank->SetScalarComponentFromDouble(i, j, 0, 0, 0);
+	  for (int j = 0; j < 100; j++)
+	    blank->SetScalarComponentFromDouble(i, j, 0, 0, 0);
 	blank->Update();
-	setImage(blank);
+ 	setImage(blank);
 	m_imageViewer->Render();
 }
 
@@ -202,7 +214,7 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
     m_reslicePlaneTransform->SetElement(0, 3, center[0]);
     m_reslicePlaneTransform->SetElement(1, 3, center[1]);
     m_reslicePlaneTransform->SetElement(2, 3, center[2]);
-	
+
     m_reslice->SetInput( m_image );
     m_reslice->SetOutputSpacing(1,1,1);
 	m_imageViewer->SetInput(m_reslice->GetOutput());
@@ -360,4 +372,50 @@ void MultiPlanarReformatWidget::resetView()
 void MultiPlanarReformatWidget::updateWidget()
 {
 	this->update();
+}
+
+void MultiPlanarReformatWidget::Multiply3x3of4x4Matrix(vtkMatrix4x4 *a4, vtkMatrix4x4 *b4, vtkMatrix4x4 *c4) {
+
+  // create 3x3 matrices
+  vtkMatrix3x3 *a3 = vtkMatrix3x3::New();
+  vtkMatrix3x3 *b3 = vtkMatrix3x3::New();
+  vtkMatrix3x3 *c3 = vtkMatrix3x3::New();
+
+  // copy elements from 4x4 to 3x3 (input)matrices
+  for (int i = 0; i < 3; i++) 
+    for (int j = 0; j < 3; j++) {
+      a3->SetElement( i, j, a4->GetElement(i, j) );
+      b3->SetElement( i, j, b4->GetElement(i, j) );
+    }
+
+  // multipy 3x3 matrices
+  vtkMatrix3x3::Multiply3x3(a3, b3, c3);
+
+  // copy elements from 3x3 to 4x4 (output)matrix
+  for (int i = 0; i < 3; i++) 
+    for (int j = 0; j < 3; j++)
+      c4->SetElement( i, j, c3->GetElement(i, j) );
+      
+}
+
+void MultiPlanarReformatWidget::rotateImage(const double RotationTrafoElements[]) {
+
+  // create transformation matrix and set elements
+  vtkMatrix4x4* trafoMatrix = vtkMatrix4x4::New();
+  trafoMatrix->SetElement(0, 0, RotationTrafoElements[0]);
+  trafoMatrix->SetElement(0, 1, RotationTrafoElements[1]);
+  trafoMatrix->SetElement(0, 2, RotationTrafoElements[2]);
+  trafoMatrix->SetElement(1, 0, RotationTrafoElements[3]);
+  trafoMatrix->SetElement(1, 1, RotationTrafoElements[4]);
+  trafoMatrix->SetElement(1, 2, RotationTrafoElements[5]);
+  trafoMatrix->SetElement(2, 0, RotationTrafoElements[6]);
+  trafoMatrix->SetElement(2, 1, RotationTrafoElements[7]);
+  trafoMatrix->SetElement(2, 2, RotationTrafoElements[8]);
+  trafoMatrix->SetElement(3, 3, 1);
+
+  // apply transformation
+  Multiply3x3of4x4Matrix(trafoMatrix, m_reslicePlaneTransform, m_reslicePlaneTransform);
+
+  m_imageViewer->Render();
+
 }

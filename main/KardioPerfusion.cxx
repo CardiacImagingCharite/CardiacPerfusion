@@ -65,6 +65,8 @@
 #include "itkShrinkImageFilter.h"
 #include "perfusionMapCreator.h"
 
+#include "autoAlignHeart.h"
+
 
 
 const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
@@ -646,6 +648,30 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 			return;
 		}
 	}
+}
+
+//action for autoAlignHeart-Button
+void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
+
+  // get current image
+  ITKVTKTreeItem<CTImageType> *currentImage = dynamic_cast<ITKVTKTreeItem<CTImageType>*>(displayedCTImage->getBaseItem());
+  CTImageType::Pointer ImagePtr = currentImage->getITKImage();
+  
+  // get tranformation from autoAlignHeart
+  // autoAlignHeart::AffineTransformType::Pointer trafo = autoAlignHeart().getTrafo(ImagePtr, 200, 1000, 5, 0);
+  autoAlignHeart::AffineTransformType::Pointer trafo = autoAlignHeart().getTrafo(ImagePtr);
+  
+  // put trafo elements into an array
+  double trafoElements[12];
+  for (int i = 0; i < 12; i++) {
+    trafoElements[i] = trafo->GetParameters()[i];
+  }
+
+  // apply rotation to widgets
+  this->ui->mprView_ur->rotateImage( trafoElements );
+  this->ui->mprView_ul->rotateImage( trafoElements );
+  this->ui->mprView_lr->rotateImage( trafoElements );
+
 }
 
 //callback for exit

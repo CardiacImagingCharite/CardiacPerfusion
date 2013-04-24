@@ -135,6 +135,8 @@ class KardioPerfusion : public QMainWindow
 	void mprWidget_doubleClicked(MultiPlanarReformatWidget &w);
 	///Action for double clicking on a mytabwidget.
 	void tabWidget_doubleClicked(MyTabWidget &w);
+        ///Action for clicking on autoAlignHeart-Button
+        void on_btn_autoAlignHeart_clicked();
 	///Slot for the contextmenu of the treeView.
 	/*! 
 	\param pos contains the position of the contextmenu.
@@ -154,7 +156,7 @@ class KardioPerfusion : public QMainWindow
 	void tableGamma_clicked(const QModelIndex & index);
 	///Slot will be called, if the checkbutton was toggled.
 	void cb_enableGamma_toggled();
-	///Slot will be calles, if the button was pressed
+	///Slot will be called, if the button was pressed
 	void on_btn_arteryInput_selected(const SegmentInfo *segment);
 	///Slot will be called, if the slider value has changed
 	void slider_opacity_changed();
@@ -215,7 +217,7 @@ private:
 	CTImageTreeModel imageModel;
 	CTImageTreeItem::ConnectorHandle displayedCTImage;
 
-	typedef std::set< BinaryImageTreeItem::ConnectorHandle > DisplayedSegmentContainer;
+        typedef std::set< BinaryImageTreeItem::ConnectorHandle > DisplayedSegmentContainer;
     DisplayedSegmentContainer displayedSegments;
 
 	typedef std::set< RealImageTreeItem::ConnectorHandle > DisplayedPerfusionMapContainer;

@@ -652,26 +652,30 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 
 //action for autoAlignHeart-Button
 void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
-
-  // get current image
-  ITKVTKTreeItem<CTImageType> *currentImage = dynamic_cast<ITKVTKTreeItem<CTImageType>*>(displayedCTImage->getBaseItem());
-  CTImageType::Pointer ImagePtr = currentImage->getITKImage();
   
-  // get tranformation from autoAlignHeart
-  // autoAlignHeart::AffineTransformType::Pointer trafo = autoAlignHeart().getTrafo(ImagePtr, 200, 1000, 5, 0);
-  autoAlignHeart::AffineTransformType::Pointer trafo = autoAlignHeart().getTrafo(ImagePtr);
-  
-  // put trafo elements into an array
-  double trafoElements[12];
-  for (int i = 0; i < 12; i++) {
-    trafoElements[i] = trafo->GetParameters()[i];
+  if (!displayedCTImage) { 
+    QMessageBox::warning(this,tr("No image selcted"),tr("Select one image as input for the Auto Align Heart\n\nHint: You should choose an image which shows a cardiac pahse where the left ventricle has a high constrast, while the right ventricle does not"));
   }
-
-  // apply rotation to widgets
-  this->ui->mprView_ur->rotateImage( trafoElements );
-  this->ui->mprView_ul->rotateImage( trafoElements );
-  this->ui->mprView_lr->rotateImage( trafoElements );
-
+  else {
+    // get current image
+    ITKVTKTreeItem<CTImageType> *currentImage = dynamic_cast<ITKVTKTreeItem<CTImageType>*>(displayedCTImage->getBaseItem());
+    CTImageType::Pointer ImagePtr = currentImage->getITKImage();
+    
+    // get tranformation from autoAlignHeart
+    // autoAlignHeart::AffineTransformType::Pointer trafo = autoAlignHeart().getTrafo(ImagePtr, 200, 1000, 5, 0);
+    autoAlignHeart::AffineTransformType::Pointer trafo = autoAlignHeart().getTrafo(ImagePtr);
+    
+    // put trafo elements into an array
+    double trafoElements[12];
+    for (int i = 0; i < 12; i++) {
+      trafoElements[i] = trafo->GetParameters()[i];
+    }
+    
+    // apply rotation to widgets
+    this->ui->mprView_ur->rotateImage( trafoElements );
+    this->ui->mprView_ul->rotateImage( trafoElements );
+    this->ui->mprView_lr->rotateImage( trafoElements );
+  }
 }
 
 //callback for exit

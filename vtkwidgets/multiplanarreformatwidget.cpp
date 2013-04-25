@@ -93,11 +93,6 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	m_reslice->SetBackgroundLevel(-1000);
 	m_reslice->SetInterpolationModeToCubic();
 
-	// why this line ????
-	// m_reslice didn't get input yet
-	// creates Error when starting KardioPerfusion
-	// m_imageViewer->SetInput(m_reslice->GetOutput());
-
 	// bind vtkRenderWindow to Qt window
 	this->SetRenderWindow(m_imageViewer->GetRenderWindow());
 
@@ -124,20 +119,10 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 
 	vtkSmartPointer<vtkRenderWindowInteractor> interactor = this->GetRenderWindow()->GetInteractor();
   
-	// what's this ????
-	// with the line before
-	// and this->SetRenderWindow(m_imageViewer->GetRenderWindow()); (above)
-	// this means: m_imageViewer->SetupInteractor(m_imageViewer->GetRenderWindow()->GetInteractor())
-	m_imageViewer->SetupInteractor(interactor);
-  
 	interactor->SetInteractorStyle(m_interactorStyle);
 	m_interactorStyle->SetCurrentRenderer(m_imageViewer->GetRenderer());
 
 	m_reslice->SetResliceAxes(m_reslicePlaneTransform);
-	// why ???
-	// already done above
-	m_reslice->SetOutputDimensionality(2);
-	
 
 	//init widget with a black image to supress error messages (input is 0)
 	vtkImageData* blank = vtkImageData::New();
@@ -252,13 +237,13 @@ void MultiPlanarReformatWidget::setOrientation(int orientation)
 			0,-1, 0, 0,
 			0, 0, 0, 1 };
 
-	vtkMatrix4x4* axialMatrix = vtkMatrix4x4::New();
+	vtkSmartPointer<vtkMatrix4x4> axialMatrix = vtkMatrix4x4::New();
 	axialMatrix->DeepCopy(axialElements);
 
-	vtkMatrix4x4* coronalMatrix = vtkMatrix4x4::New();
+	vtkSmartPointer<vtkMatrix4x4> coronalMatrix = vtkMatrix4x4::New();
 	coronalMatrix->DeepCopy(coronalElements);
 	
-	vtkMatrix4x4* sagittalMatrix = vtkMatrix4x4::New();
+	vtkSmartPointer<vtkMatrix4x4> sagittalMatrix = vtkMatrix4x4::New();
 	sagittalMatrix->DeepCopy(sagittalElements);
 
 	switch(m_orientation)
@@ -377,9 +362,9 @@ void MultiPlanarReformatWidget::updateWidget()
 void MultiPlanarReformatWidget::Multiply3x3of4x4Matrix(vtkMatrix4x4 *a4, vtkMatrix4x4 *b4, vtkMatrix4x4 *c4) {
 
   // create 3x3 matrices
-  vtkMatrix3x3 *a3 = vtkMatrix3x3::New();
-  vtkMatrix3x3 *b3 = vtkMatrix3x3::New();
-  vtkMatrix3x3 *c3 = vtkMatrix3x3::New();
+  vtkSmartPointer<vtkMatrix3x3> a3 = vtkMatrix3x3::New();
+  vtkSmartPointer<vtkMatrix3x3> b3 = vtkMatrix3x3::New();
+  vtkSmartPointer<vtkMatrix3x3> c3 = vtkMatrix3x3::New();
 
   // copy elements from 4x4 to 3x3 (input)matrices
   for (int i = 0; i < 3; i++) 
@@ -401,7 +386,7 @@ void MultiPlanarReformatWidget::Multiply3x3of4x4Matrix(vtkMatrix4x4 *a4, vtkMatr
 void MultiPlanarReformatWidget::rotateImage(const double RotationTrafoElements[]) {
 
   // create transformation matrix and set elements
-  vtkMatrix4x4* trafoMatrix = vtkMatrix4x4::New();
+  vtkSmartPointer<vtkMatrix4x4> trafoMatrix = vtkMatrix4x4::New();
   trafoMatrix->SetElement(0, 0, RotationTrafoElements[0]);
   trafoMatrix->SetElement(0, 1, RotationTrafoElements[1]);
   trafoMatrix->SetElement(0, 2, RotationTrafoElements[2]);

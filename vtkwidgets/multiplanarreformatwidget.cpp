@@ -224,18 +224,18 @@ void MultiPlanarReformatWidget::setOrientation(int orientation)
 	         0, 1, 0, 0,
 	         0, 0, 1, 0,
 	         0, 0, 0, 1 };
-
+		 
 	static double coronalElements[16] = {
-	         1, 0, 0, 0,
-	         0, 0, 1, 0,
-	         0,-1, 0, 0,
+	         0, 1, 0, 0,
+	         0, 0,-1, 0,
+	        -1, 0, 0, 0,
 	         0, 0, 0, 1 };
 
 	static double sagittalElements[16] = {
-			0, 0,-1, 0,
-			1, 0, 0, 0,
-			0,-1, 0, 0,
-			0, 0, 0, 1 };
+		 0, 0, 1, 0,
+	         0, 1, 0, 0,
+	        -1, 0, 0, 0,
+		 0, 0, 0, 1 };
 
 	vtkSmartPointer<vtkMatrix4x4> axialMatrix = vtkMatrix4x4::New();
 	axialMatrix->DeepCopy(axialElements);

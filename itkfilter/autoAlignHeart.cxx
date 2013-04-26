@@ -183,7 +183,9 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	if( labelMap->GetNumberOfLabelObjects() == 0 ) {
 		std::cout << "ERROR: No objects could be found in the image. Please check thresholds and morphology kernel size. \n\nAbort" << std::endl;
-		return EXIT_FAILURE;
+		AffineTransformType::Pointer failTrafo = AffineTransformType::New();
+		failTrafo->SetIdentity();
+		return failTrafo;
 	}
 
 	//***************************************

@@ -493,14 +493,7 @@ boost::filesystem::path normalize( const boost::filesystem::path &p_) {
 boost::filesystem::path absoluteDirectory( const boost::filesystem::path &p_) {
 	boost::filesystem::path p = p_;
 	if (!p.is_complete()) p = boost::filesystem::current_path() / p;
-	return normalize(p).branch_path();
-}
-
-// TEST
-boost::filesystem::path relativeDirectory( const boost::filesystem::path &p_) {
-  boost::filesystem::path p = p_;
-  if (!p.is_complete()) p = boost::filesystem::current_path() / p;
-  return normalize(p).branch_path();
+	return normalize(p).parent_path();
 }
 
 boost::filesystem::path fromAtoB( const boost::filesystem::path &a, const boost::filesystem::path &b) {
@@ -529,20 +522,23 @@ void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 	uint64_t fnListLength;
 	ar & fnListLength;
 	std::string fn;
-	std::string serPathString;
-	ar & serPathString;
-	boost::filesystem::path serPath( serPathString );
+	std::list<std::string> pathList;
 	for(;fnListLength != 0; --fnListLength) {
 		ar & fn;
-		boost::filesystem::path fnPath( fn );
+		pathList.push_back( fn );
+	}
+	ar & HeaderFields;
+	ar & dict;
+	ar & boost::serialization::base_object<BaseClass>(*this);
+	boost::filesystem::path serPath( model->getSerializationPath() );
+	serPath = serPath.parent_path();
+	for( std::list<std::string>::const_iterator path = pathList.begin(); path != pathList.end(); ++path) {
+		boost::filesystem::path fnPath( *path );
 		if (!fnPath.is_complete()) {
 			fnPath = normalize( serPath / fnPath );
 		}
 		fnList.insert(fnPath.string());
 	}
-	ar & HeaderFields;
-	ar & dict;
-	ar & boost::serialization::base_object<BaseClass>(*this);
 	ar & segmentationValueCache;
 }
 
@@ -552,8 +548,6 @@ void CTImageTreeItem::save(Archive & ar, const unsigned int version) const {
 	const uint64_t fnListLength = fnList.size();
 	ar & fnListLength;
 	boost::filesystem::path serPath( absoluteDirectory( model->getSerializationPath() ) );
-	std::string serPathString = serPath.string();
-	ar & serPathString;
 	BOOST_FOREACH( const std::string &name, fnList ) {
 		boost::filesystem::path fnPath( name );
 		boost::filesystem::path newFnPath = fromAtoB( serPath, fnPath );

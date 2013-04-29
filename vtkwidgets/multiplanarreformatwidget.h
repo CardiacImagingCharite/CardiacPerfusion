@@ -146,6 +146,8 @@ public:
 	\param orientation A number that appoints the desired orientation
 	*/
 	void setOrientation(int orientation);
+	///Sets the translation vector of the image m_reslicePlaneTransform
+	void setTranslation();
 
 	vtkSmartPointer<vtkInteractorStyleProjectionView> GetInteractorStyle() { return this->m_interactorStyle; }
 	///Rotates the image by changing m_reslicePlaneTransform, e.g. after autoAlignHeart

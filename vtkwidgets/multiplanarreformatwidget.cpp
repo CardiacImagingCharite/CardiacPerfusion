@@ -97,12 +97,6 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	this->SetRenderWindow(m_imageViewer->GetRenderWindow());
 
 	// Set up the interaction
-	vtkTransform *transform = vtkTransform::New();
-	transform->SetMatrix( m_reslicePlaneTransform );
-	transform->RotateX(180);
-	m_reslicePlaneTransform->DeepCopy( transform->GetMatrix() );
-	transform->Delete();
-  
 //	m_interactorStyle->SetImageMapToWindowLevelColors( m_colormap );
 	m_interactorStyle->SetOrientationMatrix( m_reslicePlaneTransform );
 	m_interactorStyle->SetImageViewer(m_imageViewer);
@@ -185,21 +179,8 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
     for(int i = 0; i < 3; i++)
       m_image->GetAxisUpdateExtent(i, extent[i*2], extent[i*2+1]);
 
-    double spacing[3];
-    double origin[3];
-    m_image->GetSpacing(spacing);
-    m_image->GetOrigin(origin);
-
-    double center[3];
-    center[0] = origin[0] + spacing[0] * 0.5 * (extent[0] + extent[1]); 
-    center[1] = origin[1] + spacing[1] * 0.5 * (extent[2] + extent[3]); 
-    center[2] = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5]); 
-	
-    // Set the point through which to slice
-    m_reslicePlaneTransform->SetElement(0, 3, center[0]);
-    m_reslicePlaneTransform->SetElement(1, 3, center[1]);
-    m_reslicePlaneTransform->SetElement(2, 3, center[2]);
-
+    setTranslation();
+      
     m_reslice->SetInput( m_image );
     m_reslice->SetOutputSpacing(1,1,1);
 	m_imageViewer->SetInput(m_reslice->GetOutput());
@@ -209,16 +190,41 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
   this->update();
 }
 
+void MultiPlanarReformatWidget::setTranslation() {
+
+  int extent[6];
+  for(int i = 0; i < 3; i++)
+    m_image->GetAxisUpdateExtent(i, extent[i*2], extent[i*2+1]); 
+  
+  double spacing[3];
+  double origin[3];
+  m_image->GetSpacing(spacing);
+  m_image->GetOrigin(origin);
+
+  double center[3];
+  center[0] = origin[0] + spacing[0] * 0.5 * (extent[0] + extent[1]); 
+  center[1] = origin[1] + spacing[1] * 0.5 * (extent[2] + extent[3]); 
+  center[2] = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5]); 
+      
+  // Set the point through which to slice
+  m_reslicePlaneTransform->SetElement(0, 3, center[0]);
+  m_reslicePlaneTransform->SetElement(1, 3, center[1]);
+  m_reslicePlaneTransform->SetElement(2, 3, center[2]);
+}
+
+
 void MultiPlanarReformatWidget::setOrientation(int orientation)
 {
+	vtkTransform *transform = vtkTransform::New();
+	vtkSmartPointer<vtkMatrix4x4> IdentMatrix = vtkMatrix4x4::New();
+	IdentMatrix->Identity();
+	transform->SetMatrix( IdentMatrix );
+	transform->RotateX(180);
+	m_reslicePlaneTransform->DeepCopy( transform->GetMatrix() );
+	transform->Delete();
+
 	m_orientation = orientation;
 	// Matrices for axial, coronal, sagittal, oblique view orientations
-	/*static double axialElements[16] = {
-	         1, 0, 0, 0,
-	         0, 1, 0, 0,
-	         0, 0, 1, 0,
-	         0, 0, 0, 1 };
-	*/
 	static double axialElements[16] = {
 	         1, 0, 0, 0,
 	         0, 1, 0, 0,
@@ -384,7 +390,11 @@ void MultiPlanarReformatWidget::Multiply3x3of4x4Matrix(vtkMatrix4x4 *a4, vtkMatr
 }
 
 void MultiPlanarReformatWidget::rotateImage(const double RotationTrafoElements[]) {
-
+	
+  // set m_reslicePlaneTransform back to basic orientation
+  setOrientation(m_orientation);
+  setTranslation();
+  
   // create transformation matrix and set elements
   vtkSmartPointer<vtkMatrix4x4> trafoMatrix = vtkMatrix4x4::New();
   trafoMatrix->SetElement(0, 0, RotationTrafoElements[0]);
@@ -404,3 +414,4 @@ void MultiPlanarReformatWidget::rotateImage(const double RotationTrafoElements[]
   m_imageViewer->Render();
 
 }
+

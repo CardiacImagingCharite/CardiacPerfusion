@@ -103,11 +103,11 @@ public:
 	//  void Set
 	///@}
 	void CycleLeftButtonAction();
-	void WindowLevelDelta( int dw, int dl );
+	void EmitWindowLevelDelta( int dw, int dl );
 	void Slice( int dpos );
 	void Rotate( int theta, int phi );
 	void Spin( int alpha );
-	void Zoom( int delta );
+	void EmitZoom( int delta );
 	void Pan( int dx, int dy );
 	void WindowLUTDelta(int dx, int dy);
 	void PickColor(); 
@@ -120,8 +120,14 @@ public:
 	void removeAction(int action);
 	void resetActions();
 
+public slots:
+    void Zoom( int delta );
+    void WindowLevelDelta(int dw, int dl);
+    
 signals:
 	void ColorTableChanged();
+	void ZoomChanged(int delta);
+	void WindowLevelDeltaChanged(int dw, int dl);
 
 protected:
 	void processAction();
@@ -152,7 +158,7 @@ protected:
 	ActionListType m_actionList;
 	int m_interAction; ///< selected interaction due to mouse button presses - determined by dipatchActions()
 	int m_leftButtonAction; ///< selected interaction for the left mouse button - changed by pressing Space in CycleLeftButtonAction()
-	int ActionFirst, ActionSpin, ActionRotate, ActionZoom, ActionPan, ActionWindowLevel, ActionSlice, ActionNone, ActionWindowLUT, ActionColorPick, ActionShowCircle;
+	int ActionFirst, ActionSpin, ActionRotate, ActionEmitZoom, ActionPan, ActionEmitWindowLevel, ActionSlice, ActionNone, ActionWindowLUT, ActionColorPick, ActionShowCircle;
 
 	/** @name Mouse Button Flags
 	State of the Mouse Buttons (Pressed?) */

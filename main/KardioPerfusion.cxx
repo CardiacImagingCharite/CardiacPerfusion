@@ -162,7 +162,6 @@ KardioPerfusion::KardioPerfusion():
 	connect(this->ui->tw_results, SIGNAL(doubleClicked(MyTabWidget &)),
 		this, SLOT(tabWidget_doubleClicked(MyTabWidget &)));
 
-
 	connect(this->ui->mprView_lr->GetInteractorStyle() , SIGNAL( ColorTableChanged() ), this->ui->mprView_ur, SLOT(updateWidget()));
 	connect(this->ui->mprView_lr->GetInteractorStyle() , SIGNAL( ColorTableChanged() ), this->ui->mprView_ul, SLOT(updateWidget()));
 
@@ -172,6 +171,25 @@ KardioPerfusion::KardioPerfusion():
 	connect(this->ui->mprView_ul->GetInteractorStyle() , SIGNAL( ColorTableChanged() ), this->ui->mprView_ur, SLOT(updateWidget()));
 	connect(this->ui->mprView_ul->GetInteractorStyle() , SIGNAL( ColorTableChanged() ), this->ui->mprView_lr, SLOT(updateWidget()));
 
+	// couple zoom
+	connect(this->ui->mprView_lr->GetInteractorStyle() , SIGNAL( ZoomChanged(int) ), this->ui->mprView_ur->GetInteractorStyle(), SLOT( Zoom(int) ) );
+	connect(this->ui->mprView_lr->GetInteractorStyle() , SIGNAL( ZoomChanged(int) ), this->ui->mprView_ul->GetInteractorStyle(), SLOT( Zoom(int) ) );
+
+	connect(this->ui->mprView_ur->GetInteractorStyle() , SIGNAL( ZoomChanged(int) ), this->ui->mprView_lr->GetInteractorStyle(), SLOT( Zoom(int) ) );
+	connect(this->ui->mprView_ur->GetInteractorStyle() , SIGNAL( ZoomChanged(int) ), this->ui->mprView_ul->GetInteractorStyle(), SLOT( Zoom(int) ) );
+
+	connect(this->ui->mprView_ul->GetInteractorStyle() , SIGNAL( ZoomChanged(int) ), this->ui->mprView_ur->GetInteractorStyle(), SLOT( Zoom(int) ) );
+	connect(this->ui->mprView_ul->GetInteractorStyle() , SIGNAL( ZoomChanged(int) ), this->ui->mprView_lr->GetInteractorStyle(), SLOT( Zoom(int) ) );
+
+	// couple window and level
+	connect(this->ui->mprView_lr->GetInteractorStyle() , SIGNAL( WindowLevelDeltaChanged(int, int) ) , this->ui->mprView_ur->GetInteractorStyle(), SLOT( WindowLevelDelta(int, int) ) );
+	connect(this->ui->mprView_lr->GetInteractorStyle() , SIGNAL( WindowLevelDeltaChanged(int, int) ) , this->ui->mprView_ul->GetInteractorStyle(), SLOT( WindowLevelDelta(int, int) ) );
+
+	connect(this->ui->mprView_ur->GetInteractorStyle() , SIGNAL( WindowLevelDeltaChanged(int, int) ) , this->ui->mprView_lr->GetInteractorStyle(), SLOT( WindowLevelDelta(int, int) ) );
+	connect(this->ui->mprView_ur->GetInteractorStyle() , SIGNAL( WindowLevelDeltaChanged(int, int) ) , this->ui->mprView_ul->GetInteractorStyle(), SLOT( WindowLevelDelta(int, int) ) );
+	
+	connect(this->ui->mprView_ul->GetInteractorStyle() , SIGNAL( WindowLevelDeltaChanged(int, int) ) , this->ui->mprView_ur->GetInteractorStyle(), SLOT( WindowLevelDelta(int, int) ) );
+	connect(this->ui->mprView_ul->GetInteractorStyle() , SIGNAL( WindowLevelDeltaChanged(int, int) ) , this->ui->mprView_lr->GetInteractorStyle(), SLOT( WindowLevelDelta(int, int) ) );
 
 };
 

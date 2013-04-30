@@ -136,9 +136,9 @@ void vtkInteractorStyleProjectionView::resetActions() {
   ActionFirst = ActionSlice = addAction("Slice", boost::bind(&vtkInteractorStyleProjectionView::Slice, this, _2), ActionDispatch::MovingAction, ActionDispatch::UnRestricted );
   ActionRotate = addAction("Rotate", boost::bind(&vtkInteractorStyleProjectionView::Rotate, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   ActionSpin = addAction("Spin", boost::bind(&vtkInteractorStyleProjectionView::Spin, this, _1), ActionDispatch::MovingAction, ActionDispatch::UnRestricted );
-  ActionZoom = addAction("Zoom", boost::bind(&vtkInteractorStyleProjectionView::Zoom, this, _2 ), ActionDispatch::MovingAction, ActionDispatch::UnRestricted );
+  ActionEmitZoom = addAction("EmitZoom", boost::bind(&vtkInteractorStyleProjectionView::EmitZoom, this, _2 ), ActionDispatch::MovingAction, ActionDispatch::UnRestricted );
   ActionPan = addAction("Pan", boost::bind(&vtkInteractorStyleProjectionView::Pan, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
-  ActionWindowLevel = addAction("Window/Level", boost::bind(&vtkInteractorStyleProjectionView::WindowLevelDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
+  ActionEmitWindowLevel = addAction("Emit Window/Level", boost::bind(&vtkInteractorStyleProjectionView::EmitWindowLevelDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
   ActionWindowLUT = addAction("Window Lookup Table", boost::bind(&vtkInteractorStyleProjectionView::WindowLUTDelta, this, _1, _2), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
@@ -146,7 +146,7 @@ void vtkInteractorStyleProjectionView::resetActions() {
   ActionShowCircle = addAction("", boost::bind(&vtkInteractorStyleProjectionView::ShowCircle, this), ActionDispatch::MovingAction, ActionDispatch::Restricted );
   
   //m_leftButtonAction = ActionSlice;
-  m_leftButtonAction = ActionWindowLevel;
+  m_leftButtonAction = ActionEmitWindowLevel;
   m_interAction = ActionNone;
 }
 
@@ -225,7 +225,7 @@ void vtkInteractorStyleProjectionView::dipatchActions() {
 	{
 		if ( m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = ActionSpin; return; }
 		if ( m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionNone; return; }
-		if ( m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionZoom; return; }
+		if ( m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = ActionEmitZoom; return; }
 		if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = m_leftButtonAction; return; }
 		if (!m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = ActionPan; return; }
 		if (!m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = ActionRotate; return; }
@@ -246,7 +246,7 @@ void vtkInteractorStyleProjectionView::CycleLeftButtonAction() {
   it++;
   if (it == m_actionList.end())
     //it = m_actionList.begin();
-	it = m_actionList.find(ActionWindowLevel);
+	it = m_actionList.find(ActionEmitWindowLevel);
   m_leftButtonAction = it->first;
   updateLMBHint();
 }
@@ -415,6 +415,14 @@ void vtkInteractorStyleProjectionView::updateDisplay(void) {
 	this->GetInteractor()->Render();
 }
 
+/** emit ZoomChanged*/
+void vtkInteractorStyleProjectionView::EmitZoom(int delta)
+{
+    emit ZoomChanged(delta);
+    Zoom(delta);
+}
+
+
 
 /** zoom the viewed object*/
 void vtkInteractorStyleProjectionView::Zoom( int delta/**<[in] positive numbers mean positive zoom, negative....*/) {
@@ -459,6 +467,14 @@ if (m_orientation) {
   }
   
 }
+
+/** emit change Window and Level */
+void vtkInteractorStyleProjectionView::EmitWindowLevelDelta(int dw, int dl)
+{
+    emit WindowLevelDeltaChanged(dw, dl);
+    WindowLevelDelta(dw, dl);
+}
+
 
 /** change Window and Level */
 void vtkInteractorStyleProjectionView::WindowLevelDelta( int dw/**<[in] delta window*/, int dl/**<[in] delta level*/) {

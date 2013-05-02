@@ -45,7 +45,7 @@
 #include <fstream>
 #include <algorithm>
 #include <vector>
-
+#include <QProgressDialog>
 
 
 
@@ -73,7 +73,44 @@ autoAlignHeart::~autoAlignHeart() {
 
 autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageType* InputImage, int ThresholdLow, int ThresholdUp, int KernelSize, int OutputSelector)
 {
-  
+    // ProgressDialog with progress scale estimated from one example
+    // 
+    // Downsampling image...                           done    ( 0.835101s )  => 1
+    // Thresholding...                                 done    ( 0.540424s )  => 1
+    // Morphological opening...                        done    ( 3.76331s )   => 4
+    // Creating label map...                           done    ( 3.36174s )   => 4
+    // Removing all but the largest struture...        done    ( 2.6894s )    => 3
+    // Creating label map...                           done    ( 2.24938s )   => 3
+    // Resampling Image...                             done    ( 2.34192s )   => 3
+    // Analyzing blobs in each slice...                done    ( 2.17635s )   => 3
+    // ---------------------------------------------------------------------------
+    // sum                                                                      22
+    
+    
+    const int progressStepDownsampling         = 1;
+    const int progressStepThresholding         = 1;
+    const int progressStepMorphologicalOpening = 4;
+    const int progressStepCreatingLabelMap1    = 4;
+    const int progressStepRemovingStructures   = 3;
+    const int progressStepCreatingLabelMap2    = 3;
+    const int progressStepResampling           = 3;
+    const int progressStepAnalyzingBlobs       = 3;
+	
+    const int progressScale = progressStepDownsampling
+                            + progressStepThresholding 
+                            + progressStepMorphologicalOpening 
+                            + progressStepCreatingLabelMap1 
+                            + progressStepRemovingStructures 
+                            + progressStepCreatingLabelMap2 
+                            + progressStepResampling 
+                            + progressStepAnalyzingBlobs;
+	
+    int progress = 0;
+
+    QProgressDialog alignProgress( QObject::tr("align Heart..."), QObject::tr("Abort"), progress, progressScale);
+    alignProgress.setMinimumDuration(1000);
+    alignProgress.setWindowModality(Qt::ApplicationModal);
+    
 	itk::TimeProbe clock;
 	clock.Start();
 
@@ -115,9 +152,13 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	clock.Stop();
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
 	clock.Start();
-
+	
 	std::cout << "New size: " << image->GetLargestPossibleRegion().GetSize() << "\n" << std::endl;
 
+	// update progress dialog
+	progress += progressStepDownsampling;
+	alignProgress.setValue(progress);
+	
 	// calculate center of the image
 	SignedShortImageType3D::PointType imageCenter;
 	SignedShortImageType3D::IndexType imageCenterIndex;
@@ -145,6 +186,10 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
 	clock.Start();
 
+	// update progress dialog
+	progress += progressStepThresholding;
+	alignProgress.setValue(progress);
+	
 	//***************************************
 	// 4. Strong morphological opening
 	//***************************************
@@ -169,6 +214,10 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	std::cout << "\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
 	clock.Start();
 
+	// update progress dialog
+	progress += progressStepMorphologicalOpening;
+	alignProgress.setValue(progress);
+	
 	//***************************************
 	// 5. Convert binary image to label map
 	//***************************************
@@ -181,6 +230,10 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	clock.Start();
 	std::cout << "There are " << labelMap->GetNumberOfLabelObjects() << " objects." << std::endl;
 
+	// update progress dialog
+	progress += progressStepCreatingLabelMap1;
+	alignProgress.setValue(progress);
+	
 	if( labelMap->GetNumberOfLabelObjects() == 0 ) {
 		std::cout << "ERROR: No objects could be found in the image. Please check thresholds and morphology kernel size. \n\nAbort" << std::endl;
 		AffineTransformType::Pointer failTrafo = AffineTransformType::New();
@@ -219,6 +272,10 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	std::cout << "\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
 	clock.Start();
 	
+	// update progress dialog
+	progress += progressStepRemovingStructures;
+	alignProgress.setValue(progress);
+	
 	// print out info
 	std::cout << "There is(are) " << labelMap->GetNumberOfLabelObjects() << " object(s) remaining." << std::endl;
 	LabelMapType3D::LabelObjectType* labelObject = labelMap->GetNthLabelObject(maxLabel);
@@ -234,6 +291,10 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
 	clock.Start();
 
+	// update progress dialog
+	progress += progressStepCreatingLabelMap1;
+	alignProgress.setValue(progress);
+	
 	//******************************************************************************************************
 	// 6. Rotate the image to make the principal axes of the main component parallel to the coordinate axes
 	//******************************************************************************************************
@@ -263,6 +324,10 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
 	clock.Start();
 
+	// update progress dialog
+	progress += progressStepResampling;
+	alignProgress.setValue(progress);
+	
 	//************************************
 	// 7. Analyse blobs in all slices
 	//************************************
@@ -344,7 +409,11 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	clock.Stop();
 	std::cout << "\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
 	clock.Start();
-
+	
+	// update progress dialog
+	progress += progressStepAnalyzingBlobs;
+	alignProgress.setValue(progress);
+	
 	// write resulting data to file
 	std::ofstream myfile;
   myfile.open ("data.txt");
@@ -439,14 +508,12 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	trafo2->SetMatrix( rotationMatrix );
 	
-	std::cout << "trafo only matrix = " << trafo2->GetParameters() << std::endl;
-	
 	itk::Vector< double, 3 > axis;
 	axis.Fill( 0 );
 	axis[1] = 1;
 	trafo2->Rotate3D( axis, 1.57, true );
 
-	std::cout << "trafo after Rotate3D = " << trafo2->GetParameters() << std::endl;
+	std::cout << "transformation elements: " << trafo2->GetParameters() << std::endl;
 
 	return trafo2;
 

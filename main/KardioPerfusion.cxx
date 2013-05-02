@@ -680,7 +680,6 @@ void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
     CTImageType::Pointer ImagePtr = currentImage->getITKImage();
     
     // get tranformation from autoAlignHeart
-    // autoAlignHeart::AffineTransformType::Pointer trafo = autoAlignHeart().getTrafo(ImagePtr, 200, 1000, 5, 0);
     autoAlignHeart::AffineTransformType::Pointer trafo = autoAlignHeart().getTrafo(ImagePtr);
     
     // put trafo elements into an array

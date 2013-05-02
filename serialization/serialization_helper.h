@@ -553,7 +553,7 @@ void CTImageTreeItem::save(Archive & ar, const unsigned int version) const {
 		boost::filesystem::path newFnPath = fromAtoB( serPath, fnPath );
 		newFnPath = normalize(newFnPath);
 		if (newFnPath.empty()) newFnPath = fnPath;
-		ar & newFnPath.string();
+		ar & newFnPath.generic_string();
 	}
 	ar & HeaderFields;
 	ar & dict;

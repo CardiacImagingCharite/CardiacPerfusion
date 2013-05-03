@@ -493,7 +493,10 @@ boost::filesystem::path normalize( const boost::filesystem::path &p_) {
 boost::filesystem::path absoluteDirectory( const boost::filesystem::path &p_) {
 	boost::filesystem::path p = p_;
 	if (!p.is_complete()) p = boost::filesystem::current_path() / p;
-	return normalize(p).parent_path();
+	// removed the normalize() below... produced problems in windows
+	// and is not needed anyway????
+	// return normalize(p).parent_path();
+	return p.parent_path();
 }
 
 boost::filesystem::path fromAtoB( const boost::filesystem::path &a, const boost::filesystem::path &b) {

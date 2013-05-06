@@ -212,17 +212,21 @@ void MultiPlanarReformatWidget::setTranslation() {
   m_reslicePlaneTransform->SetElement(2, 3, center[2]);
 }
 
+void MultiPlanarReformatWidget::ResetOrientation() {
+    
+    vtkTransform *transform = vtkTransform::New();
+    vtkSmartPointer<vtkMatrix4x4> IdentMatrix = vtkMatrix4x4::New();
+    IdentMatrix->Identity();
+    transform->SetMatrix( IdentMatrix );
+    transform->RotateX(180);
+    m_reslicePlaneTransform->DeepCopy( transform->GetMatrix() );
+    transform->Delete();
+}
 
 void MultiPlanarReformatWidget::setOrientation(int orientation)
 {
-	vtkTransform *transform = vtkTransform::New();
-	vtkSmartPointer<vtkMatrix4x4> IdentMatrix = vtkMatrix4x4::New();
-	IdentMatrix->Identity();
-	transform->SetMatrix( IdentMatrix );
-	transform->RotateX(180);
-	m_reslicePlaneTransform->DeepCopy( transform->GetMatrix() );
-	transform->Delete();
-
+        ResetOrientation();
+    
 	m_orientation = orientation;
 	// Matrices for axial, coronal, sagittal, oblique view orientations
 	static double axialElements[16] = {
@@ -232,15 +236,15 @@ void MultiPlanarReformatWidget::setOrientation(int orientation)
 	         0, 0, 0, 1 };
 		 
 	static double coronalElements[16] = {
-	         0, 1, 0, 0,
-	         0, 0,-1, 0,
-	        -1, 0, 0, 0,
+	         1, 0, 0, 0,
+	         0, 0, 1, 0,
+	         0,-1, 0, 0,
 	         0, 0, 0, 1 };
 
 	static double sagittalElements[16] = {
-		 0, 0, 1, 0,
-	         0, 1, 0, 0,
-	        -1, 0, 0, 0,
+		 0, 0,-1, 0,
+		 1, 0, 0, 0,
+		 0,-1, 0, 0,
 		 0, 0, 0, 1 };
 
 	vtkSmartPointer<vtkMatrix4x4> axialMatrix = vtkMatrix4x4::New();
@@ -259,6 +263,50 @@ void MultiPlanarReformatWidget::setOrientation(int orientation)
 	case 1: vtkMatrix4x4::Multiply4x4(m_reslicePlaneTransform, coronalMatrix, m_reslicePlaneTransform);
 		break;
 	case 2: vtkMatrix4x4::Multiply4x4(m_reslicePlaneTransform, sagittalMatrix, m_reslicePlaneTransform);
+		break;
+	}
+}
+
+
+void MultiPlanarReformatWidget::setAlignHeartOrientation()
+{
+        ResetOrientation();
+	
+	// Matrices for 3-chamber, 4-chamber and axial axes view
+	static double ThreeChamberElements[16] = {
+	         1, 0, 0, 0,
+	         0, 1, 0, 0,
+	         0, 0, 1, 0,
+	         0, 0, 0, 1 };
+		 
+	static double FourChamberElements[16] = {
+	         0, 1, 0, 0,
+	         0, 0,-1, 0,
+	        -1, 0, 0, 0,
+	         0, 0, 0, 1 };
+
+	static double AxialElements[16] = {
+		 0, 0, 1, 0,
+	         0, 1, 0, 0,
+	        -1, 0, 0, 0,
+		 0, 0, 0, 1 };
+
+	vtkSmartPointer<vtkMatrix4x4> ThreeChamberMatrix = vtkMatrix4x4::New();
+	ThreeChamberMatrix->DeepCopy(ThreeChamberElements);
+
+	vtkSmartPointer<vtkMatrix4x4> FourChamberMatrix = vtkMatrix4x4::New();
+	FourChamberMatrix->DeepCopy(FourChamberElements);
+	
+	vtkSmartPointer<vtkMatrix4x4> AxialMatrix = vtkMatrix4x4::New();
+	AxialMatrix->DeepCopy(AxialElements);
+
+	switch(m_orientation)
+	{
+	case 0: vtkMatrix4x4::Multiply4x4(m_reslicePlaneTransform, ThreeChamberMatrix, m_reslicePlaneTransform);
+		break;
+	case 1: vtkMatrix4x4::Multiply4x4(m_reslicePlaneTransform, FourChamberMatrix, m_reslicePlaneTransform);
+		break;
+	case 2: vtkMatrix4x4::Multiply4x4(m_reslicePlaneTransform, AxialMatrix, m_reslicePlaneTransform);
 		break;
 	}
 }
@@ -392,7 +440,7 @@ void MultiPlanarReformatWidget::Multiply3x3of4x4Matrix(vtkMatrix4x4 *a4, vtkMatr
 void MultiPlanarReformatWidget::rotateImage(const double RotationTrafoElements[]) {
 	
   // set m_reslicePlaneTransform back to basic orientation
-  setOrientation(m_orientation);
+  setAlignHeartOrientation();
   setTranslation();
   
   // create transformation matrix and set elements

@@ -141,11 +141,15 @@ public:
 	\param cubic (optional) Default is TRUE, if FALSE the interpolation is set to linear.
 	*/
 	void setCubicInterpolation(bool cubic=true);
-	///Sets the orientation of the slices
+	///Reset the orientation matrix
+	void ResetOrientation();
+	///Sets the orientation of the slices, oblique view
 	/*!
 	\param orientation A number that appoints the desired orientation
 	*/
 	void setOrientation(int orientation);
+	///Sets the orientation of the slices for autoAlignHeart view
+	void setAlignHeartOrientation();
 	///Sets the translation vector of the image m_reslicePlaneTransform
 	void setTranslation();
 

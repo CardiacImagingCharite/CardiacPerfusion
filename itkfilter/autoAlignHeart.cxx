@@ -148,7 +148,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	AffineTransformType::Pointer identityTransform = AffineTransformType::New();
 	identityTransform->SetIdentity();
 
-	SignedShortImageType3D::Pointer image = resampleImage(InputImage, identityTransform, interpolator, outputSpacing, true);
+	SignedShortImageType3D::Pointer image = resampleImage(InputImage, identityTransform, interpolator, outputSpacing, false);
 	clock.Stop();
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
 	clock.Start();

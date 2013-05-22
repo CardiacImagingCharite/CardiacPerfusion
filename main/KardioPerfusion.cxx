@@ -66,6 +66,7 @@
 #include "perfusionMapCreator.h"
 
 #include "autoAlignHeart.h"
+#include "itkFindLeftVentricle.h"
 
 
 
@@ -671,16 +672,26 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 //action for autoAlignHeart-Button
 void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
   
-  if (!displayedCTImage) { 
-    QMessageBox::warning(this,tr("No image selcted"),tr("Select one image as input for the Auto Align Heart\n\nHint: You should choose an image which shows a cardiac pahse where the left ventricle has a high constrast, while the right ventricle does not"));
-  }
-  else {
+    typedef itk::FindLeftVentricle<CTImageType> FindLVType;
+    
+    FindLVType::Pointer findLV = FindLVType::New();
+    
+    int i = findLV->GetImageIndex(&imageModel);
+    
+    QModelIndex ImIdx = imageModel.index(i, 1);
+    TreeItem* item = &imageModel.getItem(ImIdx);
+    
+    std::cout << "Image number used for calculating trafo = " << i << endl;
+    
     // get current image
-    ITKVTKTreeItem<CTImageType> *currentImage = dynamic_cast<ITKVTKTreeItem<CTImageType>*>(displayedCTImage->getBaseItem());
+    ITKVTKTreeItem<CTImageType> *currentImage = dynamic_cast<ITKVTKTreeItem<CTImageType>*>(item);
     CTImageType::Pointer ImagePtr = currentImage->getITKImage();
     
+    
+    autoAlignHeart AAH;
+    
     // get tranformation from autoAlignHeart
-    autoAlignHeart::AffineTransformType::Pointer trafo = autoAlignHeart().getTrafo(ImagePtr);
+    autoAlignHeart::AffineTransformType::Pointer trafo = AAH.getTrafo(ImagePtr);
     
     // put trafo elements into an array
     double trafoElements[12];
@@ -692,7 +703,22 @@ void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
     this->ui->mprView_ur->rotateImage( trafoElements );
     this->ui->mprView_ul->rotateImage( trafoElements );
     this->ui->mprView_lr->rotateImage( trafoElements );
-  }
+
+    double ellLength = AAH.getEllipsoidLength();
+    
+    // scale view to ellipsoid length + 10%
+    this->ui->mprView_ur->scaleImage(ellLength * 1.1);
+    this->ui->mprView_ul->scaleImage(ellLength * 1.1);
+    this->ui->mprView_lr->scaleImage(ellLength * 1.1);
+    
+    double ellCenter[3];
+    
+    AAH.getCenter(ellCenter);
+    
+    // pan the centre of the ellipsoid to the center of the imageItem
+    this->ui->mprView_ur->panImage(ellCenter);
+    this->ui->mprView_ul->panImage(ellCenter);
+    this->ui->mprView_lr->panImage(ellCenter);
 }
 
 //callback for exit

@@ -60,6 +60,11 @@ template <typename T> int sgn(T val) {
 //******************************
 
 autoAlignHeart::autoAlignHeart() {
+	
+	m_ellipsoidLength = 0;
+	m_center[0] = 0;
+	m_center[1] = 0;
+	m_center[2] = 0;
 
 }
 
@@ -222,6 +227,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	// 5. Convert binary image to label map
 	//***************************************
 	std::cout << "Creating label map... ";
+//_______________________________________________________________________________
 
 	LabelMapType3D::Pointer labelMap = createLabelMap( binaryDilate->GetOutput());
 
@@ -286,7 +292,12 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	std::cout << "Creating label map... ";
 
 	SignedShortImageType3D::Pointer labelImage = createImageFromLabelMap( labelMap );
-
+	
+	m_ellipsoidLength = labelObject->GetEquivalentEllipsoidDiameter()[2];
+	m_center[0] = labelObject->GetCentroid()[0];
+	m_center[1] = labelObject->GetCentroid()[1];
+	m_center[2] = labelObject->GetCentroid()[2];
+	
 	clock.Stop();
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
 	clock.Start();
@@ -305,7 +316,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	trafo->SetCenter( imageCenter );
 	trafo->SetMatrix(labelObject->GetPrincipalAxesToPhysicalAxesTransform()->GetMatrix());
-
+	
 	std::cout << "\nResampling Image... ";
 
 	// Do the resampling
@@ -517,6 +528,22 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	return trafo2;
 
+}
+
+//_______________________________________________________________________________
+
+double autoAlignHeart::getEllipsoidLength()
+{
+	return m_ellipsoidLength;
+}
+
+//_______________________________________________________________________________
+
+void autoAlignHeart::getCenter(double pos[3])
+{
+	pos[0] = m_center[0];
+	pos[1] = m_center[1];
+	pos[2] = m_center[2];
 }
 
 //_______________________________________________________________________________

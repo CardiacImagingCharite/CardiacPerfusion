@@ -82,6 +82,8 @@ public:
   virtual ~autoAlignHeart();
   void Align();
   AffineTransformType::Pointer getTrafo(CTImageType* InputImage, int ThresholdLow = 200, int ThresholdUp = 1000, int KernelSize = 5, int OutputSelector = 0);
+  double getEllipsoidLength();
+  void getCenter(double pos[3]);
 
 protected:
 
@@ -102,6 +104,9 @@ protected:
 
   double median( std::vector<double> vec );
   std::vector<double> medianFilterVector( std::vector<double> vec, int radius);
+  
+  double m_ellipsoidLength;
+  double m_center[3];
 
 };
 

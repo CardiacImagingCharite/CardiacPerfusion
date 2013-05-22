@@ -140,6 +140,10 @@ SET( KardioPerfusionSrcs
 	itkfilter/itkNaryPerfusionImageFilter.h
 	itkfilter/autoAlignHeart.cxx
 	itkfilter/autoAlignHeart.h
+	itkfilter/itkFindLeftVentricle.txx
+	itkfilter/itkFindLeftVentricle.h
+	itkfilter/itkShrinkAverageFilter.txx
+	itkfilter/itkShrinkAverageFilter.h
 
 )
 

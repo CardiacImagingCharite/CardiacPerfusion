@@ -162,10 +162,20 @@ public:
 	///Multiplies only the top left 3x3 submatrices of 4x4 matrices
 	/*!
 	\param a4 Left 4x4 matrix of Multiplication
-	\param a4 Right 4x4 matrix of Multiplication
-	\param a4 Resulting 4x4 matrix of Multiplication
+	\param b4 Right 4x4 matrix of Multiplication
+	\param c4 Resulting 4x4 matrix of Multiplication
 	*/
         void Multiply3x3of4x4Matrix(vtkMatrix4x4 *a4, vtkMatrix4x4 *b4, vtkMatrix4x4 *c4);
+	///Pan the image
+	/*!
+	\param pos new transpose
+	*/
+	void panImage(const double pos[3]);
+	///Scale the image
+	/*!
+	\param length reference for scaling
+	*/
+	void scaleImage(const double length);
 
 public slots:
 	///Resets the view.

@@ -175,9 +175,6 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
     window->RemoveRenderer( m_imageViewer->GetRenderer() );
     m_image = image;
     m_image->UpdateInformation();
-    int extent[6];
-    for(int i = 0; i < 3; i++)
-      m_image->GetAxisUpdateExtent(i, extent[i*2], extent[i*2+1]);
 
     setTranslation();
       
@@ -463,3 +460,36 @@ void MultiPlanarReformatWidget::rotateImage(const double RotationTrafoElements[]
 
 }
 
+void MultiPlanarReformatWidget::panImage(const double pos[3])
+{
+	vtkTransform *transform = vtkTransform::New();
+	transform->SetMatrix(m_reslicePlaneTransform);
+	double oldPos[3];
+	transform->GetPosition(oldPos);
+	double trans[3];
+	trans[0] = pos[0] - oldPos[0];
+	trans[1] = pos[1] - oldPos[1];
+	trans[2] = pos[2] - oldPos[2];
+	transform->Translate(trans);
+	transform->GetMatrix(m_reslicePlaneTransform);
+	transform->Delete();
+	m_imageViewer->Render();
+}
+
+void MultiPlanarReformatWidget::scaleImage(const double length)
+{
+	if (length > 0) 
+	{
+		double b = 145; // reference length in mm
+		vtkTransform *transform = vtkTransform::New();
+		transform->SetMatrix(m_reslicePlaneTransform);
+		double oldScale = *transform->GetScale();
+		double newScale = length / ( b *  oldScale );
+		transform->Scale(newScale, newScale, newScale);
+		double scalefac[3];
+		transform->GetScale(scalefac);
+		transform->GetMatrix(m_reslicePlaneTransform);
+		transform->Delete();
+		m_imageViewer->Render();
+	}
+}

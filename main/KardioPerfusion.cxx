@@ -68,6 +68,9 @@
 #include "autoAlignHeart.h"
 #include "itkFindLeftVentricle.h"
 
+#include <itkTimeProbe.h>
+
+
 
 
 const DicomTagList KardioPerfusion::CTModelHeaderFields = boost::assign::list_of
@@ -683,10 +686,15 @@ void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
     
     std::cout << "Image number used for calculating trafo = " << i << endl;
     
+    itk::TimeProbe clock;
+    clock.Start();
+    
     // get current image
     ITKVTKTreeItem<CTImageType> *currentImage = dynamic_cast<ITKVTKTreeItem<CTImageType>*>(item);
     CTImageType::Pointer ImagePtr = currentImage->getITKImage();
     
+    clock.Stop();
+    std::cout << "FindLeftVentricle: getITKImage\t\t\t\tdone\t( " << clock.GetMean() << "s )" << std::endl;
     
     autoAlignHeart AAH;
     

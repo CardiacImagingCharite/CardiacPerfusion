@@ -24,7 +24,7 @@
 
 #include "autoAlignHeart.h"
 
-#include "itkImage.h"
+#include <itkImage.h>
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "itkResampleImageFilter.h"
@@ -227,7 +227,6 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	// 5. Convert binary image to label map
 	//***************************************
 	std::cout << "Creating label map... ";
-//_______________________________________________________________________________
 
 	LabelMapType3D::Pointer labelMap = createLabelMap( binaryDilate->GetOutput());
 
@@ -292,6 +291,14 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	std::cout << "Creating label map... ";
 
 	SignedShortImageType3D::Pointer labelImage = createImageFromLabelMap( labelMap );
+	
+	LabelMapType3D::RegionType labelRegion = labelObject->GetBoundingBox();
+	std::cout << "BoxSize           = " << labelRegion.GetSize() << std::endl;
+	std::cout << "EllipsoidDiameter = " << labelObject->GetEquivalentEllipsoidDiameter() << std::endl;
+	std::cout << "Radius            = " << labelObject->GetEquivalentSphericalRadius() << std::endl;
+	std::cout << "FeretDiameter     = " << labelObject->GetFeretDiameter() << std::endl;
+	std::cout << "EllipsoidCentroid = " << labelObject->GetCentroid() << std::endl;
+	
 	
 	m_ellipsoidLength = labelObject->GetEquivalentEllipsoidDiameter()[2];
 	m_center[0] = labelObject->GetCentroid()[0];

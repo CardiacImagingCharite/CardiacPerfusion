@@ -37,11 +37,13 @@
 #define __itkShrinkAverageFilter_txx
 
 #include "itkShrinkAverageFilter.h"
-#include "itkImageRegionIteratorWithIndex.h"
-#include "itkImageRegionIterator.h"
-#include "itkContinuousIndex.h"
-#include "itkObjectFactory.h"
-#include "itkProgressReporter.h"
+#include <itkImageRegionIterator.h>
+#include <itkImageRegionConstIterator.h>
+#include <itkContinuousIndex.h>
+#include <itkObjectFactory.h>
+#include <itkProgressReporter.h>
+// #include <boost/type_traits.hpp>
+// #include <boost/mpl/if.hpp>
 
 namespace itk
 {
@@ -116,95 +118,107 @@ namespace itk
 		// Get the input and output pointers
 		InputImageConstPointer inputPtr = this->GetInput();
 		OutputImagePointer     outputPtr = this->GetOutput();
+
+		typename OutputImageType::SizeType outputSize = outputRegionForThread.GetSize();
 		
-		// Convert the factor for convenient multiplication
-		unsigned int i;
-		
-		typename TOutputImage::SizeType factorSize;
-		for ( i = 0; i < TInputImage::ImageDimension; i++ )
+		InputImageRegionType inputRegion = inputPtr->GetLargestPossibleRegion();
+		typename InputImageType::SizeType inputSize;
+
+		for ( unsigned int dim = 0; dim < TInputImage::ImageDimension; dim++ )
 		{
-			factorSize[i] = m_ShrinkFactors[i];
+			inputSize[dim] = outputSize[dim] * m_ShrinkFactors[dim];
+		}
+		inputRegion.SetSize(inputSize);
+		
+		// number of all pixel/voxel of the output image
+		unsigned int outputPixelNumber = 1;
+		for ( unsigned int dim = 0; dim < TInputImage::ImageDimension; dim++ )
+		{
+			outputPixelNumber *= outputSize[dim];
 		}
 		
-		// Define a few indices that will be used to transform from an input pixel
-		// to an output pixel
-		OutputIndexType  outputIndex;
-		InputIndexType   inputIndex;
-		OutputOffsetType offsetIndex;
+		// sum of all pixel values of the corresponding input values for each output pixel
+		std::vector<long int> valSum(outputPixelNumber, 0); 
 		
-		typename TOutputImage::PointType tempPoint;
+		// iterator for input image
+		typedef ImageRegionConstIterator< TInputImage > InputImageIterator;
+		InputImageIterator inIt(inputPtr, inputRegion);
 		
-		// Use this index to compute the offset everywhere in this class
-		outputIndex = outputPtr->GetLargestPossibleRegion().GetIndex();
+		unsigned outIdx = 0;
 		
-		// We wish to perform the following mapping of outputIndex to
-		// inputIndex on all points in our region
-		outputPtr->TransformIndexToPhysicalPoint(outputIndex, tempPoint);
-		inputPtr->TransformPhysicalPointToIndex(tempPoint, inputIndex);
+		// 		InputIndexType indexInsideOutputBlock;
+		// 		vector< unsigned > outBlockSizePerDimension(OutputImageType::ImageDimension + 1, 0);
+		// 		unsigned osize = 1;
+		// 		for(unsigned dim = 0; dim < OutputImageType::ImageDimension; dim++) {
+		// 			outBlockSizePerDimension[dim+1] = osize;
+		// 			osize *= outputSize[dim];
+		// 		}
+		// 		while ( !inIt.IsAtEnd() )
+		// 		{
+		// 			valSum[outIdx] += inIt.Get();
+		// 			indexInsideOutputBlock[0]++;
+		// 			unsigned dim = 0;
+		// 			while(indexInsideOutputBlock[dim] == m_ShrinkFactors[dim]) {
+		// 				indexInsideOutputBlock[dim] = 0;
+		// 				outIdx -= outBlockSizePerDimension[dim];
+		// 				dim++;
+		// 				outIdx += outBlockSizePerDimension[dim];
+		// 				indexInsideOutputBlock[dim]++;
+		// 			}
+		// 			++inIt;
+		// 		}
 		
-		// Given that the size is scaled by a constant factor eq:
-		// inputIndex = outputIndex * factorSize
-		// is equivalent up to a fixed offset which we now compute
-		OffsetValueType zeroOffset = 0;
-		for ( i = 0; i < TInputImage::ImageDimension; i++ )
+		
+		// walk blockwise (in steps of shrink factors) the input image
+		// and sum all values for each corresponding output pixel
+		for ( unsigned int oz = 0; oz < outputSize[2]; oz++ ) 
 		{
-			offsetIndex[i] = inputIndex[i] - outputIndex[i] * m_ShrinkFactors[i];
-			// It is plausible that due to small amounts of loss of numerical
-			// precision that the offset it negaive, this would cause sampling
-			// out of out region, this is insurance against that possibility
-			offsetIndex[i] = vnl_math_max(zeroOffset, offsetIndex[i]);
+			for ( unsigned int iz = 0; iz < m_ShrinkFactors[2]; iz++ )
+			{
+				for ( unsigned int oy = 0; oy < outputSize[1]; oy++ ) 
+				{
+					for ( unsigned int iy = 0; iy < m_ShrinkFactors[1]; iy++ )
+					{
+						for ( unsigned int ox = 0; ox < outputSize[0]; ox++ ) 
+						{
+							for ( unsigned int ix = 0; ix < m_ShrinkFactors[0]; ix++ )
+							{
+								valSum[outIdx] += inIt.Get();
+								++inIt;
+							}
+							outIdx++;
+						}
+						outIdx -= outputSize[0];
+					}
+					outIdx += outputSize[0];
+				}
+				outIdx -= outputSize[0] * outputSize[1];
+			}
+			outIdx += outputSize[0] * outputSize[1];
 		}
-		
-		// Support progress methods/callbacks
-		ProgressReporter progress( this, threadId, outputRegionForThread.GetNumberOfPixels() );
 		
 		// Define/declare an iterator that will walk the output region for this
 		// thread.
-		typedef ImageRegionIteratorWithIndex< TOutputImage > OutputIterator;
+		typedef ImageRegionIterator< TOutputImage > OutputIterator;
 		OutputIterator outIt(outputPtr, outputRegionForThread);
 		
+		// Number of input pixel per output pixel
+		int VoxelShrinkNumber = 1;
+		for ( unsigned int dim = 0; dim < TInputImage::ImageDimension; dim++ )
+		{
+			VoxelShrinkNumber *= m_ShrinkFactors[dim];
+		}
+		
+		outIdx = 0;
+		
+		// walk the output pixel and set new value
 		while ( !outIt.IsAtEnd() )
 		{
-			// Determine the index and physical location of the output pixel
-			outputIndex = outIt.GetIndex();
-
-			// determine the average value of all input pixel in the corresponding region
-			
-			typename InputImageType::SizeType inputSize;
-			InputIndexType inputIndex;
-			for ( unsigned int j = 0; j < TInputImage::ImageDimension; j++ )
-			{
-				inputIndex[j] = outputIndex[j] * m_ShrinkFactors[j];
-				inputSize[j] = m_ShrinkFactors[j];
-			}
-			
-			InputImageRegionType inputRegion;
-			inputRegion.SetSize(inputSize);
-			inputRegion.SetIndex(inputIndex);
-			
-			typedef ImageRegionIterator< TInputImage > InputRegionIterator;
-			InputRegionIterator inIt(inputPtr, inputRegion);
-			
-			double valSum = 0;
-			int pixelNum = 0;
-			
-			// loop over all pixel in input region
-			while ( !inIt.IsAtEnd() )
-			{
-				valSum += inIt.Get();
-				++pixelNum;
-				++inIt;
-			}
-
-			// average value
-			InputImagePixelType outVal = valSum / pixelNum;
-			
-			// set average value to output pixel
-			outIt.Set( outVal );
+			outIt.Set( valSum[outIdx] / VoxelShrinkNumber );
+			++outIdx;
 			++outIt;
-			
-			progress.CompletedPixel();
 		}
+
 	}
 	
 	/**

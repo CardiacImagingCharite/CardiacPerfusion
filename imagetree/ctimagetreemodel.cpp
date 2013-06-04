@@ -203,6 +203,15 @@ void CTImageTreeModel::insertItemCopy(const TreeItem& item) {
   rootItem.insertChild(item.clone(&rootItem));
 }
 
+void CTImageTreeModel::removeAllItems() 
+{
+	for (int i = this->rowCount() -1; i >= 0; i--)
+	{
+		QModelIndex ImIdx = this->index(i, 1);
+		this->removeItem( ImIdx );
+	}
+}
+
 bool CTImageTreeModel::removeItem(const QModelIndex &idx) {
   TreeItem &item = getItem(idx);
   if (&item != &rootItem) {

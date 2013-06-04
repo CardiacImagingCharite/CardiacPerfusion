@@ -190,6 +190,8 @@ class CTImageTreeModel : public QAbstractItemModel {
 	\return Serialization path.
 	*/
     const std::string &getSerializationPath() const { return serializationPath; }
+    ///Removes all items.
+    void removeAllItems();
   
     friend class TreeItem;
     friend class CTImageTreeItem;

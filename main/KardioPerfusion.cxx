@@ -1082,6 +1082,7 @@ void KardioPerfusion::on_actionOpen_Project_triggered() {
     tr("Project Files (*.perfproj)"));
   if (!pname.isEmpty()) {
     setImage(NULL);
+    imageModel.removeAllItems();
     imageModel.openModelFromFile(pname.toAscii().data());
     m_modelChanged = true;
   }

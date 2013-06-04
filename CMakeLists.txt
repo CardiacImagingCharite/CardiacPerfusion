@@ -47,9 +47,9 @@ IF(WIN32)
   ENDIF ()
 ENDIF(WIN32)
 
-IF(UNIX)
+IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x -fpermissive")
-ENDIF(UNIX)
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 # Set your files and resources here  
 

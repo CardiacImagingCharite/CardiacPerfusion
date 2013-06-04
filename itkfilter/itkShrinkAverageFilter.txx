@@ -42,8 +42,8 @@
 #include <itkContinuousIndex.h>
 #include <itkObjectFactory.h>
 #include <itkProgressReporter.h>
-// #include <boost/type_traits.hpp>
-// #include <boost/mpl/if.hpp>
+#include <boost/type_traits.hpp>
+#include <boost/mpl/if.hpp>
 
 namespace itk
 {
@@ -137,8 +137,11 @@ namespace itk
 			outputPixelNumber *= outputSize[dim];
 		}
 		
+		// set pixel type depending on input image
+		typedef typename boost::mpl::if_< boost::is_integral<InputImagePixelType>, long int, double >::type ValType;
+
 		// sum of all pixel values of the corresponding input values for each output pixel
-		std::vector<long int> valSum(outputPixelNumber, 0); 
+		std::vector<ValType> valSum(outputPixelNumber, 0);
 		
 		// iterator for input image
 		typedef ImageRegionConstIterator< TInputImage > InputImageIterator;

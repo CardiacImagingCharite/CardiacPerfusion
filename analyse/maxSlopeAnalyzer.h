@@ -38,18 +38,25 @@
 #include "perfusionAnalyzer.h"
 #include "segmentinfo.h"
 #include <QString>
-
+/*! \class MaxSlopeAnalyzer MaxSlopeAnalyzer.h "MaxSlopeAnalyzer.h"
+ *  \brief This class represents an maximum slope analyzer. It inherits the PerfusionAnalyzer-class.
+ */
 class MaxSlopeAnalyzer : public PerfusionAnalyzer
 {
 	public:
+		///Constructor
 		MaxSlopeAnalyzer(QWidget *p);
+		//Destructor
 		~MaxSlopeAnalyzer(); 
-		
+		///Calculates perfusion results.
 		void calculatePerfusionResults();
-
+		///Sets the gamma start index.
 		void setGammaStartIndex(int value, const QModelIndexList& indexList);
+		///Sets the gamma end index.
 		void setGammaEndIndex(int value, const QModelIndexList& indexList);
+		///recalculates the gamma variate.
 		void recalculateGamma(SegmentInfo &seginfo);
+		///recalculates the gamma variate.
 		void recalculateGamma(const QModelIndexList& indexList);
 
 	private:

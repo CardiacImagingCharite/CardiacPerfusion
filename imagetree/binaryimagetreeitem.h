@@ -42,6 +42,7 @@
 #include <QColor>
 #include <boost/function.hpp>
 #include <boost/serialization/access.hpp>
+#include <vtkMatrix4x4.h>
 
 /*! \class BinaryImageTreeItem BinaryImageTreeItem.h "BinaryImageTreeItem.h"
  *  \brief This is the representation of an image overlay which can be placed in a TreeView.
@@ -118,6 +119,8 @@ class BinaryImageTreeItem : public ITKVTKTreeItem< BinaryImageType > {
 	\param threshold Contains the threshold for the surrounding of the seed.
 	\param postGrowingAction This function is called after the regionGrow algorithm.
 	*/
+	void drawPlate(float radius, float x, float y, float z, vtkMatrix4x4 *orientation, bool erase);
+
     void regionGrow( float x, float y, float z, int threshold, boost::function<void()> postGrowingAction);
 	///Sets the pixel at a given position to 255
 	/*!

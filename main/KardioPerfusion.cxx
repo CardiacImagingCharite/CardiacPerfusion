@@ -106,6 +106,7 @@ KardioPerfusion::KardioPerfusion():
 	this->ui->qwtPlot_tac->setAxisTitle(QwtPlot::xBottom, QObject::tr("Time [s]"));
 	this->ui->qwtPlot_tac->setAxisTitle(QwtPlot::yLeft, QObject::tr("Density [HU]"));
 	this->ui->qwtPlot_tac->insertLegend(new QwtLegend(), QwtPlot::RightLegend);
+	this->ui->qwtPlot_tac->setAutoDelete(false);
 
 	//just temporary until autoscale and zoom works
 	this->ui->qwtPlot_tac->setAxisScale(2,0,20);
@@ -148,6 +149,14 @@ KardioPerfusion::KardioPerfusion():
 	this->ui->mprView_ur->setOrientation(1);	//coronal
 	this->ui->mprView_lr->setOrientation(2);	//sagittal
 
+	this->ui->mprView_ul->SetRootItem(&imageModel.getRootItem());
+	this->ui->mprView_ur->SetRootItem(&imageModel.getRootItem());
+	this->ui->mprView_lr->SetRootItem(&imageModel.getRootItem());
+
+
+	this->ui->mprView_ul->SetPlot(this->ui->qwtPlot_tac);
+	this->ui->mprView_ur->SetPlot(this->ui->qwtPlot_tac);
+	this->ui->mprView_lr->SetPlot(this->ui->qwtPlot_tac);
 
 	// Set up action signals and slots
 	connect(this->ui->actionOpenFile, SIGNAL(triggered()), this, SLOT(slotOpenFile()));
@@ -280,55 +289,20 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 	if (index.isValid()) {
   		//get clicked item
   		TreeItem &item = imageModel.getItem( index );
-  		//check if item is a CT image
-  		if (item.isA(typeid(CTImageTreeItem))) {
+		//check if item is a CT image
+		if (item.isA(typeid(CTImageTreeItem))) {
 			
-  			setImage(dynamic_cast<CTImageTreeItem*>(&item));
-  			for(int i = 0; i < item.childCount(); i++)
-  			{
-  				if(item.child(i).isA(typeid(BinaryImageTreeItem)))
-  				{
-  					BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item.child(i));
-  					segmentShow(SegItem);
-  				}
-  			}
-  		}
-
-				/*for(int i = 0; i < item.childCount(); i++)
+			setImage(dynamic_cast<CTImageTreeItem*>(&item));
+			for(int i = 0; i < item.childCount(); i++)
+			{
+				if(item.child(i).isA(typeid(BinaryImageTreeItem)))
 				{
-					if(item.child(i).isA(typeid(BinaryImageTreeItem)))
-					{
-						BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item.child(i));
-						segmentShow(SegItem);
-					}
-				}
-		//		setImage( NULL );
-			} else {
-				//show image
-				setImage( dynamic_cast<CTImageTreeItem*>(&item) );
-				for(int i = 0; i < item.childCount(); i++)
-				{
-					if(item.child(i).isA(typeid(BinaryImageTreeItem)))
-					{
-						BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item.child(i));
-						segmentShow(SegItem);
-					}
+					BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item.child(i));
+					segmentShow(SegItem);
 				}
 			}
-			//check if item is a segement
-		} else if (item.isA(typeid(BinaryImageTreeItem))) {
-			//get selected segment
-		//	BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item);
-			//if segment is not in the list of displayed segments
-		//	if (displayedSegments.find( SegItem->getVTKConnector() )==displayedSegments.end()) {
-				//show segement
-		//		segmentShow( SegItem );
-		//	} else {
-				//else hide it
-		//		segmentHide( SegItem );
-		*/
-		//	}
-		}
+		}	
+	}
 }
 
 //Callback if double click on treeview occurs
@@ -401,17 +375,10 @@ void KardioPerfusion::on_btn_draw_clicked()
 		BinaryImageTreeItem *seg = focusSegmentFromSelection();
 		if (seg)
 		{
-/*			ActionDispatch cirlceAction(std::string("test circle"), 
-			boost::bind(&BinaryImageTreeItem::test, seg, 
-			_3, _4, _5, this->ui->sb_size->value()),
-			ActionDispatch::MovingAction, ActionDispatch::Restricted );
-*/
 			//activate drawing action on VTK image data
 			this->ui->mprView_ul->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
 			this->ui->mprView_ur->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
 			this->ui->mprView_lr->activateOverlayAction(seg->getVTKConnector()->getVTKImageData());
-
-//			this->ui->mprView_ul->addAction(cirlceAction);
 		}
 		else 
 			this->ui->btn_draw->setChecked(false);
@@ -491,40 +458,10 @@ void KardioPerfusion::on_btn_dilate_clicked()
 	}
 }
 
-//callback for cannyEdge button
-/*void KardioPerfusion::on_btn_cannyEdges_clicked()
-{
-	//get selected segment
-	BinaryImageTreeItem *seg = focusSegmentFromSelection();
-	if (seg) {
-		//extract canny edges and update mprView
-		seg->extractEdges();
-	    this->ui->mprView->update();
-	}
-}
-*/
-
 //callback for analyse button
 void KardioPerfusion::on_btn_analyse_clicked()
 {
-	//create plot dialog 
-/*	if(m_tacDialog == NULL)
-	{
-		m_tacDialog = new TacDialog(this);
-	}
-	else
-	{
-		QSize size = m_tacDialog->size();
-		QPoint pos = m_tacDialog->pos();
-		m_tacDialog->close();
-		m_tacDialog = new TacDialog(this);
-
-		m_tacDialog->resize(size);
-		m_tacDialog->move(pos);
-	}
-	*/
 	
-	//mmid4Analyzer = new MMID4Analyzer(this);
 	maxSlopeAnalyzer = new MaxSlopeAnalyzer(this);
 
 	this->ui->tbl_gammaFit->setModel( maxSlopeAnalyzer->getSegments() );
@@ -568,13 +505,16 @@ void KardioPerfusion::on_btn_analyse_clicked()
 	maxSlopeAnalyzer->calculateTacValues();
 	SegmentListModel *segments = maxSlopeAnalyzer->getSegments();
 
+
 	//picker = new TimeDensityDataPicker(markerPickerX, markerPickerY, segments, this->ui->qwtPlot_tac->canvas());
 	
 	//iterate over the list of segments
 	BOOST_FOREACH( SegmentInfo &currentSegment, *segments) {
 		//attach the curves for the actual segment to the plot
 		currentSegment.attachSampleCurves(this->ui->qwtPlot_tac);
+		
 	}
+	
 
 	this->ui->slider_startTime->setMaximum(maxSlopeAnalyzer->getImageCount()-1);
 	this->ui->slider_endTime->setMaximum(maxSlopeAnalyzer->getImageCount()-1);
@@ -608,9 +548,12 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 			if(item->isA(typeid(BinaryImageTreeItem)))
 			{
 				maxSlopeAnalyzer->addSegment(dynamic_cast<BinaryImageTreeItem*>(item));
-				//	const SegmentInfo arterySegment = maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
-				//const SegmentInfo* arterySegment = reinterpret_cast<const SegmentInfo*>(&maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] ));
+
 				SegmentInfo* arterySegment = &maxSlopeAnalyzer->getSegments()->getSegment( selectedIndexes[0] );
+
+				this->ui->mprView_lr->SetArterySegment(dynamic_cast<BinaryImageTreeItem*>(item));
+				this->ui->mprView_ul->SetArterySegment(dynamic_cast<BinaryImageTreeItem*>(item));
+				this->ui->mprView_ur->SetArterySegment(dynamic_cast<BinaryImageTreeItem*>(item));
 
 				this->ui->treeView->selectAll();
 				//get list of selected items
@@ -1179,4 +1122,43 @@ void KardioPerfusion::updateFunc(vtkObject* caller, long unsigned int eventId, v
 	self->ui->mprView_lr->update();
 	self->ui->mprView_ul->update();
 	self->ui->mprView_ur->update();
+}
+
+void KardioPerfusion::on_btn_clearPlot_clicked()
+{
+	this->ui->qwtPlot_tac->detachItems(QwtPlotItem::Rtti_PlotCurve, false);
+	this->ui->qwtPlot_tac->replot();
+}
+
+void KardioPerfusion::on_btn_writeResults_clicked()
+{
+	QString pname = "./unnamed.csv";
+	pname = QFileDialog::getSaveFileName( this,
+    tr("Save Results"),
+    pname,
+    tr("CSV Files (*.csv)"));
+  if (!pname.isEmpty()) {
+    
+	ofstream resultFile;
+	resultFile.open (pname.toAscii().data());
+
+	resultFile << maxSlopeAnalyzer->getTacValuesAsString() << std::endl;
+
+	SegmentListModel *segments = maxSlopeAnalyzer->getSegments();
+	BOOST_FOREACH( SegmentInfo &currentSegment, *segments) {
+
+		if(currentSegment.getArterySegment() != NULL)
+		{
+			resultFile << &currentSegment.getName() << std::endl;
+
+			double perfusion = 60 * currentSegment.getGammaMaxSlope() / currentSegment.getArterySegment()->getGammaMaximum();
+			resultFile << "Perfusion;" << perfusion << std::endl;
+			resultFile << "Max Slope;" << currentSegment.getGammaMaxSlope() << std::endl;
+			resultFile << "Max Gamma;" << currentSegment.getArterySegment()->getGammaMaximum() << std::endl << std::endl;
+		}
+	}
+
+	resultFile.close();
+  }
+
 }

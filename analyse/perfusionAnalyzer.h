@@ -62,6 +62,7 @@ class PerfusionAnalyzer
 		\param segment The segment, that is to be added. 
 		*/
 		void addSegment(BinaryImageTreeItem *segment);
+		void popBackSegment();
 		///Gets the model of the segmentlist
 		/*!
 		\return Segemnts
@@ -82,6 +83,10 @@ class PerfusionAnalyzer
 		\return Time as a double. 
 		*/
 		double getTime(int index);
+		///Getter for the image count
+		/*!
+		\return Returns the image count.
+		*/
 		int getImageCount();
 
 	protected:

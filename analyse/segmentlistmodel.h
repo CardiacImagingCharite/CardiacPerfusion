@@ -51,6 +51,7 @@ class SegmentListModel : public QAbstractListModel
     typedef SegmentListType::const_iterator const_iterator;
     SegmentListModel(QObject *parent = 0);
     void addSegment( const BinaryImageTreeItem *seg );
+	void popBackSegment();
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
     virtual int columnCount(const QModelIndex & parent = QModelIndex() ) const;
     virtual QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;

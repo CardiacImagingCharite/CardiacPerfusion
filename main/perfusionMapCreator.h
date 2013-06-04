@@ -42,17 +42,38 @@
 #include "itkSmartPointer.h"
 #include "realimagetreeitem.h"
 
-
+/*! \class PerfusionMapCreator PerfusionMapCreator.h "PerfusionMapCreator.h"
+ *  \brief This class creates an perfusion map.
+ */
 class PerfusionMapCreator
 {
 	public:
-
+	///Constructor
 	PerfusionMapCreator(MaxSlopeAnalyzer* analyzer, SegmentInfo* artery, int factor);
+	///Destructor
 	~PerfusionMapCreator();
 
+	///calculates the perfusion map.
+	/*!
+	\param model The used image model.
+
+	\return Returns an image filled with perfusion values.
+	*/
 	RealImageTreeItem::ImageType::Pointer calculatePerfusionMap(CTImageTreeModel* model);
+	///Setter for the used analyzer. 
+	/*!
+	\param analyzer The Analyzer
+	*/
 	void setAnalyzer(MaxSlopeAnalyzer* analyzer);
+	///Sets the shrink factor.
+	/*!
+	\param shrinkFactor The factor for shrinking the image before processing. 
+	*/
 	void setShrinkFactor(int shrinkFactor);
+	///Sets the artery segment.
+	/*!
+	\param artery The artery segment, which is needed to calculate the perfusion values. 
+	*/
 	void setArterySegment(SegmentInfo* artery);
 
 private:

@@ -46,7 +46,14 @@
 #include <itkRecursiveGaussianImageFilter.h>
 #include <itkCannyEdgeDetectionImageFilter.h>
 #include <itkCastImageFilter.h>
-//#include <itkSliceBySliceImageFilter.h>
+#include <vtkImageReslice.h>
+#include <vtkSmartPointer.h>
+#include "itkSpatialObjectToImageFilter.h"
+#include "itkEllipseSpatialObject.h"
+#include "itkMatrix.h"
+#include "itkVector.h"
+
+#include "itkImageFileWriter.h"
 
 #include <QMessageBox>
 
@@ -173,6 +180,109 @@ void BinaryImageTreeItem::drawSphere( float radius, float x, float y, float z, b
 	//emit signal that data was modified
 	itkIm->Modified();
 	dynamic_cast<ConnectorData*>(getVTKConnector().get())->getConnector()->Modified();
+}
+
+void BinaryImageTreeItem::drawPlate(float radius, float x, float y, float z, vtkMatrix4x4 *orientation, bool erase)
+{
+	/*vtkSmartPointer<vtkImageReslice> reslice =
+		vtkSmartPointer<vtkImageReslice>::New();
+	
+	vtkMatrix4x4 *transform = vtkMatrix4x4::New();
+
+    transform->DeepCopy( orientation );
+	
+	reslice->SetResliceAxes( transform );
+	reslice->SetOutputDimensionality(2);
+	reslice->SetResliceAxesOrigin(x,y,z);
+
+	ConnectorHandle segmentConnector = this->getVTKConnector();	
+	reslice->SetInput(segmentConnector->getVTKImageData());
+
+	reslice->Update();
+
+
+	vtkSmartPointer<vtkPNGWriter> writer =
+		vtkSmartPointer<vtkPNGWriter>::New();
+
+	writer->SetFileName("resliceBinaryTest.png");
+	writer->SetInput(reslice->GetOutput());
+	writer->Write();
+	*/
+
+	typedef itk::EllipseSpatialObject< ImageDimension >   EllipseType;
+
+	typedef itk::SpatialObjectToImageFilter
+		< EllipseType, ImageType >   SpatialObjectToImageFilterType;
+
+	SpatialObjectToImageFilterType::Pointer imageFilter =
+		SpatialObjectToImageFilterType::New();
+
+	EllipseType::Pointer ellipse    = EllipseType::New();
+	
+	EllipseType::ArrayType radiusArray;
+	radiusArray[0] = radius;
+	radiusArray[1] = radius;
+	radiusArray[2] = 10;
+	  
+	ellipse->SetRadius(radiusArray);
+	BinaryImageTreeItem::ImageType::SpacingType spacing = this->getITKImage()->GetSpacing();
+	BinaryImageTreeItem::ImageType::SizeType size = this->getITKImage()->GetLargestPossibleRegion().GetSize();
+	BinaryImageTreeItem::ImageType::PointType origin = this->getITKImage()->GetOrigin();
+
+	//ellipse->SetSpacing(this->getITKImage()->GetSpacing());
+
+	itk::Matrix<double, 3, 3> matrix;
+		itk::Vector<double, 3> offset;
+
+	matrix.SetIdentity();
+
+	for(int i = 0; i < 3; i++)
+	for(int j = 0; j < 3; j++)
+		matrix[i][j] = orientation->GetElement(i,j);
+
+	offset[0] = orientation->GetElement(0,3);
+	offset[1] = orientation->GetElement(1,3);
+	offset[2] = orientation->GetElement(2,3);
+
+	typedef EllipseType::TransformType TransformType;
+ 
+	TransformType::Pointer transform = TransformType::New();
+	transform->SetIdentity();
+	transform->SetMatrix(matrix);
+	transform->SetOffset(offset);
+
+	ellipse->SetObjectToParentTransform( transform );
+    
+	imageFilter->SetSize(this->getITKImage()->GetLargestPossibleRegion().GetSize());
+	imageFilter->SetSpacing(this->getITKImage()->GetSpacing());
+	imageFilter->SetOrigin(this->getITKImage()->GetOrigin());
+
+	imageFilter->SetInput(ellipse);
+	ellipse->SetDefaultInsideValue(255);
+	ellipse->SetDefaultOutsideValue(0);
+	imageFilter->SetUseObjectValue( true );
+	imageFilter->SetOutsideValue( 0 );
+
+	typedef itk::ImageFileWriter< ImageType >     WriterType;
+	WriterType::Pointer writer = WriterType::New();
+
+	typedef itk::GDCMImageIO       ImageIOType;
+	ImageIOType::Pointer dicomIO = ImageIOType::New();
+
+ 
+	writer->SetFileName( "testPlate.dcm" );
+	writer->SetInput( imageFilter->GetOutput() );
+	writer->SetImageIO(dicomIO);
+
+	try
+	{
+		imageFilter->Update();
+		writer->Update();
+	}
+	catch( itk::ExceptionObject & excp )
+	{
+		std::cerr << excp << std::endl;
+	}
 }
 
 //applies a regionGrow algorithm from a given seed with a specific threshold to the parent image

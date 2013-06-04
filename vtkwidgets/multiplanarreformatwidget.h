@@ -56,10 +56,10 @@ class vtkImageReslice;
 class vtkImageMapToWindowLevelColors;
 class vtkImageMapToColors;
 class vtkBinaryImageToColor;
-//class vtkImageActor;
-//class vtkRenderer;
 class vtkMatrix4x4;
 class vtkCornerAnnotation;
+class CTImageTreeModel;
+class SegmentInfo;
 
 
 /*! \class MultiPlanarReformatWidget MultiPlanarReformatWidget.h "MultiPlanarReformatWidget.h"
@@ -152,8 +152,26 @@ public:
 	void setAlignHeartOrientation();
 	///Sets the translation vector of the image m_reslicePlaneTransform
 	void setTranslation();
-
+	///Gets the interactor style of the widget.
+	/*!
+	\return Interactor style.
+	*/
 	vtkSmartPointer<vtkInteractorStyleProjectionView> GetInteractorStyle() { return this->m_interactorStyle; }
+	///Sets the root item of the CT image tree.
+	/*!
+	\param root The root item.
+	*/
+	void SetRootItem(TreeItem* root) {m_interactorStyle->SetRootItem(root); }
+	///Sets the QwtPlot for displaying the TACs.
+	/*!
+	\param plot The QwtPlot.
+	*/
+	void SetPlot(QwtPlot* plot) { m_interactorStyle->SetPlot(plot); }
+	///Sets the artery segment.
+	/*!
+	\param seg The artery Segment of the perfusion map.
+	*/
+	void SetArterySegment(BinaryImageTreeItem* seg) { m_interactorStyle->SetArterySegment(seg); }
 	///Rotates the image by changing m_reslicePlaneTransform, e.g. after autoAlignHeart
 	/*!
 	\param RotationTrafoElements Elements of a 3x3-rotation matrix

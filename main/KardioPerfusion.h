@@ -39,15 +39,12 @@
 #include <QMainWindow>
 #include <QObject>
 #include "vtkSmartPointer.h"    // Required for smart pointer internal ivars.
-//#include "vtkImageViewer2.h"
 #include "ctimagetreemodel.h"
 #include "binaryimagetreeitem.h"
 #include "ctimagetreeitem.h"
 #include <qitemselectionmodel.h>
-//#include "tacdialog.h"
 #include <QMouseEvent>
 #include "mytabwidget.h"
-//#include "mmid4Analyzer.h"
 #include "maxSlopeAnalyzer.h"
 #include "realimagetreeitem.h"
 
@@ -137,6 +134,10 @@ class KardioPerfusion : public QMainWindow
 	void tabWidget_doubleClicked(MyTabWidget &w);
         ///Action for clicking on autoAlignHeart-Button
         void on_btn_autoAlignHeart_clicked();
+	///Action for clicking on clearPlot-Button
+	void on_btn_clearPlot_clicked();
+	///Action for clicking on writeResult-Button
+	void on_btn_writeResults_clicked();
 	///Slot for the contextmenu of the treeView.
 	/*! 
 	\param pos contains the position of the contextmenu.
@@ -228,8 +229,6 @@ private:
     int pendingAction;
 
 	bool oneWindowIsMax;
-	//TacDialog* m_tacDialog;
-	//MMID4Analyzer* mmid4Analyzer;
 	MaxSlopeAnalyzer* maxSlopeAnalyzer;
 
 	QwtPlotMarker *markerStart, *markerEnd;

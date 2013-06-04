@@ -22,7 +22,17 @@
 #include <string>
 #include "ctimagetreemodel.h"
 
+///Deserializes an Image Tree
+	/*!
+	\param model The resulting model.
+	\param fname The filename of the serialized model.
+	*/
 void deserializeCTImageTreeModelFromFile(CTImageTreeModel &model, const std::string &fname);
+///Serializes an Image Tree
+	/*!
+	\param model The Image Tree Model, which should be serialized.
+	\param fname The filename for the model.
+	*/
 void serializeCTImageTreeModelToFile(CTImageTreeModel &model, const std::string &fname);
 
 

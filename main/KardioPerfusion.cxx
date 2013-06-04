@@ -250,6 +250,7 @@ void KardioPerfusion::loadDicomData(DicomSelectorDialogPtr dicomSelector) {
 	dicomSelector->exec();
 	//set image data to imageModel
 	dicomSelector->getSelectedImageDataList(imageModel);
+	m_modelChanged = true;
 }
 
 //callback if the selection at the treeview changed
@@ -355,10 +356,14 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 		segmentHide( dynamic_cast<const BinaryImageTreeItem*>((*displayedSegments.begin())->getBaseItem()) );
 		}
 		//show VTK image at the different windows
-		this->ui->mprView_ul->setImage( vtkImage );
-		this->ui->mprView_ur->setImage(vtkImage);
-		this->ui->mprView_lr->setImage(vtkImage);
+		//recalculate translation if the model is changed
+		this->ui->mprView_ul->setImage( vtkImage, m_modelChanged );
+		this->ui->mprView_ur->setImage( vtkImage, m_modelChanged );
+		this->ui->mprView_lr->setImage( vtkImage, m_modelChanged );
 
+		// set back to false... until model is changed
+		if ( m_modelChanged ) m_modelChanged = false;
+		
 		if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->clearActiveDown();
 		displayedCTImage = connectorPtr;
 		if (displayedCTImage && displayedCTImage->getBaseItem()) displayedCTImage->getBaseItem()->setActive();
@@ -1078,6 +1083,7 @@ void KardioPerfusion::on_actionOpen_Project_triggered() {
   if (!pname.isEmpty()) {
     setImage(NULL);
     imageModel.openModelFromFile(pname.toAscii().data());
+    m_modelChanged = true;
   }
 }
 

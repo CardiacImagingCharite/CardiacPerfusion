@@ -165,7 +165,8 @@ void MultiPlanarReformatWidget::setCubicInterpolation(bool cubic) {
 
 
 /** Volume Setter*/
-void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D) Image with one component*/) {
+void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D) Image with one component*/,
+					 bool changeTranslation) {
   if (image==NULL) {
     m_image = NULL;
     vtkRenderWindow *window = this->GetRenderWindow();
@@ -176,7 +177,7 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
     m_image = image;
     m_image->UpdateInformation();
 
-    setTranslation();
+    if ( changeTranslation ) setTranslation();
       
     m_reslice->SetInput( m_image );
     m_reslice->SetOutputSpacing(1,1,1);

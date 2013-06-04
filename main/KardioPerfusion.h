@@ -236,6 +236,7 @@ private:
 	QwtPlotGrid *grid;
 	QwtPlotPicker *picker;
 	vtkLookupTable *m_perfusionColorMap;
+	bool m_modelChanged; ///< True if model is changed until frist image is set
 };
 
 #endif // KardioPerfusion_H

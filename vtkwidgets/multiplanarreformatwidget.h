@@ -77,8 +77,9 @@ public:
 	///Sets the image that is to be shown
 	/*!
 	\param image Contains a pointer to the image.
+	\param changeTranslation true if the translation of the image should be recalculated
 	*/
-	void setImage(vtkImageData *image);
+	void setImage(vtkImageData *image, bool changeTranslation = true);
 	///Adds a binary overlay to the actual image
 	/*!
 	\param image Contains a pointer to the image.

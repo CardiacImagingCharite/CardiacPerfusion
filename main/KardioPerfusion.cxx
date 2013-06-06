@@ -111,6 +111,7 @@ KardioPerfusion::KardioPerfusion():
 	//just temporary until autoscale and zoom works
 	this->ui->qwtPlot_tac->setAxisScale(2,0,20);
 	this->ui->qwtPlot_tac->setAxisScale(0,0,500);
+	this->ui->qwtPlot_tac->setAxisAutoScale(0);
 
 	markerStart->setLabel(tr("Start"));
 	markerStart->setLabelAlignment(Qt::AlignRight|Qt::AlignTop);

@@ -51,6 +51,10 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x -fpermissive")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
+IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -stdlib=libc++")
+ENDIF()
+
 # Set your files and resources here  
 
 SET( KardioPerfusionSrcs 

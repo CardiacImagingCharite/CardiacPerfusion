@@ -273,7 +273,7 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 			if (item.isA(typeid(CTImageTreeItem))) {
 			
 				setImage(dynamic_cast<CTImageTreeItem*>(&item));
-				for(int i = 0; i < item.childCount(); i++)
+				for( unsigned int i = 0; i < item.childCount(); i++)
 				{
 					if(item.child(i).isA(typeid(BinaryImageTreeItem)))
 					{
@@ -295,7 +295,7 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 		if (item.isA(typeid(CTImageTreeItem))) {
 			
 			setImage(dynamic_cast<CTImageTreeItem*>(&item));
-			for(int i = 0; i < item.childCount(); i++)
+			for( unsigned int i = 0; i < item.childCount(); i++)
 			{
 				if(item.child(i).isA(typeid(BinaryImageTreeItem)))
 				{

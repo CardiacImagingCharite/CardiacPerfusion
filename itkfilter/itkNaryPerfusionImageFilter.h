@@ -72,7 +72,7 @@ public:
 		
 		if(B.size() == times.size())
 		{
-			for(int i = 0; i < B.size(); i++)
+			for( unsigned int i = 0; i < B.size(); i++)
 			{
 				gamma.addSample(times[i], B[i]);
 			}

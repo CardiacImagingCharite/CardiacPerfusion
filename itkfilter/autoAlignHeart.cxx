@@ -364,7 +364,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	c0_old.Fill( 0 );
 	c1_old.Fill( 0 );
 
-	for( int sliceNumber = 0; sliceNumber < inputImageSize[2]; sliceNumber++ ) {
+	for( unsigned int sliceNumber = 0; sliceNumber < inputImageSize[2]; sliceNumber++ ) {
 		distance = 0;
 
 		// conduct blob analysis for current slice
@@ -444,7 +444,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	//****************************************************
 	// calculate mean in x and y
 	double sumY = 0, meanX, meanY;
-	for(int x = 0; x < distances.size(); x++) {
+	for( unsigned int x = 0; x < distances.size(); x++) {
 		sumY += distances[x];
 	}
 	meanX = distances.size() / 2;
@@ -452,7 +452,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	double numerator = 0, denominator = 0;
 
-	for(int x = 0; x < distances.size(); x++) {
+	for( unsigned int x = 0; x < distances.size(); x++) {
 		numerator += ( x - meanX ) * ( distances[x] - meanY );
 		denominator += ( x - meanX ) * ( x - meanX );
 	}
@@ -461,7 +461,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	std::vector<double> filteredVector = medianFilterVector( distances, 2 );
   myfile.open ("distancesMedian.txt");
-	for( int i = 0; i < filteredVector.size(); i++)
+	for( unsigned int i = 0; i < filteredVector.size(); i++)
 		myfile << filteredVector[i] << std::endl;
   myfile.close();
 	std::cout << "\nOutput written to distancesMedian.txt" << std::endl;
@@ -865,10 +865,10 @@ std::vector<double> autoAlignHeart::medianFilterVector( std::vector<double> vec,
 	// copy entries at end and beginning which are not filtered
 	for( int i = 0; i < radius; i++)
 		filteredVector[i] = vec[i];
-	for( int i = vec.size() - 1; i > vec.size() - radius; i--)
+	for( unsigned int i = vec.size() - 1; i > vec.size() - radius; i--)
 		filteredVector[i] = vec[i];
 	// fill middle values
-	for( int i = radius; i < vec.size() - radius; i++) {
+	for( unsigned int i = radius; i < vec.size() - radius; i++) {
 		std::vector<double> tempVector( 2*radius + 1 );
 		for( int j = 0; j < 2*radius + 1; j++) {
 			tempVector[j] = vec[ j - radius + i];

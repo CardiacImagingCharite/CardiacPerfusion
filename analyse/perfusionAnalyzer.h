@@ -82,7 +82,7 @@ class PerfusionAnalyzer
 		/*!
 		\return Time as a double. 
 		*/
-		double getTime(int index);
+		double getTime(unsigned int index);
 		///Getter for the image count
 		/*!
 		\return Returns the image count.

@@ -104,7 +104,7 @@ std::string PerfusionAnalyzer::getTacValuesAsString()
 
 		tacValueStream << &currentSegment.getName() << ";";
 
-		for(int i = 0; i < data->size(); i++)
+		for( unsigned int i = 0; i < data->size(); i++)
 		{
 			tacValueStream << data->y(i) << ";";
 		}
@@ -171,7 +171,7 @@ bool PerfusionAnalyzer::CTImageTimeCompareFunctor::operator()(const argT &x, con
   return (x->getTime() < y->getTime());
 }
 
-double PerfusionAnalyzer::getTime(int index)
+double PerfusionAnalyzer::getTime(unsigned int index)
 {
 	if(index < times.size())
 		return times[index];

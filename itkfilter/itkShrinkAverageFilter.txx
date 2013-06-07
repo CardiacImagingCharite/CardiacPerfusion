@@ -148,56 +148,42 @@ namespace itk
 		InputImageIterator inIt(inputPtr, inputRegion);
 		
 		unsigned outIdx = 0;
-		
-		// 		InputIndexType indexInsideOutputBlock;
-		// 		vector< unsigned > outBlockSizePerDimension(OutputImageType::ImageDimension + 1, 0);
-		// 		unsigned osize = 1;
-		// 		for(unsigned dim = 0; dim < OutputImageType::ImageDimension; dim++) {
-		// 			outBlockSizePerDimension[dim+1] = osize;
-		// 			osize *= outputSize[dim];
-		// 		}
-		// 		while ( !inIt.IsAtEnd() )
-		// 		{
-		// 			valSum[outIdx] += inIt.Get();
-		// 			indexInsideOutputBlock[0]++;
-		// 			unsigned dim = 0;
-		// 			while(indexInsideOutputBlock[dim] == m_ShrinkFactors[dim]) {
-		// 				indexInsideOutputBlock[dim] = 0;
-		// 				outIdx -= outBlockSizePerDimension[dim];
-		// 				dim++;
-		// 				outIdx += outBlockSizePerDimension[dim];
-		// 				indexInsideOutputBlock[dim]++;
-		// 			}
-		// 			++inIt;
-		// 		}
-		
-		
-		// walk blockwise (in steps of shrink factors) the input image
-		// and sum all values for each corresponding output pixel
-		for ( unsigned int oz = 0; oz < outputSize[2]; oz++ ) 
+		std::vector<unsigned> outIdxA(OutputImageType::ImageDimension, 0);
+
+		InputIndexType indexInsideOutputBlock;
+
+		std::vector< unsigned > outBlockSizePerDimension(OutputImageType::ImageDimension);
+		unsigned osize = 1;
+		for(unsigned dim = 0; dim < OutputImageType::ImageDimension; dim++) {
+			outBlockSizePerDimension[dim] = osize;
+			osize *= outputSize[dim];
+			indexInsideOutputBlock[dim] = 0;
+		}
+
+		// walk the input image and sum all values for each corresponding output pixel
+		while ( !inIt.IsAtEnd() )
 		{
-			for ( unsigned int iz = 0; iz < m_ShrinkFactors[2]; iz++ )
-			{
-				for ( unsigned int oy = 0; oy < outputSize[1]; oy++ ) 
+			valSum[outIdx] += inIt.Get();
+			++inIt;
+			unsigned dim = 0;
+			bool nextdim = false;
+			do {
+				indexInsideOutputBlock[dim]++;
+				nextdim = false;
+				if (indexInsideOutputBlock[dim] == m_ShrinkFactors[dim])
 				{
-					for ( unsigned int iy = 0; iy < m_ShrinkFactors[1]; iy++ )
+					indexInsideOutputBlock[dim] = 0;
+					outIdx += outBlockSizePerDimension[dim];
+					outIdxA[dim]++;
+					if ( outIdxA[dim] == outputSize[dim] )
 					{
-						for ( unsigned int ox = 0; ox < outputSize[0]; ox++ ) 
-						{
-							for ( unsigned int ix = 0; ix < m_ShrinkFactors[0]; ix++ )
-							{
-								valSum[outIdx] += inIt.Get();
-								++inIt;
-							}
-							outIdx++;
-						}
-						outIdx -= outputSize[0];
+						outIdxA[dim] = 0;
+						outIdx -= outBlockSizePerDimension[dim+1];
+						nextdim = true;
 					}
-					outIdx += outputSize[0];
 				}
-				outIdx -= outputSize[0] * outputSize[1];
-			}
-			outIdx += outputSize[0] * outputSize[1];
+				dim++;
+			} while (nextdim);
 		}
 		
 		// Define/declare an iterator that will walk the output region for this

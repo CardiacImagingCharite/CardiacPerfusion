@@ -178,8 +178,8 @@ private:
 	typedef std::auto_ptr<DicomSelectorDialog> DicomSelectorDialogPtr;
 	//vtkSmartPointer<vtkImageViewer2> m_pViewer[4];
 
-    /// Designer form
-    Ui_KardioPerfusion *ui;
+	/// Designer form
+	Ui_KardioPerfusion *m_ui;
 
 	///load selected Dicom-File
 	/*! 
@@ -215,26 +215,26 @@ private:
 	///Callback to update the widgets
 	static void updateFunc(vtkObject* caller, long unsigned int eventId, void* clientData, void* callData );
 
-	CTImageTreeModel imageModel;
-	CTImageTreeItem::ConnectorHandle displayedCTImage;
+	CTImageTreeModel m_imageModel;
+	CTImageTreeItem::ConnectorHandle m_displayedCTImage;
 
         typedef std::set< BinaryImageTreeItem::ConnectorHandle > DisplayedSegmentContainer;
-    DisplayedSegmentContainer displayedSegments;
+	DisplayedSegmentContainer m_displayedSegments;
 
 	typedef std::set< RealImageTreeItem::ConnectorHandle > DisplayedPerfusionMapContainer;
-    DisplayedPerfusionMapContainer displayedPerfusionMaps;
+	DisplayedPerfusionMapContainer m_displayedPerfusionMaps;
 
 
-	static const DicomTagList CTModelHeaderFields;
-    int pendingAction;
+	static const DicomTagList m_CTModelHeaderFields;
+	int m_pendingAction;
 
-	bool oneWindowIsMax;
-	MaxSlopeAnalyzer* maxSlopeAnalyzer;
+	bool m_oneWindowIsMax;
+	MaxSlopeAnalyzer* m_maxSlopeAnalyzer;
 
-	QwtPlotMarker *markerStart, *markerEnd;
-    QwtPlotMarker *markerPickerX, *markerPickerY;
-	QwtPlotGrid *grid;
-	QwtPlotPicker *picker;
+	QwtPlotMarker *m_markerStart, *m_markerEnd;
+	QwtPlotMarker *m_markerPickerX, *m_markerPickerY;
+	QwtPlotGrid *m_grid;
+	QwtPlotPicker *m_picker;
 	vtkLookupTable *m_perfusionColorMap;
 	bool m_modelChanged; ///< True if model is changed until frist image is set
 };

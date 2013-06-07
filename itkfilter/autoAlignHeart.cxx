@@ -156,6 +156,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	SignedShortImageType3D::Pointer image = resampleImage(InputImage, identityTransform, interpolator, outputSpacing, false);
 	clock.Stop();
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
+	clock = itk::TimeProbe();
 	clock.Start();
 	
 	std::cout << "New size: " << image->GetLargestPossibleRegion().GetSize() << "\n" << std::endl;
@@ -189,6 +190,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	clock.Stop();
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
+	clock = itk::TimeProbe();
 	clock.Start();
 
 	// update progress dialog
@@ -217,6 +219,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	clock.Stop();
 	std::cout << "\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
+	clock = itk::TimeProbe();
 	clock.Start();
 
 	// update progress dialog
@@ -232,6 +235,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	clock.Stop();
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
+	clock = itk::TimeProbe();
 	clock.Start();
 	std::cout << "There are " << labelMap->GetNumberOfLabelObjects() << " objects." << std::endl;
 
@@ -275,6 +279,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	clock.Stop();
 	std::cout << "\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
+	clock = itk::TimeProbe();
 	clock.Start();
 	
 	// update progress dialog
@@ -307,6 +312,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 	
 	clock.Stop();
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
+	clock = itk::TimeProbe();
 	clock.Start();
 
 	// update progress dialog
@@ -340,6 +346,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	clock.Stop();
 	std::cout << "\t\t\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
+	clock = itk::TimeProbe();
 	clock.Start();
 
 	// update progress dialog
@@ -426,6 +433,7 @@ autoAlignHeart::AffineTransformType::Pointer autoAlignHeart::getTrafo(CTImageTyp
 
 	clock.Stop();
 	std::cout << "\t\tdone\t( " << clock.GetMean() << "s )\n" << std::endl;
+	clock = itk::TimeProbe();
 	clock.Start();
 	
 	// update progress dialog

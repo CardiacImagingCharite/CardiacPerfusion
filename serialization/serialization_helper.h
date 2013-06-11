@@ -137,6 +137,8 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 
 			typedef float RealStorageType;
 
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			// serialization of BinaryImageType
 			template<class Archive, unsigned Dimension>
 			inline void load(Archive & ar, typename itk::SmartPointer< itk::Image<BinaryPixelType, Dimension> > &i, const unsigned int version)
 			{
@@ -178,8 +180,6 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 					sizeCount++;
 				}
 			}
-
-
 
 			template<class Archive, unsigned Dimension>
 			inline void save(Archive & ar, const typename itk::SmartPointer< itk::Image<BinaryPixelType, Dimension> > &i, const unsigned int version)
@@ -225,6 +225,83 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 				boost::serialization::split_free(ar, i, version);
 			}
 
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			// serialization of CTImageType
+			template<class Archive, unsigned Dimension>
+			inline void load(Archive & ar, typename itk::SmartPointer< itk::Image<CTPixelType, Dimension> > &i, const unsigned int version)
+			{
+				typedef typename itk::Image<CTPixelType, Dimension> ImageType;
+				i = ImageType::New();
+				typename ImageType::SpacingType spacing;
+				typename ImageType::SizeType size;
+				typename ImageType::IndexType index;
+				typename ImageType::PointType origin;
+				uint64_t t;
+				for(unsigned d = 0; d < Dimension; d++) {
+				  ar & t;
+				  size[d] = t;
+				  ar & t;
+				  index[d] = t;
+				  ar & spacing[d];
+				  ar & origin[d];
+				}
+				typename ImageType::RegionType region;
+				region.SetIndex( index );
+				region.SetSize( size );
+				i->SetRegions( region );
+				i->SetSpacing( spacing );
+				i->SetOrigin( origin );
+				i->Allocate();
+				itk::ImageRegionIterator<ImageType> it(i,region);
+
+				int16_t p = 0;
+				while( !it.IsAtEnd() )
+				{
+					ar & p;
+					//it.Value() = p;
+					it.Set(p);
+					++it;
+				}
+
+			}
+
+			template<class Archive, unsigned Dimension>
+			inline void save(Archive & ar, const typename itk::SmartPointer< itk::Image<CTPixelType, Dimension> > &i, const unsigned int version)
+			{
+				typedef typename itk::Image<CTPixelType, Dimension> ImageType;
+				typename ImageType::RegionType region = i->GetBufferedRegion();
+				typename ImageType::SpacingType spacing = i->GetSpacing();
+				typename ImageType::SizeType size = region.GetSize();
+				typename ImageType::IndexType index = region.GetIndex();
+				typename ImageType::PointType origin = i->GetOrigin();
+				uint64_t t;
+				for(unsigned d = 0; d < Dimension; d++) {
+				  t = size[d];
+				  ar & t;
+				  t = index[d];
+				  ar & t;
+				  ar & spacing[d];
+				  ar & origin[d];
+				}
+				itk::ImageRegionConstIterator<ImageType> it(i,region);
+				int16_t p;
+
+				while( !it.IsAtEnd() )
+				{
+					p = it.Get();
+					ar & p;
+					++it;
+				}
+			}
+
+			template<class Archive, unsigned Dimension>
+			inline void serialize(Archive & ar, typename itk::SmartPointer< itk::Image<CTPixelType, Dimension> > &i, const unsigned int version)
+			{
+				boost::serialization::split_free(ar, i, version);
+			}
+
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			// serialization of RealImageType
 			template<class Archive, unsigned Dimension>
 			inline void load(Archive & ar, typename itk::SmartPointer< itk::Image<RealPixelType, Dimension> > &i, const unsigned int version)
 			{
@@ -279,8 +356,6 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 				*/
 			}
 
-
-
 			template<class Archive, unsigned Dimension>
 			inline void save(Archive & ar, const typename itk::SmartPointer< itk::Image<RealPixelType, Dimension> > &i, const unsigned int version)
 			{
@@ -328,7 +403,6 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 				}
 				*/
 			}
-			
 
 			template<class Archive, unsigned Dimension>
 			inline void serialize(Archive & ar, typename itk::SmartPointer< itk::Image<RealPixelType, Dimension> > &i, const unsigned int version)
@@ -336,6 +410,8 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 				boost::serialization::split_free(ar, i, version);
 			}
 
+			//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			// serialization of SegmentationValueMap
 			template<class Archive>
 			inline void load(Archive & ar, CTImageTreeItem::SegmentationValueMap &svm, const unsigned int version)
 			{
@@ -524,6 +600,8 @@ void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 	ar & itemUID;
 	uint64_t fnListLength;
 	ar & fnListLength;
+	ImageType::Pointer ctIm;
+	ar & ctIm;
 	std::string fn;
 	std::list<std::string> pathList;
 	for(;fnListLength != 0; --fnListLength) {
@@ -533,6 +611,7 @@ void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 	ar & HeaderFields;
 	ar & dict;
 	ar & boost::serialization::base_object<BaseClass>(*this);
+	setITKImage( ctIm );
 	boost::filesystem::path serPath( model->getSerializationPath() );
 	serPath = serPath.parent_path();
 	for( std::list<std::string>::const_iterator path = pathList.begin(); path != pathList.end(); ++path) {
@@ -550,6 +629,8 @@ void CTImageTreeItem::save(Archive & ar, const unsigned int version) const {
 	ar & itemUID;
 	const uint64_t fnListLength = fnList.size();
 	ar & fnListLength;
+	ImageType::Pointer ctIm = getITKImage();
+	ar & ctIm;
 	boost::filesystem::path serPath( absoluteDirectory( model->getSerializationPath() ) );
 	BOOST_FOREACH( const std::string &name, fnList ) {
 		boost::filesystem::path fnPath( name );

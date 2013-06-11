@@ -41,6 +41,7 @@
 #include <boost/foreach.hpp>
 #include "ctimagetreemodel_serializer.h"
 #include "ctimagetreeitem.h"
+#include "itkShrinkAverageFilter.h"
 
 
 const QString CTImageTreeModel::MaxImageMemoryUsageSettingName("MaxImageMemoryUsage");
@@ -248,7 +249,33 @@ void CTImageTreeModel::openModelFromFile(const std::string &fname) {
 }
 
 void CTImageTreeModel::saveModelToFile(const std::string &fname) {
-  serializeCTImageTreeModelToFile(*this, fname);
+	shrinkAllCTImageTreeItems();
+	serializeCTImageTreeModelToFile(*this, fname);
+}
+
+void CTImageTreeModel::shrinkAllCTImageTreeItems()
+{
+	typedef itk::ShrinkAverageFilter<CTImageType, CTImageType> ShrinkAverageFilterType;
+	
+	int rows = this->rowCount();
+	
+	for ( int i = 0; i < rows; i++ )
+	{
+		QModelIndex ImIdx = this->index(i, 1);
+		TreeItem* item = &this->getItem(ImIdx);
+		ITKVTKTreeItem<CTImageType> *currentItem = dynamic_cast<ITKVTKTreeItem<CTImageType>*>(item);
+		typename CTImageType::Pointer ImagePtr = currentItem->getITKImage();
+
+		typename ShrinkAverageFilterType::Pointer shrinkAverageFilter = ShrinkAverageFilterType::New();
+		shrinkAverageFilter->SetInput( ImagePtr );
+		shrinkAverageFilter->SetShrinkFactor(0, 2);
+		shrinkAverageFilter->SetShrinkFactor(1, 2);
+		shrinkAverageFilter->SetShrinkFactor(2, 2);
+		shrinkAverageFilter->Update();
+		typename CTImageType::Pointer outImage = shrinkAverageFilter->GetOutput();
+
+		currentItem->setITKImage(outImage);
+	}
 }
 
 

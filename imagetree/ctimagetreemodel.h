@@ -192,6 +192,8 @@ class CTImageTreeModel : public QAbstractItemModel {
     const std::string &getSerializationPath() const { return m_serializationPath; }
     ///Removes all items.
     void removeAllItems();
+    ///Shrinks all CTImageTreeItem
+    void shrinkAllCTImageTreeItems();
   
     friend class TreeItem;
     friend class CTImageTreeItem;

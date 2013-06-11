@@ -58,7 +58,7 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
 	///Constructor of the class.
     CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict=itk::MetaDataDictionary());
 	
-	CTImageTreeItem():imageTime(-1) {}
+	CTImageTreeItem():m_imageTime(-1) {}
 	///Clones this item. 
 	/*!
 	\param clonesParent The parent of the item. Default is NULL.
@@ -87,7 +87,7 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
 	/*!
 	\return String that contains the UID.
 	*/
-    virtual const std::string &getUID() const { return itemUID; }
+    virtual const std::string &getUID() const { return m_itemUID; }
 	///Getter for the time.
 	/*!
 	\return Time.
@@ -110,7 +110,7 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
 	/*!
 	\param fn The filename.
 	*/
-    void appendFileName( const std::string &fn ) { fnList.insert( fn ); }
+    void appendFileName( const std::string &fn ) { m_fnList.insert( fn ); }
     ///Generates an overlay segemnt for the actual image.
 	/*!
 	\return A pointer to the generated Binary tree item.
@@ -161,7 +161,7 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
     
     
   protected:
-    SegmentationValueMap segmentationValueCache;
+    SegmentationValueMap m_segmentationValueCache;
 	///Calculate the segmentation values.
 	/*!
 	\param values Placeholder for the calculated values.
@@ -176,11 +176,11 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
 	\return Number of slices.
 	*/
     int getNumberOfSlices() const;
-    std::string itemUID;
-    FileNameList fnList;
-    DicomTagListPointer HeaderFields;
-    itk::MetaDataDictionary dict;
-    double imageTime;
+    std::string m_itemUID;
+    FileNameList m_fnList;
+    DicomTagListPointer m_HeaderFields;
+    itk::MetaDataDictionary m_dict;
+    double m_imageTime;
 
   private:
     friend class boost::serialization::access;

@@ -57,14 +57,14 @@
 
 //Constructor
 CTImageTreeItem::CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict )
-  :BaseClass(parent),HeaderFields(headerFields),dict(_dict),imageTime(-1) {
-    getUIDFromDict(dict, itemUID);
+  :BaseClass(parent),m_HeaderFields(headerFields),m_dict(_dict),m_imageTime(-1) {
+    getUIDFromDict(m_dict, m_itemUID);
 }
 
 TreeItem *CTImageTreeItem::clone(TreeItem *clonesParent) const {
 	if (clonesParent==NULL) clonesParent = const_cast<TreeItem*>(parent());
-	CTImageTreeItem *c = new CTImageTreeItem( clonesParent, HeaderFields, dict );
-	c->fnList = fnList;
+	CTImageTreeItem *c = new CTImageTreeItem( clonesParent, m_HeaderFields, m_dict );
+	c->m_fnList = m_fnList;
 	cloneChildren(c);
 	return c;
 }
@@ -88,9 +88,9 @@ struct IndexCompareFunctor {
 //returns the values of the segmentation
 bool CTImageTreeItem::getSegmentationValues( SegmentationValues &values) const {
 	//a map that contains the binary images and the segmentation values
-	SegmentationValueMap::const_iterator it = segmentationValueCache.find( values.segment );
+	SegmentationValueMap::const_iterator it = m_segmentationValueCache.find( values.segment );
 	// if values exist, no need to calculate again
-	if (it != segmentationValueCache.end() //if segment was found
+	if (it != m_segmentationValueCache.end() //if segment was found
 	&& it->second.mtime == values.segment->getITKMTime()
     && it->second.accuracy == values.accuracy) { //has the same accuracy
 		values = it->second;
@@ -237,7 +237,7 @@ bool CTImageTreeItem::internalGetSegmentationValues( SegmentationValues &values)
 	values.stddev = std::sqrt( variance( acc ) );
 	//set the image modification time
 	values.mtime = segment->GetMTime();
-	const_cast<CTImageTreeItem*>(this)->segmentationValueCache[ values.segment ] = values;
+	const_cast<CTImageTreeItem*>(this)->m_segmentationValueCache[ values.segment ] = values;
 	return values.sampleCount > 0;
 }    
     
@@ -247,7 +247,7 @@ bool CTImageTreeItem::setData(int column, const QVariant& value) {
 }
 
 QVariant CTImageTreeItem::do_getData_UserRole(int column) const {
-	if ((*HeaderFields)[ column ].tag == getAcquisitionDatetimeTag()) {
+	if ((*m_HeaderFields)[ column ].tag == getAcquisitionDatetimeTag()) {
 		return getTime();
 	}
 	return do_getData_DisplayRole(column);
@@ -255,16 +255,16 @@ QVariant CTImageTreeItem::do_getData_UserRole(int column) const {
 
 
 QVariant CTImageTreeItem::do_getData_DisplayRole(int column) const {
-	if (column < 0 || column >= int(HeaderFields->size())) 
+	if (column < 0 || column >= int(m_HeaderFields->size())) 
 		return QVariant::Invalid;
-	if ((*HeaderFields)[ column ].tag == getNumberOfFramesTag()) 
+	if ((*m_HeaderFields)[ column ].tag == getNumberOfFramesTag()) 
 		return getNumberOfSlices();
-	if ((*HeaderFields)[ column ].tag == getAcquisitionDatetimeTag()) {
+	if ((*m_HeaderFields)[ column ].tag == getAcquisitionDatetimeTag()) {
 		boost::posix_time::ptime dicomTime = getPTime();
 		return boost::posix_time::to_simple_string(dicomTime).c_str();
 	}
 	std::string val;
-	itk::ExposeMetaData( dict, (*HeaderFields)[ column ].tag, val );
+	itk::ExposeMetaData( m_dict, (*m_HeaderFields)[ column ].tag, val );
 	return QString::fromAscii( val.c_str() );
 }
 
@@ -277,13 +277,13 @@ QVariant CTImageTreeItem::do_getData_ForegroundRole(int column) const {
 //get the acquisition time from meta data
 boost::posix_time::ptime CTImageTreeItem::getPTime() const {
 	std::string dicomTimeString;
-	itk::ExposeMetaData( dict, getAcquisitionDatetimeTag(), dicomTimeString );
+	itk::ExposeMetaData( m_dict, getAcquisitionDatetimeTag(), dicomTimeString );
 	if(dicomTimeString.empty())
 	{
 		std::string dicomContentDateString;
 		std::string dicomAquistionTimeString;
-		itk::ExposeMetaData( dict, getContentDateTag(), dicomContentDateString );
-		itk::ExposeMetaData( dict, getAquisitionTimeTag(), dicomAquistionTimeString );
+		itk::ExposeMetaData( m_dict, getContentDateTag(), dicomContentDateString );
+		itk::ExposeMetaData( m_dict, getAquisitionTimeTag(), dicomAquistionTimeString );
 		dicomTimeString = dicomContentDateString + dicomAquistionTimeString;
 	}
 	using namespace boost::posix_time;
@@ -298,8 +298,8 @@ boost::posix_time::ptime CTImageTreeItem::getPTime() const {
 
 //get image acquisition time
 double CTImageTreeItem::getTime() const {
-	if (imageTime > 0) 
-		return imageTime;
+	if (m_imageTime > 0) 
+		return m_imageTime;
 	using namespace boost::posix_time;
 	ptime dicomTime = getPTime();
 	time_duration since1900 = dicomTime - ptime(boost::gregorian::date(1900,1,1));
@@ -309,13 +309,13 @@ double CTImageTreeItem::getTime() const {
 
 
 Qt::ItemFlags CTImageTreeItem::flags(int column) const {
-    if (column < 0 || column >= int(HeaderFields->size())) return Qt::NoItemFlags;
+    if (column < 0 || column >= int(m_HeaderFields->size())) return Qt::NoItemFlags;
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;  
 }
 
 //return number of columns
 int CTImageTreeItem::columnCount() const {
-    return HeaderFields->size();
+    return m_HeaderFields->size();
 }
 
 //get number of slices
@@ -325,12 +325,12 @@ int CTImageTreeItem::getNumberOfSlices() const {
 		ImageType::RegionType imageRegion = itkImage->GetLargestPossibleRegion();
 		return static_cast<uint>(imageRegion.GetSize(2));
 	} else {
-		int num = fnList.size();
+		int num = m_fnList.size();
 		if (num > 1) 
 			return num;
 		else {
 			std::string t;
-			itk::ExposeMetaData( dict, getNumberOfFramesTag(), t );
+			itk::ExposeMetaData( m_dict, getNumberOfFramesTag(), t );
 			std::istringstream buffer(t);
 			buffer >> num;
 			return num;
@@ -392,7 +392,7 @@ void CTImageTreeItem::retrieveITKImage(QProgressDialog *progress, int progressSc
 	ReaderType::Pointer imageReader = ReaderType::New();
 	ReaderType::FileNamesContainer fc;
 	//assign filenames
-	fc.assign(fnList.begin(), fnList.end());
+	fc.assign(m_fnList.begin(), m_fnList.end());
 	//set ImageIO and filenames
 	itk::GDCMImageIO::Pointer gdcmImageIO = itk::GDCMImageIO::New();
 	imageReader->SetImageIO( gdcmImageIO );

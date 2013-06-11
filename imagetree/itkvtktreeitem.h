@@ -102,10 +102,10 @@ class ITKVTKTreeItem : public TreeItem {
     typename ImageType::Pointer getITKImage(QProgressDialog *progress = NULL, int progressScale=0, int progressBase=0) const;
     virtual void retrieveITKImage(QProgressDialog *progress = NULL, int progressScale=0, int progressBase=0) {}
     virtual ConnectorHandle getVTKConnector(QProgressDialog *progress = NULL, int progressScale=0, int progressBase=0) const {
-      ConnectorHandle connData( weakConnector.lock());
+      ConnectorHandle connData( m_weakConnector.lock());
       if (!connData) {
 	const_cast<ITKVTKTreeItem<TImage>*>(this)->retrieveITKImage(progress, progressScale, progressBase);
-	connData = weakConnector.lock();
+	connData = m_weakConnector.lock();
       } else { 	model->registerConnectorData(connData); }
 //      dynamic_cast<ConnectorData*>(connData.get())->getConnector()->Update();
       return connData;
@@ -124,10 +124,10 @@ class ITKVTKTreeItem : public TreeItem {
 	public:
 	inline void setITKImage(typename ImageType::Pointer image) { 
       if (image) {
-	ConnectorHandle connData( weakConnector.lock() );
+	ConnectorHandle connData( m_weakConnector.lock() );
 	if (!connData) {
 	  connData.reset(new ConnectorData(this, image));
-	  weakConnector = connData;
+	  m_weakConnector = connData;
 	} else {
 	  ConnectorData *conn =  dynamic_cast<ConnectorData*>(connData.get());
 	  conn->setITKImage(image);
@@ -138,7 +138,7 @@ class ITKVTKTreeItem : public TreeItem {
 
   protected:
     inline typename ImageType::Pointer peekITKImage(void) const { 
-      ConnectorHandle tHand = weakConnector.lock();
+      ConnectorHandle tHand = m_weakConnector.lock();
       if (tHand) {
 	return dynamic_cast<ConnectorData*>(tHand.get())->getITKImage();
       }
@@ -147,7 +147,7 @@ class ITKVTKTreeItem : public TreeItem {
 
   private:
     typedef boost::weak_ptr<VTKConnectorDataBasePtr::value_type> WeakConnectorHandle;
-    WeakConnectorHandle weakConnector;
+    WeakConnectorHandle m_weakConnector;
     
   protected:
     ITKVTKTreeItem() {}

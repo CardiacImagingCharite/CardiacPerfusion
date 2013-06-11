@@ -459,8 +459,8 @@ void CTImageTreeModel::serialize(Archive & ar, const unsigned int version) {
 	ar.register_type(static_cast<RealImageTreeItem*>(NULL));
 
 	beginResetModel(); 
-	ar & HeaderFields;
-	ar & rootItem;
+	ar & m_HeaderFields;
+	ar & m_rootItem;
 	endResetModel(); 
 }
 
@@ -597,7 +597,7 @@ boost::filesystem::path fromAtoB( const boost::filesystem::path &a, const boost:
 
 template<class Archive>
 void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
-	ar & itemUID;
+	ar & m_itemUID;
 	uint64_t fnListLength;
 	ar & fnListLength;
 	ImageType::Pointer ctIm;
@@ -608,8 +608,8 @@ void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 		ar & fn;
 		pathList.push_back( fn );
 	}
-	ar & HeaderFields;
-	ar & dict;
+	ar & m_HeaderFields;
+	ar & m_dict;
 	ar & boost::serialization::base_object<BaseClass>(*this);
 	setITKImage( ctIm );
 	boost::filesystem::path serPath( model->getSerializationPath() );
@@ -619,30 +619,30 @@ void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 		if (!fnPath.is_complete()) {
 			fnPath = normalize( serPath / fnPath );
 		}
-		fnList.insert(fnPath.string());
+		m_fnList.insert(fnPath.string());
 	}
-	ar & segmentationValueCache;
+	ar & m_segmentationValueCache;
 }
 
 template<class Archive>
 void CTImageTreeItem::save(Archive & ar, const unsigned int version) const {
-	ar & itemUID;
-	const uint64_t fnListLength = fnList.size();
+	ar & m_itemUID;
+	const uint64_t fnListLength = m_fnList.size();
 	ar & fnListLength;
 	ImageType::Pointer ctIm = getITKImage();
 	ar & ctIm;
 	boost::filesystem::path serPath( absoluteDirectory( model->getSerializationPath() ) );
-	BOOST_FOREACH( const std::string &name, fnList ) {
+	BOOST_FOREACH( const std::string &name, m_fnList ) {
 		boost::filesystem::path fnPath( name );
 		boost::filesystem::path newFnPath = fromAtoB( serPath, fnPath );
 		newFnPath = normalize(newFnPath);
 		if (newFnPath.empty()) newFnPath = fnPath;
 		ar & newFnPath.generic_string();
 	}
-	ar & HeaderFields;
-	ar & dict;
+	ar & m_HeaderFields;
+	ar & m_dict;
 	ar & boost::serialization::base_object<BaseClass>(*this);
-	ar & segmentationValueCache;
+	ar & m_segmentationValueCache;
 }
 
 

@@ -171,7 +171,7 @@ class CTImageTreeModel : public QAbstractItemModel {
 	/*!
 	\return Size of the maximum memory.
 	*/
-    size_t getMaxImageMemoryUsage() const { return maxImageMemoryUsage; }
+    size_t getMaxImageMemoryUsage() const { return m_maxImageMemoryUsage; }
 	///Sets the maximum memory.
 	/*!
 	\param Size of the memory.
@@ -184,12 +184,12 @@ class CTImageTreeModel : public QAbstractItemModel {
 	/*!
 	\param p Contains the path name.
 	*/
-    void setSerializationPath( const std::string p ) { serializationPath = p; }
+    void setSerializationPath( const std::string p ) { m_serializationPath = p; }
 	///Gets the serialization path.
 	/*!
 	\return Serialization path.
 	*/
-    const std::string &getSerializationPath() const { return serializationPath; }
+    const std::string &getSerializationPath() const { return m_serializationPath; }
     ///Removes all items.
     void removeAllItems();
   
@@ -212,18 +212,18 @@ class CTImageTreeModel : public QAbstractItemModel {
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version);
     
-    CTImageTreeModel(QObject *parent = 0):QAbstractItemModel(parent),rootItem(this) {
+    CTImageTreeModel(QObject *parent = 0):QAbstractItemModel(parent),m_rootItem(this) {
       initMaxMemoryUsage();
     }
     void emitLayoutAboutToBeChanged() { emit layoutAboutToBeChanged(); }
     void emitLayoutChanged() { emit layoutChanged(); }
     QModelIndex createIndex(int r, int c, const TreeItem*p) const;
-    DicomTagListPointer HeaderFields;
-    TreeItem rootItem;
-    size_t maxImageMemoryUsage;
+    DicomTagListPointer m_HeaderFields;
+    TreeItem m_rootItem;
+    size_t m_maxImageMemoryUsage;
     typedef std::list<VTKConnectorDataBasePtr> ConnectorDataStorageType;
-    ConnectorDataStorageType ConnectorDataStorage;
-    std::string serializationPath;
+    ConnectorDataStorageType m_ConnectorDataStorage;
+    std::string m_serializationPath;
 };
 
 

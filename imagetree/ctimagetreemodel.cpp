@@ -248,12 +248,12 @@ void CTImageTreeModel::openModelFromFile(const std::string &fname) {
   deserializeCTImageTreeModelFromFile( *this, fname );
 }
 
-void CTImageTreeModel::saveModelToFile(const std::string &fname) {
-	shrinkAllCTImageTreeItems();
+void CTImageTreeModel::saveModelToFile(const std::string &fname, unsigned int shrinkFactor) {
+	shrinkAllCTImageTreeItems(shrinkFactor);
 	serializeCTImageTreeModelToFile(*this, fname);
 }
 
-void CTImageTreeModel::shrinkAllCTImageTreeItems()
+void CTImageTreeModel::shrinkAllCTImageTreeItems(unsigned int shrinkFactor)
 {
 	typedef itk::ShrinkAverageFilter<CTImageType, CTImageType> ShrinkAverageFilterType;
 	
@@ -268,9 +268,9 @@ void CTImageTreeModel::shrinkAllCTImageTreeItems()
 
 		typename ShrinkAverageFilterType::Pointer shrinkAverageFilter = ShrinkAverageFilterType::New();
 		shrinkAverageFilter->SetInput( ImagePtr );
-		shrinkAverageFilter->SetShrinkFactor(0, 2);
-		shrinkAverageFilter->SetShrinkFactor(1, 2);
-		shrinkAverageFilter->SetShrinkFactor(2, 2);
+		shrinkAverageFilter->SetShrinkFactor(0, shrinkFactor);
+		shrinkAverageFilter->SetShrinkFactor(1, shrinkFactor);
+		shrinkAverageFilter->SetShrinkFactor(2, shrinkFactor);
 		shrinkAverageFilter->Update();
 		typename CTImageType::Pointer outImage = shrinkAverageFilter->GetOutput();
 

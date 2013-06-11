@@ -165,8 +165,9 @@ class CTImageTreeModel : public QAbstractItemModel {
 	///Saves the model to a file.
 	/*!
 	\param fname The filename where the model is to be saved.
+	\param shrinkFactor The Shrink Factor for the CTImageTreeItems before saving.
 	*/
-    void saveModelToFile(const std::string &fname);
+    void saveModelToFile(const std::string &fname, const unsigned int shrinkFactor);
     ///Gets the size of the maximum memory to be used.
 	/*!
 	\return Size of the maximum memory.
@@ -193,7 +194,10 @@ class CTImageTreeModel : public QAbstractItemModel {
     ///Removes all items.
     void removeAllItems();
     ///Shrinks all CTImageTreeItem
-    void shrinkAllCTImageTreeItems();
+    /*!
+    \param shrinkFactor The Shrink Factor for the CTImageTreeItems
+    */
+    void shrinkAllCTImageTreeItems(unsigned int shrinkFactor);
   
     friend class TreeItem;
     friend class CTImageTreeItem;

@@ -1072,7 +1072,7 @@ void KardioPerfusion::on_actionSave_Project_triggered() {
     pname,
     tr("Project Files (*.perfproj)"));
   if (!pname.isEmpty()) {
-    m_imageModel.saveModelToFile(pname.toAscii().data());
+    m_imageModel.saveModelToFile(pname.toAscii().data(), this->m_ui->sb_ShrinkFactorSaving->value());
   }
 }
 

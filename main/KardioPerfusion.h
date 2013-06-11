@@ -163,6 +163,8 @@ class KardioPerfusion : public QMainWindow
 	void slider_opacity_changed();
 	///Renames a selected item
 	void renameTreeviewItem();
+	///Action for clicking High Resolution-Button
+	void on_btn_highResolution_clicked();
 protected:
 	///clears pending actions
     void clearPendingAction();

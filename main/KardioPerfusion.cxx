@@ -1089,6 +1089,13 @@ void KardioPerfusion::on_actionOpen_Project_triggered() {
   }
 }
 
+void KardioPerfusion::on_btn_highResolution_clicked()
+{
+	TreeItem *item = m_displayedCTImage->getBaseItem();
+	dynamic_cast<CTImageTreeItem*>(item)->retrieveITKImage();
+}
+
+
 void KardioPerfusion::slider_opacity_changed()
 {		
 	//get list of selected items

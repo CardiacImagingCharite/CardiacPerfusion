@@ -113,7 +113,7 @@ namespace itk
 			std::cout << "getITKImage\t\t\t\tdone\t( " << clock2.GetMean() << "s )" << std::endl;
 
 			// do shrinikg or not
-			bool doShrinking = false;
+			bool doShrinking = true;
 			
 			// set shrink factors
 			if ( i == 0 )
@@ -122,7 +122,7 @@ namespace itk
 				yDenominator = ImagePtr->GetLargestPossibleRegion().GetSize()[1] / m_AimedMatrixSize;
 				zDenominator = ImagePtr->GetLargestPossibleRegion().GetSize()[2] / m_AimedMatrixSize;
 				
-				if ( xDenominator > 0 && yDenominator > 0 && zDenominator > 0 ) doShrinking = true;
+				if ( !( xDenominator > 0 && yDenominator > 0 && zDenominator > 0 ) ) doShrinking = false;
 			}
 			
 			typename TInputImage::Pointer outImage;

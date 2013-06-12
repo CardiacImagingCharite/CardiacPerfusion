@@ -622,6 +622,7 @@ void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 		m_fnList.insert(fnPath.string());
 	}
 	ar & m_segmentationValueCache;
+	ar & m_IsShrinked;
 }
 
 template<class Archive>
@@ -643,6 +644,7 @@ void CTImageTreeItem::save(Archive & ar, const unsigned int version) const {
 	ar & m_dict;
 	ar & boost::serialization::base_object<BaseClass>(*this);
 	ar & m_segmentationValueCache;
+	ar & m_IsShrinked;
 }
 
 

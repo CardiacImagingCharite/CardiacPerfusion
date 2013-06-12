@@ -56,8 +56,8 @@
 #include "itkImageFileWriter.h"
 
 //Constructor
-CTImageTreeItem::CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict )
-  :BaseClass(parent),m_HeaderFields(headerFields),m_dict(_dict),m_imageTime(-1) {
+CTImageTreeItem::CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict, bool IsShrinked, bool ResolutionChanged )
+  :BaseClass(parent),m_HeaderFields(headerFields),m_dict(_dict),m_imageTime(-1),m_IsShrinked(IsShrinked),m_ResolutionChanged(ResolutionChanged) {
     getUIDFromDict(m_dict, m_itemUID);
 }
 
@@ -425,6 +425,21 @@ void CTImageTreeItem::getUIDFromDict(const itk::MetaDataDictionary &dict, std::s
 //	else  
 		itk::ExposeMetaData( dict, getSOPInstanceUIDTag(), iUID );
 }
+
+void CTImageTreeItem::setShrinked(bool shrinked) const
+{
+	if ( shrinked != m_IsShrinked )
+	{
+		const_cast<CTImageTreeItem*>(this)->m_IsShrinked = shrinked;
+		setResolutionChanged(true);
+	}
+}
+
+void CTImageTreeItem::setResolutionChanged(bool changed) const
+{
+	const_cast<CTImageTreeItem*>(this)->m_ResolutionChanged = changed;
+}
+
 
 //DICOM tags
 const std::string &CTImageTreeItem::getNumberOfFramesTag() {

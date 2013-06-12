@@ -263,7 +263,7 @@ void CTImageTreeModel::shrinkAllCTImageTreeItems(unsigned int shrinkFactor)
 	{
 		QModelIndex ImIdx = this->index(i, 1);
 		TreeItem* item = &this->getItem(ImIdx);
-		ITKVTKTreeItem<CTImageType> *currentItem = dynamic_cast<ITKVTKTreeItem<CTImageType>*>(item);
+		CTImageTreeItem *currentItem = dynamic_cast<CTImageTreeItem*>(item);
 		typename CTImageType::Pointer ImagePtr = currentItem->getITKImage();
 
 		typename ShrinkAverageFilterType::Pointer shrinkAverageFilter = ShrinkAverageFilterType::New();
@@ -275,6 +275,8 @@ void CTImageTreeModel::shrinkAllCTImageTreeItems(unsigned int shrinkFactor)
 		typename CTImageType::Pointer outImage = shrinkAverageFilter->GetOutput();
 
 		currentItem->setITKImage(outImage);
+		if ( shrinkFactor != 1 ) 
+			currentItem->setShrinked(true);
 	}
 }
 

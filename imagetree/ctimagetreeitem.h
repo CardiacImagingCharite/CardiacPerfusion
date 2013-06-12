@@ -56,7 +56,7 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
   public:
     typedef ITKVTKTreeItem< CTImageType > BaseClass;
 	///Constructor of the class.
-    CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict=itk::MetaDataDictionary());
+    CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict=itk::MetaDataDictionary(), bool IsShrinked = false, bool ResolutionChanged = false);
 	
 	CTImageTreeItem():m_imageTime(-1) {}
 	///Clones this item. 
@@ -144,6 +144,14 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
 	\return TRUE or FALSE.
 	*/
 	static inline bool isRealHUvalue(CTPixelType value) { return (value!=-2048)?true:false; }
+	///Set status of m_IsShrinked
+	void setShrinked(bool shrinked=true) const;
+	///Get status of m_IsShrinked
+	bool isShrinked(void) const { return m_IsShrinked; }
+	///Set status of m_ResolutionChanged
+	void setResolutionChanged(bool changed=true) const;
+	///Get status of m_ResolutionChanged
+	bool isResolutionChanged(void) const { return m_ResolutionChanged; }
     
     typedef std::map< const ITKVTKTreeItem<BinaryImageType> *, SegmentationValues > SegmentationValueMap;
     ///Identifies the type of a TreeItem.
@@ -183,6 +191,9 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
     double m_imageTime;
 
   private:
+    bool m_IsShrinked;
+    bool m_ResolutionChanged;
+
     friend class boost::serialization::access;
     
     BOOST_SERIALIZATION_SPLIT_MEMBER()

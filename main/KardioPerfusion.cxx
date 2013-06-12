@@ -342,6 +342,7 @@ void KardioPerfusion::on_treeView_doubleClicked(const QModelIndex &index) {
 
 //set image to the widget
 void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
+	bool ResolutionIsChanged = false;
 	vtkImageData *vtkImage = NULL;
 	//create ITK VTK connector
 	CTImageTreeItem::ConnectorHandle connectorPtr;
@@ -349,9 +350,10 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 		//get the VTK image
 		connectorPtr = imageItem->getVTKConnector();
 		vtkImage = connectorPtr->getVTKImageData();
+		ResolutionIsChanged = imageItem->isResolutionChanged();
 	}
 	// if displayed image and new image is different
-	if (connectorPtr != m_displayedCTImage) {
+	if (connectorPtr != m_displayedCTImage || ResolutionIsChanged ) {
 		//hide all associated segments
 		while(!m_displayedSegments.empty()) {
 		segmentHide( dynamic_cast<const BinaryImageTreeItem*>((*m_displayedSegments.begin())->getBaseItem()) );
@@ -368,6 +370,9 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 		if (m_displayedCTImage && m_displayedCTImage->getBaseItem()) m_displayedCTImage->getBaseItem()->clearActiveDown();
 		m_displayedCTImage = connectorPtr;
 		if (m_displayedCTImage && m_displayedCTImage->getBaseItem()) m_displayedCTImage->getBaseItem()->setActive();
+		//set resolution is changed back to false
+		if ( imageItem->isResolutionChanged() ) 
+			imageItem->setResolutionChanged(false);
 	}
 }
 
@@ -1091,8 +1096,20 @@ void KardioPerfusion::on_actionOpen_Project_triggered() {
 
 void KardioPerfusion::on_btn_highResolution_clicked()
 {
-	TreeItem *item = m_displayedCTImage->getBaseItem();
-	dynamic_cast<CTImageTreeItem*>(item)->retrieveITKImage();
+	// if no image is selected, print warning
+	if ( !m_displayedCTImage ) {
+		QMessageBox::warning(this,tr("Error"),tr("Select one volume for changing the resolution"));
+		return;
+	}
+
+	CTImageTreeItem *item = dynamic_cast<CTImageTreeItem*>( m_displayedCTImage->getBaseItem() );
+	if ( item->isShrinked() )
+	{
+		// retrieve (non shrinked) image from disk
+		item->retrieveITKImage();
+		item->setShrinked(false);
+	}
+	setImage(item);
 }
 
 

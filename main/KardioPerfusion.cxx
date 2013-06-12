@@ -303,6 +303,7 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 					segmentShow(SegItem);
 				}
 			}
+			loadHighResolution();
 		}	
 	}
 }

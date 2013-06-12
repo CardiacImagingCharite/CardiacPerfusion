@@ -46,7 +46,13 @@ namespace itk
 	template <class TInputImage>
 	FindLeftVentricle<TInputImage>::FindLeftVentricle()
 	{
-		
+		m_AimedMatrixSize = 32;
+	}
+	
+	template <class TInputImage>
+	void FindLeftVentricle<TInputImage>::setMatrixSize(int MatrixSize)
+	{
+		m_AimedMatrixSize = MatrixSize;
 	}
 	
 	template <class TInputImage>
@@ -59,9 +65,6 @@ namespace itk
 		// get number of files		
 		int rows = model->rowCount();
 		std::cerr << "Number of input files = " << rows << endl;
-		
-		// aimed number of pixel per dimension
-		int AimedSize = 32;
 		
 		// Size of the images, values set when analysing 1st image
 		int xSize = 0;
@@ -109,31 +112,44 @@ namespace itk
 			std::cout << i << endl;
 			std::cout << "getITKImage\t\t\t\tdone\t( " << clock2.GetMean() << "s )" << std::endl;
 
+			// do shrinikg or not
+			bool doShrinking = false;
+			
 			// set shrink factors
 			if ( i == 0 )
 			{
-				xDenominator = ImagePtr->GetLargestPossibleRegion().GetSize()[0] / AimedSize;
-				yDenominator = ImagePtr->GetLargestPossibleRegion().GetSize()[1] / AimedSize;
-				zDenominator = ImagePtr->GetLargestPossibleRegion().GetSize()[2] / AimedSize;
+				xDenominator = ImagePtr->GetLargestPossibleRegion().GetSize()[0] / m_AimedMatrixSize;
+				yDenominator = ImagePtr->GetLargestPossibleRegion().GetSize()[1] / m_AimedMatrixSize;
+				zDenominator = ImagePtr->GetLargestPossibleRegion().GetSize()[2] / m_AimedMatrixSize;
+				
+				if ( xDenominator > 0 && yDenominator > 0 && zDenominator > 0 ) doShrinking = true;
 			}
 			
-			itk::TimeProbe clock4;
-			clock4.Start();
-			
-			// shrink image
-			typedef itk::ShrinkAverageFilter<TInputImage, TInputImage> ShrinkAverageFilterType;
-			typename ShrinkAverageFilterType::Pointer shrinkAverageFilter = ShrinkAverageFilterType::New();
-			shrinkAverageFilter->SetInput( ImagePtr );
-			shrinkAverageFilter->SetShrinkFactor(0, xDenominator);
-			shrinkAverageFilter->SetShrinkFactor(1, yDenominator);
-			shrinkAverageFilter->SetShrinkFactor(2, zDenominator);
-			shrinkAverageFilter->Update();
-			
-			typename TInputImage::Pointer outImage = shrinkAverageFilter->GetOutput();
-
-			clock4.Stop();
-			std::cout << "shrinking\t\t\t\tdone\t( " << clock4.GetMean() << "s )" << std::endl;
-			
+			typename TInputImage::Pointer outImage;
+	
+			if ( doShrinking )
+			{
+				itk::TimeProbe clock4;
+				clock4.Start();
+				// shrink image
+				typedef itk::ShrinkAverageFilter<TInputImage, TInputImage> ShrinkAverageFilterType;
+				typename ShrinkAverageFilterType::Pointer shrinkAverageFilter = ShrinkAverageFilterType::New();
+				shrinkAverageFilter->SetInput( ImagePtr );
+				shrinkAverageFilter->SetShrinkFactor(0, xDenominator);
+				shrinkAverageFilter->SetShrinkFactor(1, yDenominator);
+				shrinkAverageFilter->SetShrinkFactor(2, zDenominator);
+				shrinkAverageFilter->Update();
+				
+				outImage = shrinkAverageFilter->GetOutput();
+				
+				clock4.Stop();
+				std::cout << "shrinking\t\t\t\tdone\t( " << clock4.GetMean() << "s )" << std::endl;
+			}
+			else
+			{
+				outImage = ImagePtr;
+			}
+				
 			typename TInputImage::SizeType outSize = outImage->GetLargestPossibleRegion().GetSize();
 			
 			// set vector size

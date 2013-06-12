@@ -84,10 +84,14 @@ namespace itk{
 	
 	FindLeftVentricle();
 	virtual ~FindLeftVentricle() {};
+	void setMatrixSize(int MatrixSize);
 	/** Get the index number of the image where the left ventricle 
          * only is filled with contrast agent
          */
 	int GetImageIndex(CTImageTreeModel *model);
+	
+    private:
+	    int m_AimedMatrixSize;
 	
     };
 } // end of namespace itk

@@ -632,6 +632,7 @@ void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
     typedef itk::FindLeftVentricle<CTImageType> FindLVType;
     
     FindLVType::Pointer findLV = FindLVType::New();
+    findLV->setMatrixSize(this->m_ui->sb_matrixSizeFindLV->value());
     
     int i = findLV->GetImageIndex(&m_imageModel);
     

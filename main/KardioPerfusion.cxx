@@ -1102,7 +1102,12 @@ void KardioPerfusion::on_btn_highResolution_clicked()
 		QMessageBox::warning(this,tr("Error"),tr("Select one volume for changing the resolution"));
 		return;
 	}
+	
+	loadHighResolution();
+}
 
+void KardioPerfusion::loadHighResolution()
+{
 	CTImageTreeItem *item = dynamic_cast<CTImageTreeItem*>( m_displayedCTImage->getBaseItem() );
 	if ( item->isShrinked() )
 	{
@@ -1112,6 +1117,7 @@ void KardioPerfusion::on_btn_highResolution_clicked()
 	}
 	setImage(item);
 }
+
 
 
 void KardioPerfusion::slider_opacity_changed()

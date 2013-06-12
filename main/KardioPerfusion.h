@@ -213,6 +213,8 @@ private:
 	\param perfItem contains a pointer to the BinaryImageTreeItem
 	*/
 	void perfusionMapHide(const RealImageTreeItem *perfItem );
+	///load high resolution image of current ctimagetreeitem
+	void loadHighResolution();
 	
 	///Callback to update the widgets
 	static void updateFunc(vtkObject* caller, long unsigned int eventId, void* clientData, void* callData );

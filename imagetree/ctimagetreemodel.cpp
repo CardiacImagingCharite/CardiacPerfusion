@@ -55,7 +55,7 @@ CTImageTreeModel::CTImageTreeModel(const DicomTagList &header, QObject *parent)
 
 void CTImageTreeModel::initMaxMemoryUsage() {
     QSettings settings;
-    unsigned defaultMaxUsage = 10*1024UL * 1024UL * 1024UL;
+    unsigned long long defaultMaxUsage = 10* 1024UL * 1024UL * 1024UL;
     m_maxImageMemoryUsage = settings.value(MaxImageMemoryUsageSettingName, defaultMaxUsage ).toULongLong();
 }
 

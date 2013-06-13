@@ -281,6 +281,7 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 						segmentShow(SegItem);
 					}
 				}
+				this->m_ui->num_phase->display(selected.indexes()[0].row());
 			}
 		}
 	}

@@ -7,7 +7,7 @@ Linux
 This code has been tested with
 * LinuxMint 14
 * gcc 4.7.2
-* Qt 4.7.4
+* Qt 4.8.4
 * qwt 5.1.2
 * boost 1.48.0
 * zlib 1.2.5
@@ -59,7 +59,10 @@ You may have to install `libbz2-dev`, `python-dev` and
     sudo apt-get install python-bzutils
     sudo apt-get install libbz2-dev
 
-Download and extract boost 1.48.0 source and change to this directory
+Download and extract boost 1.48.0 source and change to this directory.
+Apply the following patch:
+http://pastebin.com/gYBAr2Td
+Do:
 
     ./bootstrap.sh
     ./b2

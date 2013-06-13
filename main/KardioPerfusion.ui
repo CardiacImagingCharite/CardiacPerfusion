@@ -26,7 +26,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_7">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,0,0,0,0">
+     <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,0,0,0,0,0,0">
       <property name="sizeConstraint">
        <enum>QLayout::SetMaximumSize</enum>
       </property>
@@ -663,6 +663,28 @@
        </layout>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_16">
+        <item>
+         <widget class="QCheckBox" name="cb_autoHRclicked">
+          <property name="text">
+           <string>auto load HighResolution when clicked</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_19">
+        <item>
+         <widget class="QCheckBox" name="cb_autoHRselchanged">
+          <property name="text">
+           <string>auto load High Resolution when selection changed</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -673,7 +695,7 @@
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>250</height>
+          <height>200</height>
          </size>
         </property>
        </spacer>

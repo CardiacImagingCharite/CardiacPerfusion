@@ -282,6 +282,8 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 					}
 				}
 				this->m_ui->num_phase->display(selected.indexes()[0].row());
+				if ( this->m_ui->cb_autoHRselchanged->isChecked() )
+					loadHighResolution();
 			}
 		}
 	}
@@ -304,7 +306,8 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 					segmentShow(SegItem);
 				}
 			}
-			loadHighResolution();
+			if ( this->m_ui->cb_autoHRclicked->isChecked() )
+				loadHighResolution();
 		}	
 	}
 }

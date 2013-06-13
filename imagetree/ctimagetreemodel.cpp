@@ -271,6 +271,7 @@ void CTImageTreeModel::shrinkAllCTImageTreeItems(unsigned int shrinkFactor)
 		shrinkAverageFilter->SetShrinkFactor(0, shrinkFactor);
 		shrinkAverageFilter->SetShrinkFactor(1, shrinkFactor);
 		shrinkAverageFilter->SetShrinkFactor(2, shrinkFactor);
+		shrinkAverageFilter->SetNumberOfThreads(8);
 		shrinkAverageFilter->Update();
 		typename CTImageType::Pointer outImage = shrinkAverageFilter->GetOutput();
 

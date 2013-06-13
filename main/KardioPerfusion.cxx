@@ -373,7 +373,7 @@ void KardioPerfusion::setImage(const CTImageTreeItem *imageItem) {
 		m_displayedCTImage = connectorPtr;
 		if (m_displayedCTImage && m_displayedCTImage->getBaseItem()) m_displayedCTImage->getBaseItem()->setActive();
 		//set resolution is changed back to false
-		if ( imageItem->isResolutionChanged() ) 
+		if ( ResolutionIsChanged ) 
 			imageItem->setResolutionChanged(false);
 	}
 }

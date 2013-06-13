@@ -120,15 +120,19 @@ namespace itk
 		OutputImagePointer     outputPtr = this->GetOutput();
 
 		typename OutputImageType::SizeType outputSize = outputRegionForThread.GetSize();
+		typename OutputImageType::IndexType outputIndex = outputRegionForThread.GetIndex();
 		
 		InputImageRegionType inputRegion = inputPtr->GetLargestPossibleRegion();
 		typename InputImageType::SizeType inputSize;
+		typename InputImageType::IndexType inputIndex;
 
 		for ( unsigned int dim = 0; dim < TInputImage::ImageDimension; dim++ )
 		{
 			inputSize[dim] = outputSize[dim] * m_ShrinkFactors[dim];
+			inputIndex[dim] = outputIndex[dim] * m_ShrinkFactors[dim];
 		}
 		inputRegion.SetSize(inputSize);
+		inputRegion.SetIndex(inputIndex);
 		
 		// number of all pixel/voxel of the output image
 		unsigned int outputPixelNumber = 1;

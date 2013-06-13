@@ -138,6 +138,7 @@ namespace itk
 				shrinkAverageFilter->SetShrinkFactor(0, xDenominator);
 				shrinkAverageFilter->SetShrinkFactor(1, yDenominator);
 				shrinkAverageFilter->SetShrinkFactor(2, zDenominator);
+				shrinkAverageFilter->SetNumberOfThreads(100);
 				shrinkAverageFilter->Update();
 				
 				outImage = shrinkAverageFilter->GetOutput();

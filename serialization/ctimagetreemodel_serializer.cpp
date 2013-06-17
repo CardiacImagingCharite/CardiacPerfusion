@@ -55,7 +55,8 @@ void serializeCTImageTreeModelToFile(CTImageTreeModel &model, const std::string 
   using namespace boost::iostreams;
   ofstream outFileStream( fname.c_str(), ios_base::out | ios_base::binary );
   filtering_stream<output> outStreamFilter;
-  outStreamFilter.push(zlib_compressor());
+  zlib_params zp(zlib::best_speed);
+  outStreamFilter.push(zlib_compressor(zp));
   outStreamFilter.push(outFileStream);
   boost::archive::binary_oarchive oa( outStreamFilter );
   model.setSerializationPath( fname );

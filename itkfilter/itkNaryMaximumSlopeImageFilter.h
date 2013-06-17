@@ -57,11 +57,11 @@ public:
 	{
 		GammaFunctions::GammaVariate gamma;
 		OutputValueType A = NumericTraits< TOutput >::NonpositiveMin();
-		if(B.size() == times.size())
+		if(B.size() == m_times.size())
 		{
 			for(int i = 0; i < B.size(); i++)
 			{
-				gamma.addSample(times[i], B[i]);
+				gamma.addSample(m_times[i], B[i]);
 			}
 
 			gamma.findFromSamples();
@@ -83,11 +83,11 @@ public:
 
 	inline void setTimePoints(const std::vector< double > _times)
 	{
-		times = _times;
+		m_times = _times;
 	}
 
 private:
-	std::vector< double > times;
+	std::vector< double > m_times;
 };
 }
 

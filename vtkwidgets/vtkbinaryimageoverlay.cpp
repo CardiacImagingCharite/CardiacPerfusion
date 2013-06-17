@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -56,7 +56,7 @@ vtkBinaryImageOverlay::vtkBinaryImageOverlay( vtkRenderer *renderer,
   m_lookup(vtkBinaryImageToColor::New()),
   m_actor(vtkImageActor::New()),
   m_renderer( renderer ),
-  m_interactorStyle(interactorStyle), actionHandle(-1) {
+  m_interactorStyle(interactorStyle), m_actionHandle(-1) {
     
   m_lookup->SetColor(color);
     
@@ -78,19 +78,19 @@ vtkBinaryImageOverlay::vtkBinaryImageOverlay( vtkRenderer *renderer,
   if (m_renderer)
     m_renderer->AddActor(m_actor);
   
-  if (action.valid) {
-    action.sig->connect( boost::bind(&vtkImageReslice::Modified, m_reslice) );
-    this->actionHandle = interactorStyle->addAction(action);
+  if (action.m_valid) {
+    action.m_sig->connect( boost::bind(&vtkImageReslice::Modified, m_reslice) );
+    this->m_actionHandle = interactorStyle->addAction(action);
   }
-  actionHandle = this->actionHandle;
+  actionHandle = this->m_actionHandle;
 }
 
 vtkBinaryImageOverlay::~vtkBinaryImageOverlay() {
   if (m_renderer) {
     m_renderer->RemoveActor( m_actor );
   }
-  if (actionHandle!=-1 && m_interactorStyle) 
-    m_interactorStyle->removeAction( actionHandle );
+  if (m_actionHandle!=-1 && m_interactorStyle) 
+    m_interactorStyle->removeAction( m_actionHandle );
   if (m_reslice) m_reslice->Delete();
   if (m_colormap) m_colormap->Delete();
   if (m_lookup) m_lookup->Delete();
@@ -103,7 +103,7 @@ void vtkBinaryImageOverlay::resize( unsigned int xres, unsigned int yres ) {
 }
 
 void vtkBinaryImageOverlay::activateAction() {
-  m_interactorStyle->activateAction(actionHandle);
+  m_interactorStyle->activateAction(m_actionHandle);
 }
 
 bool vtkBinaryImageOverlay::operator<(const vtkBinaryImageOverlay &other) const {

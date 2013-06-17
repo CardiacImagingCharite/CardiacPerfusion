@@ -60,11 +60,11 @@ class vtkBinaryImageToColor: public vtkScalarsToColors {
   private:
 	  vtkIdType GetNumberOfAvailableColors(){return 0;}
     void adjustUpperLower(void);
-    boost::array< double, 2> range;
-    unsigned char threshold;
-    double dthreshold;
-    boost::array< unsigned char, 4> &upperColor, &lowerColor, blackColor, colorColor;
-    boost::array< double,3 > &dUpperColor, &dLowerColor, dBlackColor, dColorColor;
+    boost::array< double, 2> m_range;
+    unsigned char m_threshold;
+    double m_dthreshold;
+    boost::array< unsigned char, 4> &m_upperColor, &m_lowerColor, m_blackColor, m_colorColor;
+    boost::array< double,3 > &m_dUpperColor, &m_dLowerColor, m_dBlackColor, m_dColorColor;
 };
 
 

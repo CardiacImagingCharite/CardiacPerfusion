@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -37,30 +37,30 @@
 #include <algorithm>
 
 PatlakData::PatlakData(const QwtData &tissueSource, const QwtData &arterySource)
-  :tissue(tissueSource), artery(arterySource), 
-  tissueBaseline(0), arteryBaseline(0),
-  startIndex(0), endIndex(0) {}
+  :m_tissue(tissueSource), m_artery(arterySource), 
+  m_tissueBaseline(0), m_arteryBaseline(0),
+  m_startIndex(0), m_endIndex(0) {}
 
 double PatlakData::y(size_t i) const {
-  return tissue.y(i+startIndex) / artery.y(i+startIndex);
+  return m_tissue.y(i+m_startIndex) / m_artery.y(i+m_startIndex);
 }
 
 double PatlakData::x(size_t i) const {
-  double lastTissueTime = tissue.x(startIndex);
-  double lastTissueDensity = tissue.y(startIndex);
+  double lastTissueTime = m_tissue.x(m_startIndex);
+  double lastTissueDensity = m_tissue.y(m_startIndex);
   double integral = .0;
-  for(unsigned k = startIndex+1; k < (startIndex+i+1); ++k) {
-    double tissueTime = tissue.x(k);
-    double tissueDensity = tissue.y(k);
+  for(unsigned k = m_startIndex+1; k < (m_startIndex+i+1); ++k) {
+    double tissueTime = m_tissue.x(k);
+    double tissueDensity = m_tissue.y(k);
     integral += (lastTissueDensity + tissueDensity) * .5 * (tissueTime - lastTissueTime);
     lastTissueTime = tissueTime;
     lastTissueDensity = tissueDensity;
   }
-  return integral / tissue.y(i);
+  return integral / m_tissue.y(i);
 }
 
 size_t PatlakData::size() const  { 
-  signed d = endIndex+1;
-  d-=startIndex;
+  signed d = m_endIndex+1;
+  d-=m_startIndex;
   return std::max(d,1); 
 }

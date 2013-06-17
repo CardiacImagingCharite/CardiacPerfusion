@@ -72,22 +72,22 @@ public:
 	/*!
 	\return The segment.
 	*/
-	inline const BinaryImageTreeItem *getSegment() const {return segment;}
+	inline const BinaryImageTreeItem *getSegment() const {return m_segment;}
 	///Sets the segment.
 	/*!
 	\param seg The segment to be set.
 	*/
-	inline void setSegment(BinaryImageTreeItem *seg) {segment = seg;}
+	inline void setSegment(BinaryImageTreeItem *seg) {m_segment = seg;}
 	///Gets the artery segment.
 	/*!
 	\return The artery segment.
 	*/
-	inline const SegmentInfo *getArterySegment() const {return arterySegment;}
+	inline const SegmentInfo *getArterySegment() const {return m_arterySegment;}
 	///Sets the artery segment.
 	/*!
 	\param seg The artery segment to be set.
 	*/
-	inline void setArterySegment(const SegmentInfo *seg) {arterySegment = seg;}
+	inline void setArterySegment(const SegmentInfo *seg) {m_arterySegment = seg;}
 	///Attach sample curve to the plot.
 	/*!
 	\param plot The desired plot to which the curve is to be attached.
@@ -150,22 +150,22 @@ public:
 	/*!
 	\param index Start index.
 	*/
-	inline void setGammaStartIndex(unsigned index) { gammaStartIndex = index; }
+	inline void setGammaStartIndex(unsigned index) { m_gammaStartIndex = index; }
 	///Sets the end index of the gamma curve.
 	/*!
 	\param index End index.
 	*/
-	inline void setGammaEndIndex(unsigned index)  { gammaEndIndex = index; }
+	inline void setGammaEndIndex(unsigned index)  { m_gammaEndIndex = index; }
 	///Gets the start index of the gamma curve.
 	/*!
 	\return Start index.
 	*/	
-	inline unsigned getGammaStartIndex() const { return gammaStartIndex; }
+	inline unsigned getGammaStartIndex() const { return m_gammaStartIndex; }
 	///Gets the end index of the gamma curve.
 	/*!
 	\return End index.
 	*/
-	inline unsigned getGammaEndIndex() const { return gammaEndIndex; }
+	inline unsigned getGammaEndIndex() const { return m_gammaEndIndex; }
   
 	///Attach patlak to a plot.
 	/*!
@@ -217,19 +217,19 @@ public:
 
 private:
 	bool createPatlak();
-	unsigned gammaStartIndex;
-	unsigned gammaEndIndex;
-	const BinaryImageTreeItem *segment;
-	const SegmentInfo *arterySegment;
-	QwtPlotCurve sampleCurve;
-	QwtPlotCurve gammaCurve;
-	QwtPlotCurve patlakCurve;
-	QwtPlotCurve patlakRegression;
-	bool patlakCreated;
+	unsigned m_gammaStartIndex;
+	unsigned m_gammaEndIndex;
+	const BinaryImageTreeItem *m_segment;
+	const SegmentInfo *m_arterySegment;
+	QwtPlotCurve m_sampleCurve;
+	QwtPlotCurve m_gammaCurve;
+	QwtPlotCurve m_patlakCurve;
+	QwtPlotCurve m_patlakRegression;
+	bool m_patlakCreated;
 	boost::accumulators::accumulator_set<
 	double,
 	boost::accumulators::stats<
-		boost::accumulators::tag::max> > standardErrorAccumulator;
+		boost::accumulators::tag::max> > m_standardErrorAccumulator;
   
 };
 

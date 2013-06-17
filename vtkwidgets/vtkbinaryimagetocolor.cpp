@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -41,47 +41,47 @@ vtkStandardNewMacro(vtkBinaryImageToColor);
 vtkCxxRevisionMacro(vtkBinaryImageToColor, "$Revision: 0.1 $");
 
 vtkBinaryImageToColor::vtkBinaryImageToColor()
-  :upperColor(colorColor), lowerColor(blackColor), 
-  dUpperColor(dColorColor), dLowerColor(dBlackColor) {
+  :m_upperColor(m_colorColor), m_lowerColor(m_blackColor), 
+  m_dUpperColor(m_dColorColor), m_dLowerColor(m_dBlackColor) {
   SetRange(BinaryPixelOff, BinaryPixelOn);
   RGBType black;
   black[0] = 0;black[1] = 0;black[2] = 0;
   SetColor(black);
-  blackColor[0] = 0;blackColor[1] = 0;blackColor[2] = 0;blackColor[3] = 0;
-  dBlackColor[0] = 0;dBlackColor[1] = 0;dBlackColor[2] = 0;
+  m_blackColor[0] = 0;m_blackColor[1] = 0;m_blackColor[2] = 0;m_blackColor[3] = 0;
+  m_dBlackColor[0] = 0;m_dBlackColor[1] = 0;m_dBlackColor[2] = 0;
 }
 
 vtkBinaryImageToColor::vtkBinaryImageToColor(const RGBType &color)
-  :upperColor(colorColor), lowerColor(blackColor), 
-  dUpperColor(dColorColor), dLowerColor(dBlackColor) {
+  :m_upperColor(m_colorColor), m_lowerColor(m_blackColor), 
+  m_dUpperColor(m_dColorColor), m_dLowerColor(m_dBlackColor) {
   SetRange(BinaryPixelOff, BinaryPixelOn);
   SetColor(color);
-  blackColor[0] = 0;blackColor[1] = 0;blackColor[2] = 0;blackColor[3] = 0;
-  dBlackColor[0] = 0;dBlackColor[1] = 0;dBlackColor[2] = 0;
+  m_blackColor[0] = 0;m_blackColor[1] = 0;m_blackColor[2] = 0;m_blackColor[3] = 0;
+  m_dBlackColor[0] = 0;m_dBlackColor[1] = 0;m_dBlackColor[2] = 0;
 }
 
 double *vtkBinaryImageToColor::GetRange() {
-  return range.c_array();
+  return m_range.c_array();
 }
 
 void vtkBinaryImageToColor::SetRange(double min, double max) {
-  range[0] = min;
-  range[1] = max;
-  dthreshold = (min+max)*.5;
-  threshold = static_cast<unsigned char>(dthreshold+.5);
+  m_range[0] = min;
+  m_range[1] = max;
+  m_dthreshold = (min+max)*.5;
+  m_threshold = static_cast<unsigned char>(m_dthreshold+.5);
   adjustUpperLower();
 }
 
 unsigned char* vtkBinaryImageToColor::MapValue(double value) {
-  if (value>=threshold) return upperColor.c_array();
-  else return lowerColor.c_array();
+  if (value>=m_threshold) return m_upperColor.c_array();
+  else return m_lowerColor.c_array();
 }
 
 void vtkBinaryImageToColor::GetColor(double value, double rgb[3]) {
-  if (value>=threshold) {
-    memcpy(rgb, dUpperColor.c_array(), sizeof(double) * 3);
+  if (value>=m_threshold) {
+    memcpy(rgb, m_dUpperColor.c_array(), sizeof(double) * 3);
   } else {
-    memcpy(rgb, dLowerColor.c_array(), sizeof(double) * 3);
+    memcpy(rgb, m_dLowerColor.c_array(), sizeof(double) * 3);
   }
 }
 
@@ -92,9 +92,9 @@ void vtkBinaryImageToColor::MapScalarsThroughTable2(void *input, unsigned char *
   unsigned char *sourceColor;
   if (outputFormat == VTK_RGBA) {
     for(int i=0;i<numberOfValues;i++) {
-      sourceColor = lowerColor.c_array();
-      if ((*inputData) >= threshold) {
-	sourceColor = upperColor.c_array();
+      sourceColor = m_lowerColor.c_array();
+      if ((*inputData) >= m_threshold) {
+	sourceColor = m_upperColor.c_array();
       }
       memcpy(output, sourceColor, sizeof(unsigned char) * 4);
       output+=4;
@@ -102,9 +102,9 @@ void vtkBinaryImageToColor::MapScalarsThroughTable2(void *input, unsigned char *
     }
   } else if (outputFormat == VTK_RGB) {
     for(int i=0;i<numberOfValues;i++) {
-      sourceColor = lowerColor.c_array();
-      if ((*inputData) >= threshold) {
-	sourceColor = upperColor.c_array();
+      sourceColor = m_lowerColor.c_array();
+      if ((*inputData) >= m_threshold) {
+	sourceColor = m_upperColor.c_array();
       }
       memcpy(output, sourceColor, sizeof(unsigned char) * 3);
       output+=3;
@@ -114,19 +114,19 @@ void vtkBinaryImageToColor::MapScalarsThroughTable2(void *input, unsigned char *
 }
 
 void vtkBinaryImageToColor::SetColor(const RGBType &c) {
-  upperColor[0] = c[0];
-  upperColor[1] = c[1];
-  upperColor[2] = c[2];
-  upperColor[3] = 255;
-  dUpperColor[0] = c[0]/255.0;dUpperColor[1] = c[1]/255.0;dUpperColor[2] = c[2]/255.0;
+  m_upperColor[0] = c[0];
+  m_upperColor[1] = c[1];
+  m_upperColor[2] = c[2];
+  m_upperColor[3] = 255;
+  m_dUpperColor[0] = c[0]/255.0;m_dUpperColor[1] = c[1]/255.0;m_dUpperColor[2] = c[2]/255.0;
   adjustUpperLower();
 }
 
 void vtkBinaryImageToColor::adjustUpperLower(void) {
-  upperColor = colorColor; dUpperColor = dColorColor;
-  lowerColor = blackColor; dLowerColor = dBlackColor;
-  if (range[0] > range[1]) {
-    std::swap(upperColor, lowerColor);
-    std::swap(dUpperColor, dLowerColor);
+  m_upperColor = m_colorColor; m_dUpperColor = m_dColorColor;
+  m_lowerColor = m_blackColor; m_dLowerColor = m_dBlackColor;
+  if (m_range[0] > m_range[1]) {
+    std::swap(m_upperColor, m_lowerColor);
+    std::swap(m_dUpperColor, m_dLowerColor);
   }
 }

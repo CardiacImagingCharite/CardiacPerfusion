@@ -45,9 +45,9 @@
 	A structure to represent the dicom tags.
 */
 struct DicomTagType {
-  std::string name;
-  std::string tag;
-  DicomTagType(const std::string &n, const std::string &t):name(n), tag(t) {}
+  std::string m_name;
+  std::string m_tag;
+  DicomTagType(const std::string &n, const std::string &t):m_name(n), m_tag(t) {}
   private:
     DicomTagType(){}
     friend class boost::serialization::access;

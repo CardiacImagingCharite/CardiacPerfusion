@@ -88,13 +88,13 @@ struct IndexCompareFunctor {
 //returns the values of the segmentation
 bool CTImageTreeItem::getSegmentationValues( SegmentationValues &values) const {
 	//a map that contains the binary images and the segmentation values
-	SegmentationValueMap::const_iterator it = m_segmentationValueCache.find( values.segment );
+	SegmentationValueMap::const_iterator it = m_segmentationValueCache.find( values.m_segment );
 	// if values exist, no need to calculate again
 	if (it != m_segmentationValueCache.end() //if segment was found
-	&& it->second.mtime == values.segment->getITKMTime()
-    && it->second.accuracy == values.accuracy) { //has the same accuracy
+	&& it->second.m_mtime == values.m_segment->getITKMTime()
+    && it->second.m_accuracy == values.m_accuracy) { //has the same accuracy
 		values = it->second;
-		return values.sampleCount > 0;
+		return values.m_sampleCount > 0;
 	}
 	return internalGetSegmentationValues( values );
 }
@@ -112,7 +112,7 @@ bool CTImageTreeItem::internalGetSegmentationValues( SegmentationValues &values)
 	//define an iterator for the binary segment
 	typedef itk::ImageRegionConstIteratorWithIndex< BinaryImageType > BinaryIteratorType;
 	//get binary segment
-	BinaryImageTreeItem::ImageType::Pointer segment = values.segment->getITKImage();
+	BinaryImageTreeItem::ImageType::Pointer segment = values.m_segment->getITKImage();
 	if (segment.IsNull()) 
 		return false;
 
@@ -141,7 +141,7 @@ bool CTImageTreeItem::internalGetSegmentationValues( SegmentationValues &values)
 	accumulator_set<double,features<tag::count, tag::min, tag::mean, tag::max, tag::variance> > acc;  
   
 	//check selected accuracy
-	if (values.accuracy == SegmentationValues::SimpleAccuracy) {
+	if (values.m_accuracy == SegmentationValues::SimpleAccuracy) {
 		ImageType::IndexType index;
 		//iterate over the pixel of the binary segment
 		for(binIter.GoToBegin(); !binIter.IsAtEnd(); ++binIter) {
@@ -164,7 +164,7 @@ bool CTImageTreeItem::internalGetSegmentationValues( SegmentationValues &values)
 			}
 		}
 	//check selected accuracy
-	} else if (values.accuracy == SegmentationValues::PreventDoubleSamplingAccuracy) {
+	} else if (values.m_accuracy == SegmentationValues::PreventDoubleSamplingAccuracy) {
 		ImageType::IndexType index;
 		//definition for a set of indices, which can be compared
 		typedef std::set< ImageType::IndexType, IndexCompareFunctor > IndexSetType;
@@ -200,7 +200,7 @@ bool CTImageTreeItem::internalGetSegmentationValues( SegmentationValues &values)
 			}
 		}
 	//check selected accuracy
-	} else if (values.accuracy == SegmentationValues::InterpolatedAccuracy) {
+	} else if (values.m_accuracy == SegmentationValues::InterpolatedAccuracy) {
 		//define an interpolate function
 		typedef  itk::LinearInterpolateImageFunction< CTImageType > InterpolatorType;
 		InterpolatorType::Pointer interpolator = InterpolatorType::New();
@@ -230,15 +230,15 @@ bool CTImageTreeItem::internalGetSegmentationValues( SegmentationValues &values)
 	}
 	//set sample count, min, mean, max and standard deviation
 	//from the accumulated intensities
-	values.sampleCount = count( acc );
-	values.min = min( acc );
-	values.mean = mean( acc );
-	values.max = max( acc );
-	values.stddev = std::sqrt( variance( acc ) );
+	values.m_sampleCount = count( acc );
+	values.m_min = min( acc );
+	values.m_mean = mean( acc );
+	values.m_max = max( acc );
+	values.m_stddev = std::sqrt( variance( acc ) );
 	//set the image modification time
-	values.mtime = segment->GetMTime();
-	const_cast<CTImageTreeItem*>(this)->m_segmentationValueCache[ values.segment ] = values;
-	return values.sampleCount > 0;
+	values.m_mtime = segment->GetMTime();
+	const_cast<CTImageTreeItem*>(this)->m_segmentationValueCache[ values.m_segment ] = values;
+	return values.m_sampleCount > 0;
 }    
     
     
@@ -247,7 +247,7 @@ bool CTImageTreeItem::setData(int column, const QVariant& value) {
 }
 
 QVariant CTImageTreeItem::do_getData_UserRole(int column) const {
-	if ((*m_HeaderFields)[ column ].tag == getAcquisitionDatetimeTag()) {
+	if ((*m_HeaderFields)[ column ].m_tag == getAcquisitionDatetimeTag()) {
 		return getTime();
 	}
 	return do_getData_DisplayRole(column);
@@ -257,14 +257,14 @@ QVariant CTImageTreeItem::do_getData_UserRole(int column) const {
 QVariant CTImageTreeItem::do_getData_DisplayRole(int column) const {
 	if (column < 0 || column >= int(m_HeaderFields->size())) 
 		return QVariant::Invalid;
-	if ((*m_HeaderFields)[ column ].tag == getNumberOfFramesTag()) 
+	if ((*m_HeaderFields)[ column ].m_tag == getNumberOfFramesTag()) 
 		return getNumberOfSlices();
-	if ((*m_HeaderFields)[ column ].tag == getAcquisitionDatetimeTag()) {
+	if ((*m_HeaderFields)[ column ].m_tag == getAcquisitionDatetimeTag()) {
 		boost::posix_time::ptime dicomTime = getPTime();
 		return boost::posix_time::to_simple_string(dicomTime).c_str();
 	}
 	std::string val;
-	itk::ExposeMetaData( m_dict, (*m_HeaderFields)[ column ].tag, val );
+	itk::ExposeMetaData( m_dict, (*m_HeaderFields)[ column ].m_tag, val );
 	return QString::fromAscii( val.c_str() );
 }
 
@@ -413,7 +413,7 @@ void CTImageTreeItem::retrieveITKImage(QProgressDialog *progress, int progressSc
 	ImageType::Pointer imagePtr =  imageReader->GetOutput();
 	setITKImage(imagePtr);
 	//emit signal, that data has changed
-	model->dataChanged(model->createIndex(childNumber(),0,parent()),model->createIndex(childNumber(),columnCount()-1,parent()));
+	m_model->dataChanged(m_model->createIndex(childNumber(),0,parent()),m_model->createIndex(childNumber(),columnCount()-1,parent()));
 }
 
 //get the unique identifier from the meta data

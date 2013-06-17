@@ -61,12 +61,12 @@ class SegmentListModel : public QAbstractListModel
     SegmentInfo &getSegment(const QModelIndex& index);
     SegmentInfo &getSegment(unsigned row);
     void setArterySegment(const QModelIndex& index, const SegmentInfo *arterySegment);
-    const_iterator begin() const { return segments.begin(); }
-    const_iterator end() const { return segments.end(); }
-    iterator begin() { return segments.begin(); }
-    iterator end() { return segments.end(); }
+    const_iterator begin() const { return m_segments.begin(); }
+    const_iterator end() const { return m_segments.end(); }
+    iterator begin() { return m_segments.begin(); }
+    iterator end() { return m_segments.end(); }
   private:
-    SegmentListType segments;
+    SegmentListType m_segments;
 };
 
 #endif // SEGMENTLISTMODEL_H

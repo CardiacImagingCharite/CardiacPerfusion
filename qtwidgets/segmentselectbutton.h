@@ -45,8 +45,8 @@ class SegmentSelectButton : public QPushButton
   Q_OBJECT
   public:
   SegmentSelectButton(QWidget *parent = 0);
-  const SegmentInfo * getSelectedSegment(void) const { return selectedSegment; }
-  void setSegmentListModel(const SegmentListModel *model) { segmentList = model; }
+  const SegmentInfo * getSelectedSegment(void) const { return m_selectedSegment; }
+  void setSegmentListModel(const SegmentListModel *model) { m_segmentList = model; }
   void setSelectedSegment(const SegmentInfo *segment);
   
   signals:
@@ -56,8 +56,8 @@ class SegmentSelectButton : public QPushButton
   void onClick();
   private:
   void updateText();
-  const SegmentInfo *selectedSegment;
-  const SegmentListModel *segmentList;
+  const SegmentInfo *m_selectedSegment;
+  const SegmentListModel *m_segmentList;
 };
 
 #endif // SEGMENTSELECTBUTTON_H

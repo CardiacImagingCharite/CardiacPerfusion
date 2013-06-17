@@ -174,24 +174,24 @@ class TreeItem : boost::noncopyable {
 	/*!
 	\return Returns the actual model.
 	*/
-    CTImageTreeModel *getModel(void) { return model; }
+    CTImageTreeModel *getModel(void) { return m_model; }
     void clearActiveDown(void) const;
-    bool isActive(void) const { return active; }
+    bool isActive(void) const { return m_active; }
     void setActive(bool act=true) const;
-    void toggleActive(void) const { setActive(!active); }
+    void toggleActive(void) const { setActive(!m_active); }
     const BinaryImageTreeItem* userSelectSegment(const QString &dialogTitle, const QString &dialogMessage) const ;
     virtual bool isA(const std::type_info &other) const { return (typeid(TreeItem)==other) ? true : false; }
     
     
   protected:
     QModelIndex getIndex(int column=0) const;
-    CTImageTreeModel *model;
-    TreeItem():model(NULL),parentItem(NULL),active(false) {};
+    CTImageTreeModel *m_model;
+    TreeItem():m_model(NULL),m_parentItem(NULL),m_active(false) {};
   private:
     typedef boost::ptr_vector<TreeItem> ChildListType;
-    ChildListType childItems;
-    TreeItem * parentItem;
-    bool active;
+    ChildListType m_childItems;
+    TreeItem * m_parentItem;
+    bool m_active;
 
   private:
     friend class boost::serialization::access;

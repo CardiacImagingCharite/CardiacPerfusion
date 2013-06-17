@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -59,14 +59,14 @@
 
 // Constructor, which takes its parent, an Image and a name
 BinaryImageTreeItem::BinaryImageTreeItem(TreeItem * parent, ImageType::Pointer itkImage, const QString &name)
-  :BaseClass(parent, itkImage), name(name), volumeMtime(0) {
-    imageKeeper = getVTKConnector();
+  :BaseClass(parent, itkImage), m_name(name), m_volumeMtime(0) {
+    m_imageKeeper = getVTKConnector();
     createRandomColor();
 }
 
 //clones an existing TreeItem
 TreeItem *BinaryImageTreeItem::clone(TreeItem *clonesParent) const {
-	BinaryImageTreeItem *c = new BinaryImageTreeItem(clonesParent, peekITKImage(), name );
+	BinaryImageTreeItem *c = new BinaryImageTreeItem(clonesParent, peekITKImage(), m_name );
 	cloneChildren(c);
 	return c;
 }
@@ -79,14 +79,14 @@ int BinaryImageTreeItem::columnCount() const {
 //returns the name of the TreeItem
 QVariant BinaryImageTreeItem::do_getData_DisplayRole(int c) const {
 	if (c==0) 
-		return name;
+		return m_name;
 	else 
 		return QVariant::Invalid;
 }
 
 //returns the color of the TreeItem
 QVariant BinaryImageTreeItem::do_getData_BackgroundRole(int column) const {
-	return QBrush( color );
+	return QBrush( m_color );
 }
 
 //returns the properties of a TreeItem
@@ -99,7 +99,7 @@ Qt::ItemFlags BinaryImageTreeItem::flags(int column) const {
 //sets the name of the TreeItem for column 0 and return true, if succeed
 bool BinaryImageTreeItem::setData(int c, const QVariant &value) {
 	if (c==0 && static_cast<QMetaType::Type>(value.type()) == QMetaType::QString) {
-		name = value.toString();
+		m_name = value.toString();
 		return true;
 	} 
 	return false;
@@ -484,7 +484,7 @@ void BinaryImageTreeItem::binaryErode(int iterations) {
 double BinaryImageTreeItem::getVolumeInML(void) const {
   ImageType::Pointer itkIm = getITKImage();
   if (itkIm.IsNull()) return -1;
-  if (volumeMtime != itkIm->GetMTime()) {
+  if (m_volumeMtime != itkIm->GetMTime()) {
     unsigned long voxelCount = 0;
     typedef itk::ImageRegionConstIterator< ImageType > BinImageIterator;
     BinImageIterator iterator = BinImageIterator( itkIm, itkIm->GetBufferedRegion() );
@@ -492,10 +492,10 @@ double BinaryImageTreeItem::getVolumeInML(void) const {
       if (iterator.Get() == BinaryPixelOn) voxelCount++;
     }
     ImageType::SpacingType spacing = itkIm->GetSpacing();
-    const_cast<BinaryImageTreeItem*>(this)->volumeInML = std::abs(spacing[0] * spacing[1] * spacing[2] * voxelCount / 1000.0);
-    const_cast<BinaryImageTreeItem*>(this)->volumeMtime = itkIm->GetMTime();
+    const_cast<BinaryImageTreeItem*>(this)->m_volumeInML = std::abs(spacing[0] * spacing[1] * spacing[2] * voxelCount / 1000.0);
+    const_cast<BinaryImageTreeItem*>(this)->m_volumeMtime = itkIm->GetMTime();
   }
-  return volumeInML;
+  return m_volumeInML;
 }
 
 //creates a random color for the overlay
@@ -504,31 +504,31 @@ void BinaryImageTreeItem::createRandomColor() {
   static boost::uniform_int<> rainbow(0,256*6);
   static boost::variate_generator<boost::mt19937&, boost::uniform_int<> > rainbowcolor(rng, rainbow);
   int hue = rainbowcolor();
-  color = Qt::black;
+  m_color = Qt::black;
   if (hue<256) {
     int ascend = hue;
-      color.setRed(255);
-      color.setGreen(ascend);
+      m_color.setRed(255);
+      m_color.setGreen(ascend);
   } else if (hue<512) {
     int descend = 511-hue;
-      color.setRed(descend);
-      color.setGreen(255);
+      m_color.setRed(descend);
+      m_color.setGreen(255);
   } else if (hue<768) {
     int ascend = hue-512;
-      color.setGreen(255);
-      color.setBlue(ascend);
+      m_color.setGreen(255);
+      m_color.setBlue(ascend);
   } else if (hue<1024) {
     int descend = 1023-hue;
-      color.setGreen(descend);
-      color.setBlue(255);
+      m_color.setGreen(descend);
+      m_color.setBlue(255);
   } else if (hue<1280) {
     int ascend = hue-1024;
-      color.setRed(ascend);
-      color.setBlue(255);
+      m_color.setRed(ascend);
+      m_color.setBlue(255);
   } else { //if (color<1536) 
     int descend = 1535-hue;
-      color.setRed(255);
-      color.setBlue(descend);
+      m_color.setRed(255);
+      m_color.setBlue(descend);
   }
 }
 

@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -44,29 +44,29 @@
 #include "binaryimagetreeitem.h"
 #include "ctimagetreemodel.h"
 
-TreeItem::TreeItem(CTImageTreeModel *model):model(model), parentItem(NULL),active(false) {
+TreeItem::TreeItem(CTImageTreeModel *model):m_model(model), m_parentItem(NULL),m_active(false) {
 }
 
-TreeItem::TreeItem(TreeItem * parent):model(parent->model), parentItem(parent),active(false) {
+TreeItem::TreeItem(TreeItem * parent):m_model(parent->m_model), m_parentItem(parent),m_active(false) {
 }
 
 TreeItem::~TreeItem() {
 }
 
 void TreeItem::cloneChildren(TreeItem *dest) const {
-  for(ChildListType::const_iterator it=childItems.begin(); it!=childItems.end(); it++)
+  for(ChildListType::const_iterator it=m_childItems.begin(); it!=m_childItems.end(); it++)
     dest->insertChild( it->clone(dest) );
 }
 
 
 TreeItem &TreeItem::child(unsigned int number) {
-  if (number >= childItems.size()) throw TreeTrouble();
-  return childItems[number];
+  if (number >= m_childItems.size()) throw TreeTrouble();
+  return m_childItems[number];
 }
 
 const TreeItem &TreeItem::child(unsigned int number) const {
-  if (number >= childItems.size()) throw TreeTrouble();
-  return childItems[number];
+  if (number >= m_childItems.size()) throw TreeTrouble();
+  return m_childItems[number];
 }
 
 TreeItem *TreeItem::clone(TreeItem *clonesParent) const {
@@ -91,7 +91,7 @@ QVariant TreeItem::data(int column, int role) const {
 }
 
 QVariant TreeItem::do_getData_FontRole(int column) const {
-  if (active) {
+  if (m_active) {
     QFont f = QApplication::font();
     f.setWeight( QFont::Bold );
     return f;
@@ -101,7 +101,7 @@ QVariant TreeItem::do_getData_FontRole(int column) const {
 
 
 unsigned int TreeItem::childCount() const {
-  return childItems.size();
+  return m_childItems.size();
 }
 
 class TreeItemCompareFunctor {
@@ -133,24 +133,24 @@ class TreeItemCompareFunctor {
 };
 
 void TreeItem::sortChildren( int column, bool ascending ) {
-  model->emitLayoutAboutToBeChanged();
-  childItems.sort(
+  m_model->emitLayoutAboutToBeChanged();
+  m_childItems.sort(
     TreeItemCompareFunctor( column, ascending ) );
-  model->emitLayoutChanged();
+  m_model->emitLayoutChanged();
 }
 
 unsigned int TreeItem::depth(void) const {
-  const TreeItem *parent = parentItem;
+  const TreeItem *parent = m_parentItem;
   unsigned int depth = 0;
   while( parent != NULL ) {
-    parent = parent->parentItem;
+    parent = parent->m_parentItem;
     depth++;
   }
   return depth;
 }
 
 bool TreeItem::insertChild(TreeItem *child) {
-  return insertChild(child, childItems.size());
+  return insertChild(child, m_childItems.size());
 }
 
 class TreeItemEqualFunctor {
@@ -169,40 +169,40 @@ class TreeItemEqualFunctor {
 };
 
 bool TreeItem::insertChild(TreeItem *child, unsigned int position) {
-  if (position > childItems.size())
+  if (position > m_childItems.size())
     return false;
-  if (std::find_if(childItems.begin(), childItems.end(), TreeItemEqualFunctor(*child)) != childItems.end())
+  if (std::find_if(m_childItems.begin(), m_childItems.end(), TreeItemEqualFunctor(*child)) != m_childItems.end())
     return false;
 
-  QModelIndex insertIndex = model->createIndex(position,0,this);
-  model->emitLayoutAboutToBeChanged();
-  model->beginInsertRows(insertIndex,position,position);
-  child->parentItem = this;
-  child->model = this->model;
-  childItems.insert(childItems.begin() + position, child);
-  model->endInsertRows();
-  model->emitLayoutChanged();
+  QModelIndex insertIndex = m_model->createIndex(position,0,this);
+  m_model->emitLayoutAboutToBeChanged();
+  m_model->beginInsertRows(insertIndex,position,position);
+  child->m_parentItem = this;
+  child->m_model = this->m_model;
+  m_childItems.insert(m_childItems.begin() + position, child);
+  m_model->endInsertRows();
+  m_model->emitLayoutChanged();
   return true;
 }
 
 const TreeItem *TreeItem::parent() const {
-  return parentItem;
+  return m_parentItem;
 }
 
 TreeItem *TreeItem::parent() {
-  return parentItem;
+  return m_parentItem;
 }
 
 bool TreeItem::removeChildren(unsigned int position, unsigned int count) {
-  if (position + count > childItems.size())
+  if (position + count > m_childItems.size())
     return false;
 // TODO: strange: the following does not work - WHY?  
 //  model->beginRemoveRows(model->createIndex(0,0,this), position, position+count-1);
-  model->beginResetModel();
+  m_model->beginResetModel();
   for (unsigned int row = 0; row < count; ++row)
-    childItems.release( childItems.begin() + position );
+    m_childItems.release( m_childItems.begin() + position );
 //  model->endRemoveRows();
-  model->endResetModel();
+  m_model->endResetModel();
   return true;
 }
 
@@ -211,18 +211,18 @@ bool TreeItem::claimChild(TreeItem *child) {
   int childPos = child->childNumber();
   ChildListType::auto_type childAutoPtr;
   TreeItem *childParent = child->parent();
-  model->beginResetModel();
+  m_model->beginResetModel();
   if (childParent) {
-    childAutoPtr = childParent->childItems.release( childParent->childItems.begin() + childPos );
+    childAutoPtr = childParent->m_childItems.release( childParent->m_childItems.begin() + childPos );
   } else { childAutoPtr.reset( child ); }
-  childItems.push_back( childAutoPtr.release() );
-  model->endResetModel();
+  m_childItems.push_back( childAutoPtr.release() );
+  m_model->endResetModel();
   return true;
 }
 
 int TreeItem::childNumber() const {
-  if (parentItem != NULL) {
-    const ChildListType &pList = parentItem->childItems;
+  if (m_parentItem != NULL) {
+    const ChildListType &pList = m_parentItem->m_childItems;
     for(ChildListType::size_type i = 0; i != pList.size(); ++i)
       if (&pList[i] == this) return i;
   }
@@ -238,21 +238,21 @@ Qt::ItemFlags TreeItem::flags(int column) const {
 }
 
 void TreeItem::setActive(bool act) const {
-  if (active==act) return;
-  const_cast<TreeItem*>(this)->active = act;
-  const_cast<TreeItem*>(this)->model->dataChanged(
+  if (m_active==act) return;
+  const_cast<TreeItem*>(this)->m_active = act;
+  const_cast<TreeItem*>(this)->m_model->dataChanged(
     getIndex(0),
     getIndex(columnCount()-1));
 }
 
 QModelIndex TreeItem::getIndex(int column) const {
-  return const_cast<TreeItem*>(this)->model->createIndex(childNumber(),column,parentItem);
+  return const_cast<TreeItem*>(this)->m_model->createIndex(childNumber(),column,m_parentItem);
 }
 
 
 void TreeItem::clearActiveDown(void) const {
   setActive(false);
-  for(ChildListType::const_iterator i = childItems.begin(); i != childItems.end(); ++i)
+  for(ChildListType::const_iterator i = m_childItems.begin(); i != m_childItems.end(); ++i)
     i->clearActiveDown();
 }
 

@@ -46,9 +46,9 @@ class TimeDensityDataPicker: public QwtPlotPicker {
   TimeDensityDataPicker(QwtPlotMarker *markerX_, QwtPlotMarker *markerY_, const SegmentListModel &segmentList_, QwtPlotCanvas *);
   virtual QwtText trackerText(const QPoint &) const;
   protected:
-    QwtPlotMarker *markerX;
-    QwtPlotMarker *markerY;
-    const SegmentListModel &segmentList;
+    QwtPlotMarker *m_markerX;
+    QwtPlotMarker *m_markerY;
+    const SegmentListModel &m_segmentList;
 };
 
 #endif // TIMEDENSITYDATAPICKER_H

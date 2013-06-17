@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -101,49 +101,49 @@ typedef itk::PowellOptimizer Optimizer;
 
 
 void GammaVariate::setParameters( double t0_, double tmax_, double y0_, double ymax_, double alpha_ ) {
-  t0 = t0_;
-  t0max = tmax_ - t0_;
-  y0 = y0_;
-  y0max = ymax_ - y0_;
-  alpha = alpha_;
+  m_t0 = t0_;
+  m_t0max = tmax_ - t0_;
+  m_y0 = y0_;
+  m_y0max = ymax_ - y0_;
+  m_alpha = alpha_;
 }
 
 double GammaVariate::computeY( double t ) const {
-  if (t0max == 0) return y0;
-  if (t<=t0) return y0;
-  double t_ = (t-t0)/(t0max);
-  return  y0 + y0max * std::pow( t_, alpha) * std::exp( alpha * ( 1 - t_ ) );
+  if (m_t0max == 0) return m_y0;
+  if (t<=m_t0) return m_y0;
+  double t_ = (t-m_t0)/(m_t0max);
+  return  m_y0 + m_y0max * std::pow( t_, m_alpha) * std::exp( m_alpha * ( 1 - t_ ) );
 }
 
 
 double GammaVariate::getMaximum( void ) const {
-  return y0max;
+  return m_y0max;
 }
 
 double GammaVariate::getBaseline( void ) const {
-  return y0;
+  return m_y0;
 }
 
 
 double GammaVariate::getMaxSlope( void ) const {
-  double sqrt_alpha = std::sqrt( alpha );
-  double slope = std::pow( (1.0 - 1.0 / sqrt_alpha) , alpha )
-    * alpha * std::exp( sqrt_alpha ) / ( sqrt_alpha - 1.0 );
-  slope *= y0max;
-  slope /= t0max;
+  double sqrt_alpha = std::sqrt( m_alpha );
+  double slope = std::pow( (1.0 - 1.0 / sqrt_alpha) , m_alpha )
+    * m_alpha * std::exp( sqrt_alpha ) / ( sqrt_alpha - 1.0 );
+  slope *= m_y0max;
+  slope /= m_t0max;
   return slope;
 }
 
 double GammaVariate::getCenterOfGravity() const {
-  double beta = t0max / alpha;
-  return beta * ( alpha + 1 );
+  double beta = m_t0max / m_alpha;
+  return beta * ( m_alpha + 1 );
 }
 
 double GammaVariate::getAUC() const {
   try {
-    double beta = t0max / alpha;
-    double k = std::exp( alpha ) * y0max / std::pow(t0max, alpha);
-    double auc = k * std::pow( beta, alpha + 1) * boost::math::tgamma( alpha + 1 );
+    double beta = m_t0max / m_alpha;
+    double k = std::exp( m_alpha ) * m_y0max / std::pow(m_t0max, m_alpha);
+    double auc = k * std::pow( beta, m_alpha + 1) * boost::math::tgamma( m_alpha + 1 );
     return auc;
   } catch (boost::exception &) {
     return std::numeric_limits< double >::quiet_NaN();
@@ -155,7 +155,7 @@ double GammaVariate::getAUC() const {
 double GammaVariate::distanceToSamples() const {
   unsigned counter = 0;
   double cummulativeDist = 0;
-  BOOST_FOREACH( const Sample current, *samples ) {
+  BOOST_FOREACH( const Sample current, *m_samples ) {
     double d = computeY(current.first) - current.second;
     cummulativeDist += d * d;
     ++counter;
@@ -166,45 +166,45 @@ double GammaVariate::distanceToSamples() const {
 
 double GammaVariate::findAlpha() {
 
-  if (t0max == 0) { alpha = minAlpha; return minAlpha; }
+  if (m_t0max == 0) { m_alpha = minAlpha; return minAlpha; }
   std::vector<double> lnX;
   std::vector<double> lnY;
 
-  if (samples->size()==0) { alpha = minAlpha; return minAlpha; }
+  if (m_samples->size()==0) { m_alpha = minAlpha; return minAlpha; }
 
   double t;
-  BOOST_FOREACH( const Sample currentSample, *samples ) {
-    if (currentSample.first > t0) {
-      t = (currentSample.first - t0) / t0max;
+  BOOST_FOREACH( const Sample currentSample, *m_samples ) {
+    if (currentSample.first > m_t0) {
+      t = (currentSample.first - m_t0) / m_t0max;
       t = std::log(t) + 1.0 - t;
       lnX.push_back( t );
       
-      t = std::log( currentSample.second ) - y0;
+      t = std::log( currentSample.second ) - m_y0;
       lnY.push_back( t );
     }
   }
-  LinearRegression( lnX.begin(), lnX.end(), lnY.begin(), t, alpha );
-  if (alpha < minAlpha) alpha = minAlpha;
-  return alpha;
+  LinearRegression( lnX.begin(), lnX.end(), lnY.begin(), t, m_alpha );
+  if (m_alpha < minAlpha) m_alpha = minAlpha;
+  return m_alpha;
 }
 
 void GammaVariate::findFromSamples() {
   SampleIt minYIt, maxYIt;
-  minYIt = maxYIt = samples->begin();
-  for(SampleIt it = samples->begin(); it != samples->end(); ++it) {
+  minYIt = maxYIt = m_samples->begin();
+  for(SampleIt it = m_samples->begin(); it != m_samples->end(); ++it) {
     if (it->second < minYIt->second) minYIt = it;
     if (it->second > maxYIt->second) maxYIt = it;
   }
 
   SampleIt y0It = minYIt;
 
-  t0 = y0It->first;
-  y0 = y0It->second;
+  m_t0 = y0It->first;
+  m_y0 = y0It->second;
 
   double maxT = maxYIt->first;
   
-  t0max = maxT - t0;
-  y0max = maxYIt->second - y0;
+  m_t0max = maxT - m_t0;
+  m_y0max = maxYIt->second - m_y0;
   optimize();
 }
 
@@ -212,13 +212,13 @@ void GammaVariate::findFromSamples() {
 void GammaVariate::optimize() {
   Optimizer::Pointer optimizer = Optimizer::New();
   itk::GammaCostFunction::Pointer myCostFunction = itk::GammaCostFunction::New();
-  myCostFunction->SetData( samples );
+  myCostFunction->SetData( m_samples );
   optimizer->SetCostFunction( myCostFunction );
   Optimizer::ParametersType p(5);
-  p[0] = t0;
-  p[1] = t0 + t0max;
-  p[2] = y0;
-  p[3] = y0 + y0max;
+  p[0] = m_t0;
+  p[1] = m_t0 + m_t0max;
+  p[2] = m_y0;
+  p[3] = m_y0 + m_y0max;
   p[4] = findAlpha();
   optimizer->SetInitialPosition( p );
   optimizer->SetMaximumIteration( MaximumNumberOfIterations );
@@ -235,12 +235,12 @@ void GammaVariate::optimize() {
 }
 
 void GammaVariate::clearSamples() {
-  if (nonConstSamples) nonConstSamples->clear();
+  if (m_nonConstSamples) m_nonConstSamples->clear();
 }
 
 void GammaVariate::addSample(double t, double y) {
-  if (nonConstSamples) {
-    nonConstSamples->insert(Sample(t,y));
+  if (m_nonConstSamples) {
+    m_nonConstSamples->insert(Sample(t,y));
   }
 }
 

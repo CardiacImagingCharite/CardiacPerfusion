@@ -420,7 +420,7 @@ BOOST_SERIALIZATION_SPLIT_FREE(itk::MetaDataDictionary)
 			  while(s) {
 			    SegmentationValues sv;
 			    ar & sv;
-			    svm.insert(CTImageTreeItem::SegmentationValueMap::value_type(sv.segment, sv));
+			    svm.insert(CTImageTreeItem::SegmentationValueMap::value_type(sv.m_segment, sv));
 			    --s;
 			  }
 			}
@@ -466,9 +466,9 @@ void CTImageTreeModel::serialize(Archive & ar, const unsigned int version) {
 
 template<class Archive>
 void TreeItem::serialize(Archive & ar, const unsigned int version) {
-	ar & model;
-	ar & parentItem;
-	ar & childItems;
+	ar & m_model;
+	ar & m_parentItem;
+	ar & m_childItems;
 }
 
 template<class TImage>
@@ -479,18 +479,18 @@ void ITKVTKTreeItem<TImage>::serialize(Archive & ar, const unsigned int version)
 
 template<class Archive>
 void BinaryImageTreeItem::serialize(Archive & ar, const unsigned int version) {
-	ar & name;
-	ar & color;
+	ar & m_name;
+	ar & m_color;
 	ImageType::Pointer binIm = peekITKImage();
 	ar & binIm;
 	ar & boost::serialization::base_object<BaseClass>(*this);
 	setITKImage( binIm );
-	imageKeeper = getVTKConnector();
+	m_imageKeeper = getVTKConnector();
 }
 
 template<class Archive>
 void RealImageTreeItem::serialize(Archive & ar, const unsigned int version) {
-	ar & name;
+	ar & m_name;
 	ImageType::Pointer realIm = peekITKImage();
 	ar & realIm;
 	ar & boost::serialization::base_object<BaseClass>(*this);
@@ -612,7 +612,7 @@ void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 	ar & m_dict;
 	ar & boost::serialization::base_object<BaseClass>(*this);
 	setITKImage( ctIm );
-	boost::filesystem::path serPath( model->getSerializationPath() );
+	boost::filesystem::path serPath( m_model->getSerializationPath() );
 	serPath = serPath.parent_path();
 	for( std::list<std::string>::const_iterator path = pathList.begin(); path != pathList.end(); ++path) {
 		boost::filesystem::path fnPath( *path );
@@ -632,7 +632,7 @@ void CTImageTreeItem::save(Archive & ar, const unsigned int version) const {
 	ar & fnListLength;
 	ImageType::Pointer ctIm = getITKImage();
 	ar & ctIm;
-	boost::filesystem::path serPath( absoluteDirectory( model->getSerializationPath() ) );
+	boost::filesystem::path serPath( absoluteDirectory( m_model->getSerializationPath() ) );
 	BOOST_FOREACH( const std::string &name, m_fnList ) {
 		boost::filesystem::path fnPath( name );
 		boost::filesystem::path newFnPath = fromAtoB( serPath, fnPath );
@@ -650,24 +650,24 @@ void CTImageTreeItem::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void SegmentationValues::serialize(Archive & ar, const unsigned int version) {
-	ITKVTKTreeItem<BinaryImageType> *nonconstseg = const_cast<ITKVTKTreeItem<BinaryImageType> *>(segment);
+	ITKVTKTreeItem<BinaryImageType> *nonconstseg = const_cast<ITKVTKTreeItem<BinaryImageType> *>(m_segment);
 	ar & nonconstseg;
-	segment = nonconstseg;
-	uint64_t imin(min), imax(max), isampleCount(sampleCount);
-        uint64_t iaccuracy = static_cast<uint64_t>(accuracy);
-	ar & mean; ar & stddev; ar & imin; ar & imax; ar & isampleCount; ar & iaccuracy;
-	min = imin; max = imax; sampleCount = isampleCount; accuracy = static_cast<Accuracy>(iaccuracy);
-	bool matchingMtime = mtime == segment->getITKMTime(); 
+	m_segment = nonconstseg;
+	uint64_t imin(m_min), imax(m_max), isampleCount(m_sampleCount);
+        uint64_t iaccuracy = static_cast<uint64_t>(m_accuracy);
+	ar & m_mean; ar & m_stddev; ar & imin; ar & imax; ar & isampleCount; ar & iaccuracy;
+	m_min = imin; m_max = imax; m_sampleCount = isampleCount; m_accuracy = static_cast<Accuracy>(iaccuracy);
+	bool matchingMtime = m_mtime == m_segment->getITKMTime(); 
 	ar & matchingMtime;
 	if (matchingMtime)
-		mtime = segment->getITKMTime();
-	else mtime = 0; 
+		m_mtime = m_segment->getITKMTime();
+	else m_mtime = 0; 
 }
 
 template<class Archive>
 void DicomTagType::serialize(Archive & ar, const unsigned int version) {
-	ar & name;
-	ar & tag;
+	ar & m_name;
+	ar & m_tag;
 }
 
 

@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 
 	This file is part of KardioPerfusion.
 
@@ -18,15 +18,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -46,8 +46,8 @@
 
 PerfusionAnalyzer::PerfusionAnalyzer(QWidget* p)
 {
-	segments = new SegmentListModel(p);
-	parent = p;
+	m_segments = new SegmentListModel(p);
+	m_parent = p;
 }
 
 PerfusionAnalyzer::~PerfusionAnalyzer()
@@ -56,17 +56,17 @@ PerfusionAnalyzer::~PerfusionAnalyzer()
 
 void PerfusionAnalyzer::addImage(CTImageTreeItem *image)
 {
-	images.insert(image);
+	m_images.insert(image);
 }
 
 void PerfusionAnalyzer::addSegment(BinaryImageTreeItem *segment)
 {
-	segments->addSegment(segment);
+	m_segments->addSegment(segment);
 }
 
 void PerfusionAnalyzer::popBackSegment()
 {
-	segments->popBackSegment();
+	m_segments->popBackSegment();
 }
 
 SegmentListModel* PerfusionAnalyzer::getSegments()
@@ -79,7 +79,7 @@ SegmentListModel* PerfusionAnalyzer::getSegments()
 		currentSegment.attachSampleCurves(plot);
 	}
 	*/
-	return segments;
+	return m_segments;
 }
 
 
@@ -92,13 +92,13 @@ std::string PerfusionAnalyzer::getTacValuesAsString()
 
 	calculateTacValues();
 
-	BOOST_FOREACH( double t, times) {
+	BOOST_FOREACH( double t, m_times) {
 		tacValueStream << t << ";";
 	}
 
 	tacValueStream << "\r\n";
 
-	BOOST_FOREACH( SegmentInfo &currentSegment, *segments) {
+	BOOST_FOREACH( SegmentInfo &currentSegment, *m_segments) {
 		//attach the curves for the actual segment to the plot
 		TimeDensityData* data = currentSegment.getSampleData();
 
@@ -116,15 +116,15 @@ std::string PerfusionAnalyzer::getTacValuesAsString()
 void PerfusionAnalyzer::calculateTacValues()
 {
 	//if image list or segment list is empty, reject dialog and print warning
-	if (!images.size() || !segments->rowCount()) {
-		QMessageBox::warning(parent,QObject::tr("Analyse Error"),QObject::tr("Select at least one volume with at least one segment"));
+	if (!m_images.size() || !m_segments->rowCount()) {
+		QMessageBox::warning(m_parent,QObject::tr("Analyse Error"),QObject::tr("Select at least one volume with at least one segment"));
 		return;
 	}
 	//get acquisition time of the first image
-	double firstTime = (*images.begin())->getTime();
+	double firstTime = (*m_images.begin())->getTime();
 	int imageIndex = 0;
 	//create object for segmentation values and set accuracy
-	SegmentationValues values; values.accuracy = SegmentationValues::SimpleAccuracy;
+	SegmentationValues values; values.m_accuracy = SegmentationValues::SimpleAccuracy;
 
 /*	typedef itk::ImageFileWriter< CTImageTreeItem::ImageType >  WriterType;
 	WriterType::Pointer writer = WriterType::New();
@@ -132,7 +132,7 @@ void PerfusionAnalyzer::calculateTacValues()
 	*/
 
 	//iterate over all images
-	for(ImageSet::const_iterator ii = images.begin(); ii != images.end(); ++ii) {
+	for(ImageSet::const_iterator ii = m_images.begin(); ii != m_images.end(); ++ii) {
 		const CTImageTreeItem *ct = *ii;
 		//calculate relative time of actual image
 		double relTime = ct->getTime() - firstTime;
@@ -149,11 +149,11 @@ void PerfusionAnalyzer::calculateTacValues()
 		}
 */
 		//add relative time to the list of times
-		times.push_back(relTime);
+		m_times.push_back(relTime);
 		//iterate over all segments
-		BOOST_FOREACH( SegmentInfo &currentSegment, *segments) {
+		BOOST_FOREACH( SegmentInfo &currentSegment, *m_segments) {
 			//add segment to the segmentation values 
-			values.segment = currentSegment.getSegment();
+			values.m_segment = currentSegment.getSegment();
 			//get segmentation values and add the sample to the list of segments
 			if (ct->getSegmentationValues( values )) {
 				currentSegment.pushSample(relTime, values);
@@ -173,13 +173,13 @@ bool PerfusionAnalyzer::CTImageTimeCompareFunctor::operator()(const argT &x, con
 
 double PerfusionAnalyzer::getTime(unsigned int index)
 {
-	if(index < times.size())
-		return times[index];
+	if(index < m_times.size())
+		return m_times[index];
 
 	return -1;
 }
 
 int PerfusionAnalyzer::getImageCount()
 {
-	return images.size();
+	return m_images.size();
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -45,8 +45,8 @@ SegmentListModel::SegmentListModel(QObject *parent):
 
 
 QVariant SegmentListModel::data(const QModelIndex& index, int role) const {
-  if (role == Qt::DisplayRole && index.row() < int(segments.size())) {
-    const SegmentInfo &seg = segments[index.row()];
+  if (role == Qt::DisplayRole && index.row() < int(m_segments.size())) {
+    const SegmentInfo &seg = m_segments[index.row()];
     switch(index.column()) {
       case 0: return seg.getName();
       case 1: return seg.getSegment()->getVolumeInML();break;
@@ -88,37 +88,37 @@ int SegmentListModel::columnCount(const QModelIndex & parent) const {
 
 
 SegmentInfo &SegmentListModel::getSegment(const QModelIndex& index) {
-  return segments.at( index.row() );
+  return m_segments.at( index.row() );
 }
 
 SegmentInfo &SegmentListModel::getSegment(unsigned row){
-	return segments.at( row );
+	return m_segments.at( row );
 }
 
 int SegmentListModel::rowCount(const QModelIndex& parent) const
 {
-  return segments.size();
+  return m_segments.size();
 }
 
 void SegmentListModel::setArterySegment(const QModelIndex& index, const SegmentInfo *arterySegment) {
-  if (index.row() < int(segments.size()) ) {
-    segments[index.row()].setArterySegment( arterySegment );
+  if (index.row() < int(m_segments.size()) ) {
+    m_segments[index.row()].setArterySegment( arterySegment );
     emit dataChanged(this->index(index.row(),1), this->index(index.row(),4));
   }
 }
 
 void SegmentListModel::refresh() {
-    emit dataChanged(this->index(0,1), this->index(segments.size()-1,4));
+    emit dataChanged(this->index(0,1), this->index(m_segments.size()-1,4));
 }
 
 
 void SegmentListModel::addSegment( const BinaryImageTreeItem *seg ) {
-  beginInsertRows(QModelIndex(), segments.size(), segments.size()+1);
-  segments.push_back(new SegmentInfo(const_cast<BinaryImageTreeItem*>(seg)));
+  beginInsertRows(QModelIndex(), m_segments.size(), m_segments.size()+1);
+  m_segments.push_back(new SegmentInfo(const_cast<BinaryImageTreeItem*>(seg)));
   endInsertRows();
 }
 
 void SegmentListModel::popBackSegment() {
 
-	segments.pop_back();
+	m_segments.pop_back();
 }

@@ -89,7 +89,7 @@ class vtkBinaryImageOverlay {
   vtkImageActor *m_actor; ///< vtkActor which actually displays the resliced volume
   vtkRenderer *m_renderer;
   vtkInteractorStyleProjectionView *m_interactorStyle;
-  int actionHandle;
+  int m_actionHandle;
 };
 
 #endif // VTKBINARYIMAGEOVERLAY_H

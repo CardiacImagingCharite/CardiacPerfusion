@@ -159,12 +159,12 @@ protected:
 		YOnly,
 		None
 	};
-	Restriction restriction;
+	Restriction m_restriction;
 	typedef std::map< int, ActionDispatch > ActionListType;
 	ActionListType m_actionList;
 	int m_interAction; ///< selected interaction due to mouse button presses - determined by dipatchActions()
 	int m_leftButtonAction; ///< selected interaction for the left mouse button - changed by pressing Space in CycleLeftButtonAction()
-	int ActionFirst, ActionSpin, ActionRotate, ActionEmitZoom, ActionPan, ActionEmitWindowLevel, ActionSlice, ActionNone, ActionWindowLUT, ActionColorPick, ActionShowCircle;
+	int m_ActionFirst, m_ActionSpin, m_ActionRotate, m_ActionEmitZoom, m_ActionPan, m_ActionEmitWindowLevel, m_ActionSlice, m_ActionNone, m_ActionWindowLUT, m_ActionColorPick, m_ActionShowCircle;
 
 	/** @name Mouse Button Flags
 	State of the Mouse Buttons (Pressed?) */
@@ -193,7 +193,7 @@ protected:
 	QwtPlot* m_plot;
 	BinaryImageTreeItem* m_arterySegment;
 private:
-	vtkTransform *tempTransform;
+	vtkTransform *m_tempTransform;
 };
 
 #endif // VTKINTERACTORSTYLEPROJECTIONVIEW_H

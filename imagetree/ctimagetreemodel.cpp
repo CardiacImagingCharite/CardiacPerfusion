@@ -102,7 +102,7 @@ void CTImageTreeModel::registerConnectorData(VTKConnectorDataBasePtr p) {
 QVariant CTImageTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (role == Qt::DisplayRole) {
     if ( section < 0 || section >= int(m_HeaderFields->size()) ) return QVariant::Invalid;
-	return QString::fromAscii((*m_HeaderFields)[section].name.c_str());
+	return QString::fromAscii((*m_HeaderFields)[section].m_name.c_str());
   } else {
     return QVariant::Invalid;
   }  

@@ -85,10 +85,10 @@ private:
 	typedef std::vector< double > DoubleVector;
   
 
-	DoubleVector times;
-	ImageSet images;
+	DoubleVector m_times;
+	ImageSet m_images;
 
-	SegmentListModel segments;
+	SegmentListModel m_segments;
 };
 
 #endif // ANALYSEDIALOG_H

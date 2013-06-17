@@ -47,17 +47,17 @@ class PatlakData : public QwtData
     virtual double x(size_t i) const;
     virtual size_t size() const;
     virtual QwtData* copy() const { return new PatlakData( *this ); }
-    inline void setTissueBaseline(double tb) { tissueBaseline = tb; }
-    inline void setArteryBaseline(double ab) { arteryBaseline = ab; }
-    inline size_t getStartIndex() const { return startIndex; }
-    inline size_t getEndIndex() const { return endIndex; }
-    inline void setStartIndex(size_t index) { startIndex = std::min(index,std::min(tissue.size(), artery.size())-1); }
-    inline void setEndIndex(size_t index) { endIndex = std::min(index,std::min(tissue.size(), artery.size())-1);  }
+    inline void setTissueBaseline(double tb) { m_tissueBaseline = tb; }
+    inline void setArteryBaseline(double ab) { m_arteryBaseline = ab; }
+    inline size_t getStartIndex() const { return m_startIndex; }
+    inline size_t getEndIndex() const { return m_endIndex; }
+    inline void setStartIndex(size_t index) { m_startIndex = std::min(index,std::min(m_tissue.size(), m_artery.size())-1); }
+    inline void setEndIndex(size_t index) { m_endIndex = std::min(index,std::min(m_tissue.size(), m_artery.size())-1);  }
   private:
-    const QwtData &tissue;
-    const QwtData &artery;
-    double tissueBaseline, arteryBaseline;
-    size_t startIndex, endIndex;
+    const QwtData &m_tissue;
+    const QwtData &m_artery;
+    double m_tissueBaseline, m_arteryBaseline;
+    size_t m_startIndex, m_endIndex;
 };
 
 #endif // PATLAKDATA_H

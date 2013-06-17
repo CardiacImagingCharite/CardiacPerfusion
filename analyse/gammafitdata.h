@@ -44,7 +44,7 @@ const unsigned GammaSamples = 500;
 class GammaFitData: public QwtData {
 public:
   GammaFitData():
-    xstart(std::numeric_limits<double>::max()), xend(std::numeric_limits<double>::min()) { }
+    m_xstart(std::numeric_limits<double>::max()), m_xend(std::numeric_limits<double>::min()) { }
     virtual QwtData *copy() const {
         return new GammaFitData(*this);
     }
@@ -52,20 +52,20 @@ public:
         return GammaSamples;
     }
     virtual double x(size_t i) const {
-        return xstart + (xend - xstart) / GammaSamples * i;
+        return m_xstart + (m_xend - m_xstart) / GammaSamples * i;
     }
     virtual double y(size_t i) const {
-      return gamma.computeY(x(i));
+      return m_gamma.computeY(x(i));
     }
-    GammaFunctions::GammaVariate &getGammaVariate() { return gamma; }
-    const GammaFunctions::GammaVariate &getGammaVariate() const { return gamma; }
+    GammaFunctions::GammaVariate &getGammaVariate() { return m_gamma; }
+    const GammaFunctions::GammaVariate &getGammaVariate() const { return m_gamma; }
     void includeTime(double t) {
-      if (t>xend) xend = t;
-      if (t<xstart) xstart = t;
+      if (t>m_xend) m_xend = t;
+      if (t<m_xstart) m_xstart = t;
     }
 private:
-  double xstart, xend;
-  GammaFunctions::GammaVariate gamma;
+  double m_xstart, m_xend;
+  GammaFunctions::GammaVariate m_gamma;
 };
 
 

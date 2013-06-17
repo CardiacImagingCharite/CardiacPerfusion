@@ -42,17 +42,17 @@
 class LinearRegressionData : public QwtData
 {
   public:
-    LinearRegressionData( const QwtData &source_ ):source(source_), m(0), n(0) { update();}
+    LinearRegressionData( const QwtData &source_ ):m_source(source_), m_m(0), m_n(0) { update();}
     virtual double y(size_t i) const;
     virtual double x(size_t i) const;
     virtual size_t size() const;
-    virtual QwtData* copy() const { return new LinearRegressionData( source ); }
+    virtual QwtData* copy() const { return new LinearRegressionData( m_source ); }
     void update(void);
     double getIntercept() const;
     double getSlope() const;
   private:
-    const QwtData &source;
-    double m, n;
-    std::vector< double > xc,yc;
+    const QwtData &m_source;
+    double m_m, m_n;
+    std::vector< double > m_xc,m_yc;
 };
 #endif // LINEARREGRESSIONDATA_H

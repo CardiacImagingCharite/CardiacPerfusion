@@ -100,11 +100,11 @@ class PerfusionAnalyzer
 		typedef std::set<CTImageTreeItem *, CTImageTimeCompareFunctor> ImageSet;
 		typedef std::vector< double > DoubleVector;
   
-		SegmentListModel *segments;
-		DoubleVector times;
-		ImageSet images;
+		SegmentListModel *m_segments;
+		DoubleVector m_times;
+		ImageSet m_images;
 
-		QWidget* parent;
+		QWidget* m_parent;
 };
 
 

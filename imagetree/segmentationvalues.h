@@ -54,15 +54,15 @@ struct SegmentationValues {
 		InterpolatedAccuracy			/**<Interpolated accuracy*/
 	};
 	//pointer to the segment
-	const ITKVTKTreeItem<BinaryImageType> *segment;
+	const ITKVTKTreeItem<BinaryImageType> *m_segment;
 	//some statistics of the segment and the used accuracy
-	long unsigned mtime;
-	double mean;
-	double stddev;
-	int min;
-	int max;
-	int sampleCount;
-	Accuracy accuracy;
+	long unsigned m_mtime;
+	double m_mean;
+	double m_stddev;
+	int m_min;
+	int m_max;
+	int m_sampleCount;
+	Accuracy m_accuracy;
 private:
 	//boost serialization class
     friend class boost::serialization::access;

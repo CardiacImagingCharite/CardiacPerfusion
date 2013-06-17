@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -40,27 +40,27 @@
 
 SegmentSelectButton::SegmentSelectButton(QWidget *parent)
   :QPushButton(0, parent),
-  selectedSegment(NULL),
-  segmentList(NULL) {
+  m_selectedSegment(NULL),
+  m_segmentList(NULL) {
     updateText();
     connect(this, SIGNAL(clicked(bool)), this, SLOT(onClick()));
 }
 
 
 void SegmentSelectButton::onClick() {
-  if (segmentList && segmentList->rowCount()>0) {
+  if (m_segmentList && m_segmentList->rowCount()>0) {
     QStringList nameList;
-    BOOST_FOREACH(const SegmentInfo &seg, *segmentList) {
+    BOOST_FOREACH(const SegmentInfo &seg, *m_segmentList) {
       nameList << seg.getName();
     }
     bool ok;
     QString selectedName = QInputDialog::getItem(this, tr("Select Segment"), tr("Choose segment"), nameList, 0, false, &ok);
     if (!ok) return;
-    BOOST_FOREACH(const SegmentInfo &seg, *segmentList) {
+    BOOST_FOREACH(const SegmentInfo &seg, *m_segmentList) {
       if (seg.getName() == selectedName) {
-	selectedSegment = &seg;
+	m_selectedSegment = &seg;
 	updateText();
-	emit selected(selectedSegment);
+	emit selected(m_selectedSegment);
 	break;
       }
     }
@@ -68,13 +68,13 @@ void SegmentSelectButton::onClick() {
 }
 
 void SegmentSelectButton::setSelectedSegment(const SegmentInfo *segment) {
-  selectedSegment = segment;
+  m_selectedSegment = segment;
   updateText();
 }
 
 void SegmentSelectButton::updateText() {
-  if (selectedSegment!=NULL) {
-    setText( selectedSegment->getName() );
+  if (m_selectedSegment!=NULL) {
+    setText( m_selectedSegment->getName() );
   } else {
     setText( tr("not selected") );
   }

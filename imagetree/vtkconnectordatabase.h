@@ -45,12 +45,12 @@ class VTKConnectorDataBase {
   public:
   virtual vtkImageData *getVTKImageData() const = 0;
   virtual size_t getSize() const = 0;
-  const TreeItem *getBaseItem() const { return baseItem; }
-  TreeItem *getBaseItem() { return baseItem; }
+  const TreeItem *getBaseItem() const { return m_baseItem; }
+  TreeItem *getBaseItem() { return m_baseItem; }
   VTKConnectorDataBase(
-    TreeItem *baseItem_): baseItem(baseItem_) {}
+    TreeItem *baseItem_): m_baseItem(baseItem_) {}
   private:
-  TreeItem *baseItem;
+  TreeItem *m_baseItem;
 };
 
 typedef boost::shared_ptr< VTKConnectorDataBase > VTKConnectorDataBasePtr;

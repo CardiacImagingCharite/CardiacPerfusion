@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -38,40 +38,40 @@
 
 double LinearRegressionData::y(size_t i) const {
   const_cast<LinearRegressionData*>(this)->update();
-  return m * x(i) + n;
+  return m_m * x(i) + m_n;
 }
 
 double LinearRegressionData::getIntercept() const { 
   const_cast<LinearRegressionData*>(this)->update();
-  return n; 
+  return m_n; 
 }
 double LinearRegressionData::getSlope() const { 
   const_cast<LinearRegressionData*>(this)->update();
-  return m; 
+  return m_m; 
 }
 
 double LinearRegressionData::x(size_t i) const {
-  if (i==0) return source.x(0);
-  else return source.x(source.size()-1);
+  if (i==0) return m_source.x(0);
+  else return m_source.x(m_source.size()-1);
 }
 size_t LinearRegressionData::size() const {
-  if (source.size()>1) return 2;
+  if (m_source.size()>1) return 2;
   else return 0;
 }
 
 void LinearRegressionData::update(void) {
   bool recalc = false;
-  if (xc.size() != source.size()) {
+  if (m_xc.size() != m_source.size()) {
     recalc = true;
-    xc.resize( source.size() );
-    yc.resize( source.size() );
+    m_xc.resize( m_source.size() );
+    m_yc.resize( m_source.size() );
   }
   double t;
-  for(unsigned i=0; i < source.size(); ++i) {
-    t = source.x(i);
-    if (xc[i] != t) { xc[i] = t; recalc = true; }
-    t = source.y(i);
-    if (yc[i] != t) { yc[i] = t; recalc = true; }
+  for(unsigned i=0; i < m_source.size(); ++i) {
+    t = m_source.x(i);
+    if (m_xc[i] != t) { m_xc[i] = t; recalc = true; }
+    t = m_source.y(i);
+    if (m_yc[i] != t) { m_yc[i] = t; recalc = true; }
   }
-  if (recalc) LinearRegression(xc.begin(),xc.end(),yc.begin(),n,m);
+  if (recalc) LinearRegression(m_xc.begin(),m_xc.end(),m_yc.begin(),m_n,m_m);
 }

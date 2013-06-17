@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -44,9 +44,9 @@
 TimeDensityDataPicker::TimeDensityDataPicker(QwtPlotMarker *markerX_, QwtPlotMarker *markerY_, 
   const SegmentListModel &segmentList_, QwtPlotCanvas *c):QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
         QwtPicker::PointSelection,QwtPlotPicker::NoRubberBand, QwtPicker::AlwaysOn, c),
-        markerX(markerX_),
-        markerY(markerY_),
-        segmentList(segmentList_) {
+        m_markerX(markerX_),
+        m_markerY(markerY_),
+        m_segmentList(segmentList_) {
 }
 
 QwtText TimeDensityDataPicker::trackerText(const QPoint &p) const {
@@ -54,7 +54,7 @@ QwtText TimeDensityDataPicker::trackerText(const QPoint &p) const {
   double minX = 0;
   SegmentationValues minValues;
    // prevent Warning
-  minValues.min = 0; minValues.max = 0; minValues.mean = 0; minValues.stddev = 0; minValues.sampleCount = 0; minValues.segment = 0;
+  minValues.m_min = 0; minValues.m_max = 0; minValues.m_mean = 0; minValues.m_stddev = 0; minValues.m_sampleCount = 0; minValues.m_segment = 0;
   QwtDoublePoint pdv;
   QPoint pv;
   BOOST_FOREACH( const SegmentInfo &currentSegment, segmentList) {
@@ -62,7 +62,7 @@ QwtText TimeDensityDataPicker::trackerText(const QPoint &p) const {
     const TimeDensityData *data = currentSegment.getSampleData();
     for(unsigned i=0; i < data->size(); ++i) {
       pdv.setX( data->getTimeAndValues(i, values) );
-      pdv.setY( values.mean );
+      pdv.setY( values.m_mean );
       pv = transform(pdv);
       int dx = pv.x() - p.x();
       int dy = pv.y() - p.y();
@@ -75,26 +75,26 @@ QwtText TimeDensityDataPicker::trackerText(const QPoint &p) const {
     }
   }
   if (minDist < 25) {
-    const BinaryImageTreeItem *binseg = dynamic_cast<const BinaryImageTreeItem *>(minValues.segment);
+    const BinaryImageTreeItem *binseg = dynamic_cast<const BinaryImageTreeItem *>(minValues.m_segment);
     QString text( binseg->getName() );
     text += "\nTime:" + QString::number(minX) + " s";
-    text += "\nMean:" + QString::number(minValues.mean) + " HU";
-    text += "\nStdDev:" + QString::number(minValues.stddev) + " HU";
-    text += "\nMin:" + QString::number(minValues.min) + " HU";
-    text += "\nMax:" + QString::number(minValues.max) + " HU";
-    text += "\n#Samples:" + QString::number(minValues.sampleCount);
-    if (!markerX->isVisible() || markerX->xValue()!= minX || markerY->yValue()!=minValues.mean) {
-      markerX->setXValue(minX);
-      markerY->setYValue(minValues.mean);
-      markerX->setVisible(true);
-      markerY->setVisible(true);
+    text += "\nMean:" + QString::number(minValues.m_mean) + " HU";
+    text += "\nStdDev:" + QString::number(minValues.m_stddev) + " HU";
+    text += "\nMin:" + QString::number(minValues.m_min) + " HU";
+    text += "\nMax:" + QString::number(minValues.m_max) + " HU";
+    text += "\n#Samples:" + QString::number(minValues.m_sampleCount);
+    if (!m_markerX->isVisible() || m_markerX->xValue()!= minX || m_markerY->yValue()!=minValues.m_mean) {
+      m_markerX->setXValue(minX);
+      m_markerY->setYValue(minValues.m_mean);
+      m_markerX->setVisible(true);
+      m_markerY->setVisible(true);
       const_cast<TimeDensityDataPicker*>(this)->canvas()->update();
     }
     return text;
   } else {
-    if (markerX->isVisible()) {
-      markerX->setVisible(false);
-      markerY->setVisible(false);
+    if (m_markerX->isVisible()) {
+      m_markerX->setVisible(false);
+      m_markerY->setVisible(false);
       const_cast<TimeDensityDataPicker*>(this)->canvas()->update();
     }
     return QwtText();

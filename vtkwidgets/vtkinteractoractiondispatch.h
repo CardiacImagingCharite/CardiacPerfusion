@@ -50,14 +50,14 @@ struct ActionDispatch {
     Restricted,
     UnRestricted
   };
-  boost::shared_ptr< ActionSignal > sig;
-  std::string label;
-  ActionType atype;
-  RestrictionType restrict;
-  bool valid;
+  boost::shared_ptr< ActionSignal > m_sig;
+  std::string m_label;
+  ActionType m_atype;
+  RestrictionType m_restrict;
+  bool m_valid;
   ActionDispatch(const std::string &label_, const ActionSignal::slot_type &slot, ActionType atype_, RestrictionType restrict_ )
-    :sig( new ActionSignal ), label(label_), atype(atype_), restrict(restrict_), valid( true ) { sig->connect(slot); }
-  ActionDispatch():valid(false) {}
+    :m_sig( new ActionSignal ), m_label(label_), m_atype(atype_), m_restrict(restrict_), m_valid( true ) { m_sig->connect(slot); }
+  ActionDispatch():m_valid(false) {}
 };
 
 

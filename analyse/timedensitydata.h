@@ -55,7 +55,7 @@ public:
 	\return Size of the time vector.
 	*/
     virtual size_t size() const {
-        return time.size();
+        return m_time.size();
     }
 	///Gets the x value at a specific position.
 	/*!
@@ -64,7 +64,7 @@ public:
 	\return The x value at the index i.
 	*/
     virtual double x(size_t i) const {
-        return time[i];
+        return m_time[i];
     }
 	///Gets the y value at a specific position.
 	/*!
@@ -73,7 +73,7 @@ public:
 	\return The y value at the index i.
 	*/
     virtual double y(size_t i) const {
-        return values[i].mean;
+        return m_values[i].m_mean;
     }
 	///Gets time and value at a specific positon
 	/*!
@@ -83,8 +83,8 @@ public:
 	\return Time of the index position.
 	*/
     double getTimeAndValues( size_t i, SegmentationValues &v ) const {
-		v = values[i];
-		return time[i];
+		v = m_values[i];
+		return m_time[i];
     }
 	///Adds a sample to the data.
 	/*!
@@ -92,15 +92,15 @@ public:
 	\param v The segmentation values.
 	*/
     void pushPoint( double t, const SegmentationValues &v) {
-		if (time.size() == 0 || t> time[time.size()-1]) {
-			time.push_back(t);
-			values.push_back(v);
+		if (m_time.size() == 0 || t> m_time[m_time.size()-1]) {
+			m_time.push_back(t);
+			m_values.push_back(v);
 		}
     }
 
 private:
-  std::vector< double > time;
-  std::vector< SegmentationValues > values;
+  std::vector< double > m_time;
+  std::vector< SegmentationValues > m_values;
 };
 
 

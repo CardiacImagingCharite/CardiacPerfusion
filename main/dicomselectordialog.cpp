@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren
+    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber
+    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fï¿½r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -48,7 +48,7 @@
 #include "imagedefinitions.h"
 #include "ctimagetreeitem.h"
 
-const DicomTagList DicomSelectorDialog::HeaderFields = boost::assign::list_of
+const DicomTagList DicomSelectorDialog::m_HeaderFields = boost::assign::list_of
 	(DicomTagType("Patient Name", "0010|0010"))
 	(DicomTagType("#Slices",CTImageTreeItem::getNumberOfFramesTag()))
 	(DicomTagType("AcquisitionDatetime","0008|002a"))
@@ -58,7 +58,7 @@ const DicomTagList DicomSelectorDialog::HeaderFields = boost::assign::list_of
 	(DicomTagType("Series Description","0008|103e"));
   
 DicomSelectorDialog::DicomSelectorDialog(QWidget * parent, Qt::WindowFlags f):
-	QDialog( parent, f ), ctImageModel(HeaderFields) {
+	QDialog( parent, f ), m_ctImageModel(m_HeaderFields) {
 	setupUi( this );
 	buttonBox->button( QDialogButtonBox::Open )->setAutoDefault(true);
 	buttonBox->button( QDialogButtonBox::Cancel)->setAutoDefault(false);
@@ -74,19 +74,19 @@ void DicomSelectorDialog::exec() {
 	typedef itk::ImageFileReader< CTImageType >  ReaderType;
 	int index = 0; bool canceled = false;
 	
-	QProgressDialog indexProgress(tr("Indexing Files..."), tr("Abort"), 0, fileNames.size(), this);
+	QProgressDialog indexProgress(tr("Indexing Files..."), tr("Abort"), 0, m_fileNames.size(), this);
 	indexProgress.setMinimumDuration(1000);
 	indexProgress.setWindowModality(Qt::ApplicationModal);
-	while( index < fileNames.size() ) {
+	while( index < m_fileNames.size() ) {
 		indexProgress.setValue(index + 1);
 		if (indexProgress.wasCanceled()) break;
-		if ( boost::filesystem::is_directory( fileNames[index].toAscii().data() ) ) 
+		if ( boost::filesystem::is_directory( m_fileNames[index].toAscii().data() ) ) 
 		{
-			boost::filesystem::path fpath( fileNames.takeAt(index).toAscii().data() );
+			boost::filesystem::path fpath( m_fileNames.takeAt(index).toAscii().data() );
 			QList< boost::filesystem::path > pathList;
 			boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
 			pathList.push_back( fpath );
-			indexProgress.setMaximum(fileNames.size() + pathList.size());
+			indexProgress.setMaximum(m_fileNames.size() + pathList.size());
 			while( !pathList.isEmpty() ) {
 				if (indexProgress.wasCanceled()) break;
 				boost::filesystem::path currentPath = pathList.takeFirst();
@@ -96,12 +96,12 @@ void DicomSelectorDialog::exec() {
 					if ( boost::filesystem::is_directory(itr->status()) ) 
 					{
 						pathList.push_back( itr->path() );
-						indexProgress.setMaximum(fileNames.size() + pathList.size());
+						indexProgress.setMaximum(m_fileNames.size() + pathList.size());
 						indexProgress.setValue(index);
 					}
 					else if ( boost::filesystem::is_regular_file( itr->status() )) 
 					{
-						fileNames.push_back( itr->path().directory_string().c_str() );
+						m_fileNames.push_back( itr->path().directory_string().c_str() );
 					}
 				}
 			}
@@ -111,22 +111,22 @@ void DicomSelectorDialog::exec() {
 	}
 	canceled = indexProgress.wasCanceled();
 	
-	fileNames.removeDuplicates();
+	m_fileNames.removeDuplicates();
 	if (!canceled ) {
-		QProgressDialog metaReadProgress(tr("Reading MetaData..."), tr("Abort"), 0, fileNames.size(), this);
+		QProgressDialog metaReadProgress(tr("Reading MetaData..."), tr("Abort"), 0, m_fileNames.size(), this);
 		metaReadProgress.setMinimumDuration(1000);
 		metaReadProgress.setWindowModality(Qt::ApplicationModal);
-		for(int i = 0; i < fileNames.size(); i++) {
+		for(int i = 0; i < m_fileNames.size(); i++) {
 			metaReadProgress.setValue(i);
 			if (metaReadProgress.wasCanceled()) 
 				break;
-			boost::filesystem::path fpath( fileNames[i].toAscii().data() );
+			boost::filesystem::path fpath( m_fileNames[i].toAscii().data() );
 			if ( boost::filesystem::is_regular_file( fpath ) ) {
 				try {
 					ReaderType::Pointer reader = ReaderType::New();
 					reader->SetFileName( fpath.string() );
 					reader->GenerateOutputInformation();
-					ctImageModel.appendFilename( reader->GetMetaDataDictionary(), fpath.string() );
+					m_ctImageModel.appendFilename( reader->GetMetaDataDictionary(), fpath.string() );
 				} catch (itk::ImageFileReaderException &ifrExep) {
 					std::cerr << "Exception caught !" << std::endl;
 					std::cerr << ifrExep << std::endl;
@@ -137,11 +137,11 @@ void DicomSelectorDialog::exec() {
 			}
 		}
 	}
-	if (ctImageModel.rowCount(QModelIndex())==0) return;
+	if (m_ctImageModel.rowCount(QModelIndex())==0) return;
 
-	treeView->setModel( &ctImageModel );
+	treeView->setModel( &m_ctImageModel );
 	treeView->selectAll();
-	for(unsigned int t=0; t < HeaderFields.size(); t++) treeView->resizeColumnToContents(t);
+	for(unsigned int t=0; t < m_HeaderFields.size(); t++) treeView->resizeColumnToContents(t);
 	
 	treeView->setSortingEnabled(true);
 	treeView->sortByColumn(2,Qt::AscendingOrder);
@@ -154,6 +154,6 @@ void DicomSelectorDialog::getSelectedImageDataList(CTImageTreeModel &other) cons
 	if (selectionModel == NULL) return;
 	QModelIndexList selectedIndexes = selectionModel->selectedRows();
 	for(QModelIndexList::const_iterator it = selectedIndexes.begin(); it != selectedIndexes.end(); it++) {
-		other.insertItemCopy( ctImageModel.getItem(*it) );
+		other.insertItemCopy( m_ctImageModel.getItem(*it) );
 	}
 }

@@ -56,12 +56,12 @@ class DicomSelectorDialog : public QDialog, private Ui_DicomSelectDialog
 	/*!
 	\param name Contains the filename to the file or directory.
 	*/
-	void setFileOrDirectory( const QString &name ) { fileNames.clear(); fileNames.push_back( name ); }
+	void setFileOrDirectory( const QString &name ) { m_fileNames.clear(); m_fileNames.push_back( name ); }
 	///Sets a list of filenames.
 	/*!
 	\param names Contains the names to the files.
 	*/
-	void setFilesOrDirectories( const QStringList &names ) { fileNames = names; }
+	void setFilesOrDirectories( const QStringList &names ) { m_fileNames = names; }
 	/// Gets a list of the selected image data.
 	/*!
 	\param other Contains the image model.
@@ -73,9 +73,9 @@ class DicomSelectorDialog : public QDialog, private Ui_DicomSelectDialog
 	virtual void reject();
   
 	private:
-	CTImageTreeModel ctImageModel;
-	QStringList fileNames;
-	static const DicomTagList HeaderFields;
+	CTImageTreeModel m_ctImageModel;
+	QStringList m_fileNames;
+	static const DicomTagList m_HeaderFields;
 };
 
 

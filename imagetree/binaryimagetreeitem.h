@@ -95,12 +95,12 @@ class BinaryImageTreeItem : public ITKVTKTreeItem< BinaryImageType > {
 	/*!
 	\return Name of the TreeItem.
 	*/
-    const QString &getName() const { return name; }
+    const QString &getName() const { return m_name; }
 	///Setter for the item name
 	/*!
 	\param _name Contains the new name of the TreeItem.
 	*/
-    void setName(const QString &_name) { name = _name; }
+    void setName(const QString &_name) { m_name = _name; }
 
 	///Draws or erases a sphere at the overlay 
 	/*!
@@ -134,12 +134,12 @@ class BinaryImageTreeItem : public ITKVTKTreeItem< BinaryImageType > {
     /*!
 	\return The color of the segment.
 	*/
-	const QColor &getColor() const { return color;}
+	const QColor &getColor() const { return m_color;}
 	///Setter for the item color.
 	/*!
 	\param newColot Contains the new item color.
 	*/
-    void setColor(const QColor &newColor) { color = newColor; }
+    void setColor(const QColor &newColor) { m_color = newColor; }
     ///Applies a threshold filter with given borders to the parent image.
 	/*!
 	\param lower The lower gray value.
@@ -182,17 +182,17 @@ class BinaryImageTreeItem : public ITKVTKTreeItem< BinaryImageType > {
   private:
 	///Creates a random color and sets it to the overlay.
     void createRandomColor();
-    QString name; // name of the TreeItem
-    QColor color;// color of the TreeItem
+    QString m_name; // name of the TreeItem
+    QColor m_color;// color of the TreeItem
     
   protected:    
 	
-    BinaryImageTreeItem():volumeMtime(0) {};
+    BinaryImageTreeItem():m_volumeMtime(0) {};
 
   private:
-    long unsigned volumeMtime;
-    double volumeInML;
-    ConnectorHandle imageKeeper;
+    long unsigned m_volumeMtime;
+    double m_volumeInML;
+    ConnectorHandle m_imageKeeper;
     friend class boost::serialization::access;
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version);

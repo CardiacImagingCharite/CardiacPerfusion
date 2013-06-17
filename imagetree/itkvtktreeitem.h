@@ -67,12 +67,12 @@ class ITKVTKTreeItem : public TreeItem {
     class ConnectorData : public VTKConnectorDataBase {
       public:
 	virtual vtkImageData *getVTKImageData() const {
-	  if (connector.IsNotNull()) return connector->GetOutput();
+	  if (m_connector.IsNotNull()) return m_connector->GetOutput();
 	  return NULL;
 	}
 	virtual size_t getSize() const {
-	  if (itkImage) {
-	    typename ImageType::RegionType reg = itkImage->GetBufferedRegion();
+	  if (m_itkImage) {
+	    typename ImageType::RegionType reg = m_itkImage->GetBufferedRegion();
 	    return reg.GetSize(0) * reg.GetSize(1) * reg.GetSize(2) * sizeof(typename ImageType::PixelType);
 	  }
 	  return 0;
@@ -80,19 +80,19 @@ class ITKVTKTreeItem : public TreeItem {
 	ConnectorData(
 	  ITKVTKTreeItem<TImage> *baseItem_, 
 	  typename ImageType::Pointer itkImage_)
-	    :VTKConnectorDataBase(baseItem_), connector(ConnectorType::New()) {
+	    :VTKConnectorDataBase(baseItem_), m_connector(ConnectorType::New()) {
 	      setITKImage( itkImage_ );
 	    }
-	typename ConnectorType::Pointer getConnector() const { return connector; }
-	typename ImageType::Pointer getITKImage() const { return itkImage; }
+	typename ConnectorType::Pointer getConnector() const { return m_connector; }
+	typename ImageType::Pointer getITKImage() const { return m_itkImage; }
 	void setITKImage(typename ImageType::Pointer i) { 
-	  itkImage = i;
-	  connector->SetInput(i);
-	  connector->Update();
+	  m_itkImage = i;
+	  m_connector->SetInput(i);
+	  m_connector->Update();
 	}
       private:
-      typename ImageType::Pointer itkImage;
-      typename ConnectorType::Pointer connector;
+      typename ImageType::Pointer m_itkImage;
+      typename ConnectorType::Pointer m_connector;
     };
 
     typedef VTKConnectorDataBasePtr ConnectorHandle;
@@ -106,7 +106,7 @@ class ITKVTKTreeItem : public TreeItem {
       if (!connData) {
 	const_cast<ITKVTKTreeItem<TImage>*>(this)->retrieveITKImage(progress, progressScale, progressBase);
 	connData = m_weakConnector.lock();
-      } else { 	model->registerConnectorData(connData); }
+      } else { 	m_model->registerConnectorData(connData); }
 //      dynamic_cast<ConnectorData*>(connData.get())->getConnector()->Update();
       return connData;
     }
@@ -132,7 +132,7 @@ class ITKVTKTreeItem : public TreeItem {
 	  ConnectorData *conn =  dynamic_cast<ConnectorData*>(connData.get());
 	  conn->setITKImage(image);
 	}
-	model->registerConnectorData(connData);
+	m_model->registerConnectorData(connData);
       }
     }
 

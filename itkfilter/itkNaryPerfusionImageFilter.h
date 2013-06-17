@@ -70,15 +70,15 @@ public:
 		GammaFunctions::GammaVariate gamma;
 		OutputValueType A = NumericTraits< TOutput >::NonpositiveMin();
 		
-		if(B.size() == times.size())
+		if(B.size() == m_times.size())
 		{
 			for( unsigned int i = 0; i < B.size(); i++)
 			{
-				gamma.addSample(times[i], B[i]);
+				gamma.addSample(m_times[i], B[i]);
 			}
 
 			gamma.findFromSamples();
-			A = static_cast< OutputValueType >( 60 * gamma.getMaxSlope() / arteryGamma.getMaximum() );
+			A = static_cast< OutputValueType >( 60 * gamma.getMaxSlope() / m_arteryGamma.getMaximum() );
 			if(!isNumber(A) || !isFiniteNumber(A))
 				A = 0;
 		}
@@ -101,7 +101,7 @@ public:
 	*/
 	inline void setTimePoints(const std::vector< double > &_times)
 	{
-		times = _times;
+		m_times = _times;
 	}
 	///Sets the artery segment.
 	/*!
@@ -109,7 +109,7 @@ public:
 	*/
 	inline void setArteryGammaFunction(const GammaFunctions::GammaVariate &gamma)
 	{
-		arteryGamma = gamma;
+		m_arteryGamma = gamma;
 	}
 	///Checks, if the value is a number. 
 	/*!
@@ -133,8 +133,8 @@ public:
 	}
 
 private:
-	std::vector< double > times;
-	GammaFunctions::GammaVariate arteryGamma;
+	std::vector< double > m_times;
+	GammaFunctions::GammaVariate m_arteryGamma;
 
 
 };

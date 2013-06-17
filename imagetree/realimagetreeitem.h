@@ -94,12 +94,12 @@ class RealImageTreeItem : public ITKVTKTreeItem< RealImageType > {
 	/*!
 	\return Name of the TreeItem.
 	*/
-    const QString &getName() const { return name; }
+    const QString &getName() const { return m_name; }
 	///Setter for the item name
 	/*!
 	\param _name Contains the new name of the TreeItem.
 	*/
-    void setName(const QString &_name) { name = _name; }
+    void setName(const QString &_name) { m_name = _name; }
 	///Setter for the colormap of the item
 	/*!
 	\param _name Contains the new colormap of the TreeItem.
@@ -132,7 +132,7 @@ class RealImageTreeItem : public ITKVTKTreeItem< RealImageType > {
     }
     
   private:
-    QString name; // name of the TreeItem
+    QString m_name; // name of the TreeItem
 	vtkLookupTable* m_colorMap;
     
   protected:

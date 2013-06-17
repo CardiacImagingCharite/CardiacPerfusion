@@ -57,12 +57,12 @@ class GammaVariate {
     typedef std::set< Sample > SampleSetType;
     typedef SampleSetType::const_iterator SampleIt;
     typedef boost::shared_ptr< const SampleSetType > SampleSetConstPtrType;
-    GammaVariate():nonConstSamples(new SampleSetType), samples(nonConstSamples) {};
+    GammaVariate():m_nonConstSamples(new SampleSetType), m_samples(m_nonConstSamples) {};
 	///Sets a sample set.
 	/*!
 	\param sset Sample set.
 	*/
-    void setSamples(SampleSetConstPtrType sset) { samples = sset; nonConstSamples.reset();}
+    void setSamples(SampleSetConstPtrType sset) { m_samples = sset; m_nonConstSamples.reset();}
 	///Adds a sample to the set. 
 	/*!
 	\param t time
@@ -107,7 +107,7 @@ class GammaVariate {
     void findFromSamples();
 	///Getter for all relevant parameter.
     void getParameters( double &t0_, double &tmax_, double &y0_, double &ymax_, double &alpha_ ) {
-      t0_ = t0; tmax_ = t0max; y0_ = y0; ymax_ = y0max; alpha_ = alpha;
+      t0_ = m_t0; tmax_ = m_t0max; y0_ = m_y0; ymax_ = m_y0max; alpha_ = m_alpha;
     }
 	///Setter for all relevant parameter.
     void setParameters( double t0_, double tmax_, double y0_, double ymax_, double alpha_ );
@@ -124,13 +124,13 @@ class GammaVariate {
 
   private:
     void optimize();
-    double t0;
-    double t0max;
-    double y0;
-    double y0max;
-    double alpha;
-    boost::shared_ptr< SampleSetType > nonConstSamples;
-    SampleSetConstPtrType samples;
+    double m_t0;
+    double m_t0max;
+    double m_y0;
+    double m_y0max;
+    double m_alpha;
+    boost::shared_ptr< SampleSetType > m_nonConstSamples;
+    SampleSetConstPtrType m_samples;
 };
 
 }

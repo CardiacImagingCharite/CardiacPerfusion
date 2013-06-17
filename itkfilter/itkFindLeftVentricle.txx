@@ -76,6 +76,9 @@ namespace itk
 		int yDenominator = 0;
 		int zDenominator = 0;
 		
+		// do shrinikg or not
+		bool doShrinking = true;
+			
 		typedef typename TInputImage::ValueType ValType;
 		
 		ValType Threshold = 150; // minimum (max value - value of 1st phase)
@@ -112,9 +115,6 @@ namespace itk
 			std::cout << i << endl;
 			std::cout << "getITKImage\t\t\t\tdone\t( " << clock2.GetMean() << "s )" << std::endl;
 
-			// do shrinikg or not
-			bool doShrinking = true;
-			
 			// set shrink factors
 			if ( i == 0 )
 			{
@@ -122,7 +122,7 @@ namespace itk
 				yDenominator = ImagePtr->GetLargestPossibleRegion().GetSize()[1] / m_AimedMatrixSize;
 				zDenominator = ImagePtr->GetLargestPossibleRegion().GetSize()[2] / m_AimedMatrixSize;
 				
-				if ( !( xDenominator > 0 && yDenominator > 0 && zDenominator > 0 ) ) doShrinking = false;
+				if ( !( xDenominator > 1 && yDenominator > 1 && zDenominator > 1 ) ) doShrinking = false;
 			}
 			
 			typename TInputImage::Pointer outImage;

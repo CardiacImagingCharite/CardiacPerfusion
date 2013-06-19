@@ -1114,11 +1114,11 @@ void KardioPerfusion::on_btn_highResolution_clicked()
 void KardioPerfusion::loadHighResolution()
 {
 	CTImageTreeItem *item = dynamic_cast<CTImageTreeItem*>( m_displayedCTImage->getBaseItem() );
-	if ( item->isShrinked() )
+	if ( item->isCurrentlyShrinked() )
 	{
 		// retrieve (non shrinked) image from disk
 		item->retrieveITKImage();
-		item->setShrinked(false);
+		item->setCurrentImageShrinked(false);
 	}
 	setImage(item);
 }

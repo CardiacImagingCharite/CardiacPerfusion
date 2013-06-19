@@ -600,6 +600,8 @@ void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 	ar & m_itemUID;
 	uint64_t fnListLength;
 	ar & fnListLength;
+	uint64_t ishrinkFactorForSaving;
+	ar & ishrinkFactorForSaving;
 	ImageType::Pointer ctIm;
 	ar & ctIm;
 	std::string fn;
@@ -611,7 +613,7 @@ void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 	ar & m_HeaderFields;
 	ar & m_dict;
 	ar & boost::serialization::base_object<BaseClass>(*this);
-	setITKImage( ctIm );
+	setITKImage( ctIm, ishrinkFactorForSaving );
 	boost::filesystem::path serPath( m_model->getSerializationPath() );
 	serPath = serPath.parent_path();
 	for( std::list<std::string>::const_iterator path = pathList.begin(); path != pathList.end(); ++path) {
@@ -622,7 +624,6 @@ void CTImageTreeItem::load(Archive & ar, const unsigned int version) {
 		m_fnList.insert(fnPath.string());
 	}
 	ar & m_segmentationValueCache;
-	ar & m_IsShrinked;
 }
 
 template<class Archive>
@@ -630,7 +631,9 @@ void CTImageTreeItem::save(Archive & ar, const unsigned int version) const {
 	ar & m_itemUID;
 	const uint64_t fnListLength = m_fnList.size();
 	ar & fnListLength;
-	ImageType::Pointer ctIm = getITKImage();
+	uint64_t ishrinkFactorForSaving(m_shrinkFactorForSaving);
+	ar & ishrinkFactorForSaving;
+	ImageType::Pointer ctIm = getITKImageByShrinkFactor(m_shrinkFactorForSaving);
 	ar & ctIm;
 	boost::filesystem::path serPath( absoluteDirectory( m_model->getSerializationPath() ) );
 	BOOST_FOREACH( const std::string &name, m_fnList ) {
@@ -644,7 +647,6 @@ void CTImageTreeItem::save(Archive & ar, const unsigned int version) const {
 	ar & m_dict;
 	ar & boost::serialization::base_object<BaseClass>(*this);
 	ar & m_segmentationValueCache;
-	ar & m_IsShrinked;
 }
 
 

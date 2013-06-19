@@ -193,11 +193,11 @@ class CTImageTreeModel : public QAbstractItemModel {
     const std::string &getSerializationPath() const { return m_serializationPath; }
     ///Removes all items.
     void removeAllItems();
-    ///Shrinks all CTImageTreeItem
+    ///Set the shrink factor for saving for all CTImageTreeItems
     /*!
-    \param shrinkFactor The Shrink Factor for the CTImageTreeItems
+    \param shrinkFactor The shrink factor for the CTImageTreeItems used for saving
     */
-    void shrinkAllCTImageTreeItems(unsigned int shrinkFactor);
+    void setShrinkFactorSavingForAllCTImageItems(unsigned int shrinkFactor);
   
     friend class TreeItem;
     friend class CTImageTreeItem;

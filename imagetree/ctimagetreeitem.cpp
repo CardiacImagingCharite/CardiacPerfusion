@@ -54,10 +54,11 @@
 #include <boost/accumulators/statistics/mean.hpp>
 
 #include "itkImageFileWriter.h"
+#include "itkShrinkAverageFilter.h"
 
 //Constructor
 CTImageTreeItem::CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict, bool IsShrinked, bool ResolutionChanged )
-  :BaseClass(parent),m_HeaderFields(headerFields),m_dict(_dict),m_imageTime(-1),m_IsShrinked(IsShrinked),m_ResolutionChanged(ResolutionChanged) {
+  :BaseClass(parent),m_HeaderFields(headerFields),m_dict(_dict),m_imageTime(-1),m_currentImageIsShrinked(IsShrinked),m_ResolutionChanged(ResolutionChanged) {
     getUIDFromDict(m_dict, m_itemUID);
 }
 
@@ -411,7 +412,7 @@ void CTImageTreeItem::retrieveITKImage(QProgressDialog *progress, int progressSc
 	}
 	//assign the reader output to an image pointer
 	ImageType::Pointer imagePtr =  imageReader->GetOutput();
-	setITKImage(imagePtr);
+	setITKImage(imagePtr, 1);
 	//emit signal, that data has changed
 	m_model->dataChanged(m_model->createIndex(childNumber(),0,parent()),m_model->createIndex(childNumber(),columnCount()-1,parent()));
 }
@@ -426,11 +427,11 @@ void CTImageTreeItem::getUIDFromDict(const itk::MetaDataDictionary &dict, std::s
 		itk::ExposeMetaData( dict, getSOPInstanceUIDTag(), iUID );
 }
 
-void CTImageTreeItem::setShrinked(bool shrinked) const
+void CTImageTreeItem::setCurrentImageShrinked(bool shrinked) const
 {
-	if ( shrinked != m_IsShrinked )
+	if ( shrinked != m_currentImageIsShrinked )
 	{
-		const_cast<CTImageTreeItem*>(this)->m_IsShrinked = shrinked;
+		const_cast<CTImageTreeItem*>(this)->m_currentImageIsShrinked = shrinked;
 		setResolutionChanged(true);
 	}
 }
@@ -438,6 +439,86 @@ void CTImageTreeItem::setShrinked(bool shrinked) const
 void CTImageTreeItem::setResolutionChanged(bool changed) const
 {
 	const_cast<CTImageTreeItem*>(this)->m_ResolutionChanged = changed;
+}
+
+void CTImageTreeItem::setITKImage(CTImageType::Pointer image, unsigned int shrinkFactor)
+{
+	BaseClass::setITKImage(image);
+	addImageToMap(image, shrinkFactor);
+	if ( shrinkFactor > 1 )
+		setCurrentImageShrinked(true);
+}
+
+void CTImageTreeItem::addImageToMap(CTImageType::Pointer image, unsigned int shrinkFactor)
+{
+	// add image to map, if shrink factor is not a key of the map
+	if ( !m_imageMap.count(shrinkFactor) )
+		m_imageMap.insert(ValuePair(shrinkFactor, image));
+}
+
+CTImageType::Pointer CTImageTreeItem::getITKImageByShrinkFactor(unsigned int shrinkFactor) const
+{
+	// find the image in the map by its key (shrinkFactor)
+	ImageMapType::const_iterator imageIt = m_imageMap.find(shrinkFactor);
+
+	// return the image if it exist in the map
+	// if not, create the image (by shrinking)
+	if ( imageIt != m_imageMap.end() )
+	{
+		return imageIt->second;
+	}
+	else
+	{
+		// if map is empty, retrieve the image, shrink an return it
+		// if not, search for the largest usable shrink factor and shrink this image again
+		if ( m_imageMap.empty() )
+		{
+			retrieveITKImage();
+			imageIt = m_imageMap.find(1);
+			return shrinkImage(imageIt->second, shrinkFactor);
+		}
+		else
+		{
+			unsigned int bestFactor = 0;
+			for ( auto kv : m_imageMap )
+			{
+				unsigned int currentFactor = kv.first;
+				// check if usable and the largest
+				if ( currentFactor < shrinkFactor && (shrinkFactor % currentFactor == 0) && currentFactor > bestFactor)
+					bestFactor = currentFactor;
+			}
+			
+			// if non usable is found, retrieve, shrink and return it
+			// if one is found, shrink with the fraction and return it
+			if ( bestFactor == 0 )
+			{
+				retrieveITKImage();
+				imageIt = m_imageMap.find(1);
+				return shrinkImage(imageIt->second, shrinkFactor);
+			}
+			else
+			{
+				unsigned int newShrinkFactor = shrinkFactor / bestFactor;
+				imageIt = m_imageMap.find(bestFactor);
+				return shrinkImage(imageIt->second, newShrinkFactor);
+			}
+		}
+	}
+}
+
+CTImageType::Pointer CTImageTreeItem::shrinkImage(CTImageType::Pointer inputImage, unsigned int shrinkFactor)
+{
+	typedef itk::ShrinkAverageFilter<CTImageType, CTImageType> ShrinkAverageFilterType;
+	typename ShrinkAverageFilterType::Pointer shrinkAverageFilter = ShrinkAverageFilterType::New();
+	shrinkAverageFilter->SetInput( inputImage );
+	shrinkAverageFilter->SetShrinkFactor(0, shrinkFactor);
+	shrinkAverageFilter->SetShrinkFactor(1, shrinkFactor);
+	shrinkAverageFilter->SetShrinkFactor(2, shrinkFactor);
+	shrinkAverageFilter->SetNumberOfThreads(8);
+	shrinkAverageFilter->Update();
+	typename CTImageType::Pointer outputImage = shrinkAverageFilter->GetOutput();
+
+	return outputImage;
 }
 
 

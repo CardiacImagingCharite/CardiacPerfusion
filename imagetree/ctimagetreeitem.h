@@ -39,6 +39,7 @@
 #include <itkvtktreeitem.h>
 #include <imagedefinitions.h>
 #include <string>
+#include <unordered_map>
 #include <boost/shared_ptr.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -145,13 +146,43 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
 	*/
 	static inline bool isRealHUvalue(CTPixelType value) { return (value!=-2048)?true:false; }
 	///Set status of m_IsShrinked
-	void setShrinked(bool shrinked=true) const;
-	///Get status of m_IsShrinked
-	bool isShrinked(void) const { return m_IsShrinked; }
+	void setCurrentImageShrinked(bool shrinked=true) const;
+	///Get status of m_currentImageIsShrinked
+	bool isCurrentlyShrinked(void) const { return m_currentImageIsShrinked; }
 	///Set status of m_ResolutionChanged
 	void setResolutionChanged(bool changed=true) const;
 	///Get status of m_ResolutionChanged
 	bool isResolutionChanged(void) const { return m_ResolutionChanged; }
+	///Add an image with its shrinkFactor to the imageMap
+	/*!
+	\param shrinkFactor shrink factor of the image
+	*/
+	void addImageToMap(typename CTImageType::Pointer image, unsigned int shrinkFactor = 1);
+	///Get a shrinked ITK Image from imageMap
+	/*!
+	\param shrinkFactor shrink factor of the image
+	\return A pointer to the shrinked image
+	*/
+	CTImageType::Pointer getITKImageByShrinkFactor(unsigned int shrinkFactor = 1) const;
+	///shrink and return an CTImageType
+	/*!
+	\param inputImage input image to be shrinked
+	\param shrinkFactor shrink factor
+	\return A pointer to the shrinked image
+	*/
+	CTImageType::Pointer shrinkImage(typename CTImageType::Pointer inputImage, unsigned int shrinkFactor);
+	///set the shrink factor used for saving
+	/*!
+	\param shrinkFactor shrink factor
+	*/
+	void setShrinkFactorForSaving(unsigned int shrinkFactor) { m_shrinkFactorForSaving = shrinkFactor; }
+	///Reimplemenation form ITKVTKTreeItem
+	///sets the current image, add the image and its shrink factor to the image map
+	/*!
+	\param image pointer to the input image
+	\param shrinkFactor shrink factor of the input image
+	*/
+	void setITKImage(typename CTImageType::Pointer image, unsigned int shrinkFactor = 1);
     
     typedef std::map< const ITKVTKTreeItem<BinaryImageType> *, SegmentationValues > SegmentationValueMap;
     ///Identifies the type of a TreeItem.
@@ -167,6 +198,9 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
       return false;
     }
     
+    typedef std::unordered_map< unsigned int, CTImageType::Pointer > ImageMapType;
+    typedef ImageMapType::value_type ValuePair;
+    ImageMapType m_imageMap; ///<map of shrink factor and correponding CTImageType::Pointer
     
   protected:
     SegmentationValueMap m_segmentationValueCache;
@@ -191,8 +225,9 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
     double m_imageTime;
 
   private:
-    bool m_IsShrinked;
-    bool m_ResolutionChanged;
+    bool m_currentImageIsShrinked; ///<true if current image is shrinked
+    bool m_ResolutionChanged; ///<true if resolution (shrink factor) is changed
+    unsigned int m_shrinkFactorForSaving; ///<shrink factor for serialization
 
     friend class boost::serialization::access;
     

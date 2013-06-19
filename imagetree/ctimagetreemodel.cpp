@@ -249,36 +249,18 @@ void CTImageTreeModel::openModelFromFile(const std::string &fname) {
 }
 
 void CTImageTreeModel::saveModelToFile(const std::string &fname, unsigned int shrinkFactor) {
-	shrinkAllCTImageTreeItems(shrinkFactor);
+	setShrinkFactorSavingForAllCTImageItems(shrinkFactor);
 	serializeCTImageTreeModelToFile(*this, fname);
 }
 
-void CTImageTreeModel::shrinkAllCTImageTreeItems(unsigned int shrinkFactor)
+void CTImageTreeModel::setShrinkFactorSavingForAllCTImageItems(unsigned int shrinkFactor)
 {
-	typedef itk::ShrinkAverageFilter<CTImageType, CTImageType> ShrinkAverageFilterType;
-	
 	int rows = this->rowCount();
-	
 	for ( int i = 0; i < rows; i++ )
 	{
 		QModelIndex ImIdx = this->index(i, 1);
 		TreeItem* item = &this->getItem(ImIdx);
 		CTImageTreeItem *currentItem = dynamic_cast<CTImageTreeItem*>(item);
-		typename CTImageType::Pointer ImagePtr = currentItem->getITKImage();
-
-		typename ShrinkAverageFilterType::Pointer shrinkAverageFilter = ShrinkAverageFilterType::New();
-		shrinkAverageFilter->SetInput( ImagePtr );
-		shrinkAverageFilter->SetShrinkFactor(0, shrinkFactor);
-		shrinkAverageFilter->SetShrinkFactor(1, shrinkFactor);
-		shrinkAverageFilter->SetShrinkFactor(2, shrinkFactor);
-		shrinkAverageFilter->SetNumberOfThreads(8);
-		shrinkAverageFilter->Update();
-		typename CTImageType::Pointer outImage = shrinkAverageFilter->GetOutput();
-
-		currentItem->setITKImage(outImage);
-		if ( shrinkFactor != 1 ) 
-			currentItem->setShrinked(true);
+		currentItem->setShrinkFactorForSaving(shrinkFactor);
 	}
 }
-
-

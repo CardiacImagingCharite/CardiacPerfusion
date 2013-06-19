@@ -447,6 +447,7 @@ void CTImageTreeItem::setITKImage(CTImageType::Pointer image, unsigned int shrin
 	addImageToMap(image, shrinkFactor);
 	if ( shrinkFactor > 1 )
 		setCurrentImageShrinked(true);
+	setCurrentImageShrinkFactor(shrinkFactor);
 }
 
 void CTImageTreeItem::addImageToMap(CTImageType::Pointer image, unsigned int shrinkFactor)

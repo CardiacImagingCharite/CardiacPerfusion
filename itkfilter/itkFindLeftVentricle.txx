@@ -98,9 +98,10 @@ namespace itk
 			// get image
 			QModelIndex ImIdx = model->index(i, 1);
 			TreeItem* item = &model->getItem(ImIdx);
-			CTImageTreeItem *currentImage = dynamic_cast<CTImageTreeItem*>(item);
+			CTImageTreeItem *currentItem = dynamic_cast<CTImageTreeItem*>(item);
 			clock2.Start();
-			typename TInputImage::Pointer ImagePtr = currentImage->getITKImage();
+			typename TInputImage::Pointer ImagePtr = currentItem->getITKImage();
+			unsigned int currentShrinkFactor = currentItem->getCurrentImageShrinkFactor();
 			
 			clock2.Stop();
 			std::cout << i << endl;
@@ -108,11 +109,12 @@ namespace itk
 
 			// set shrink factors, assuming that x-size and y-size is the same
 			unsigned int shrinkFactor = ImagePtr->GetLargestPossibleRegion().GetSize()[0] / m_AimedMatrixSize;
+			shrinkFactor *= currentShrinkFactor;
 
 			itk::TimeProbe clock4;
 			clock4.Start();
 			
-			typename TInputImage::Pointer outImage = currentImage->getITKImageByShrinkFactor(shrinkFactor);
+			typename TInputImage::Pointer outImage = currentItem->getITKImageByShrinkFactor(shrinkFactor);
 			
 			clock4.Stop();
 			std::cout << "getITKImageByShrinkFactor\t\tdone\t( " << clock4.GetMean() << "s )" << std::endl;
@@ -125,7 +127,7 @@ namespace itk
 				xSize = outSize[0];
 				ySize = outSize[1];
 				zSize = outSize[2];
-			
+				
 				// resize the 3D vectors
 				N.resize(xSize, std::vector<std::vector<ValType> > (ySize, std::vector<ValType>(zSize) ) );
 				Max.resize(xSize, std::vector<std::vector<ValType> > (ySize, std::vector<ValType>(zSize) ) );

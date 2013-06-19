@@ -147,6 +147,10 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
 	static inline bool isRealHUvalue(CTPixelType value) { return (value!=-2048)?true:false; }
 	///Set status of m_IsShrinked
 	void setCurrentImageShrinked(bool shrinked=true) const;
+	///Set the shrink factor of the current image
+	void setCurrentImageShrinkFactor(unsigned int shrinkFactor) { m_currentImageShrinkFactor = shrinkFactor; }
+	///Get the shrink factor of the current image
+	unsigned int getCurrentImageShrinkFactor(void) { return m_currentImageShrinkFactor; }
 	///Get status of m_currentImageIsShrinked
 	bool isCurrentlyShrinked(void) const { return m_currentImageIsShrinked; }
 	///Set status of m_ResolutionChanged
@@ -227,6 +231,7 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
   private:
     bool m_currentImageIsShrinked; ///<true if current image is shrinked
     bool m_ResolutionChanged; ///<true if resolution (shrink factor) is changed
+    unsigned int m_currentImageShrinkFactor; ///<shrink factor of the current image
     unsigned int m_shrinkFactorForSaving; ///<shrink factor for serialization
 
     friend class boost::serialization::access;

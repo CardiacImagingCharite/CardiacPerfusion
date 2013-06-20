@@ -42,6 +42,7 @@
 #include <itkContinuousIndex.h>
 #include <itkObjectFactory.h>
 #include <itkProgressReporter.h>
+#include <itkVariableLengthVector.h>
 #include <boost/type_traits.hpp>
 #include <boost/mpl/if.hpp>
 
@@ -145,18 +146,25 @@ namespace itk
 		typedef typename boost::mpl::if_< boost::is_integral<InputImagePixelType>, long int, double >::type ValType;
 
 		// sum of all pixel values of the corresponding input values for each output pixel
-		std::vector<ValType> valSum(outputPixelNumber, 0);
+		typedef itk::VariableLengthVector<ValType> VectorValSumType;
+		VectorValSumType valSum;
+		valSum.SetSize(outputPixelNumber);
+		valSum.Fill(0);
 		
 		// iterator for input image
 		typedef ImageRegionConstIterator< TInputImage > InputImageIterator;
 		InputImageIterator inIt(inputPtr, inputRegion);
 		
 		unsigned outIdx = 0;
-		std::vector<unsigned> outIdxA(OutputImageType::ImageDimension, 0);
+		typedef itk::VariableLengthVector<unsigned> VectorUnsignedType;
+		VectorUnsignedType outIdxA;
+		outIdxA.SetSize(OutputImageType::ImageDimension);
+		outIdxA.Fill(0);
 
 		InputIndexType indexInsideOutputBlock;
 
-		std::vector< unsigned > outBlockSizePerDimension(OutputImageType::ImageDimension);
+		VectorUnsignedType outBlockSizePerDimension;
+		outBlockSizePerDimension.SetSize(OutputImageType::ImageDimension);
 		unsigned osize = 1;
 		for(unsigned dim = 0; dim < OutputImageType::ImageDimension; dim++) {
 			outBlockSizePerDimension[dim] = osize;

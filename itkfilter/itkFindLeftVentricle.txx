@@ -36,6 +36,7 @@
 
 #include "ctimagetreemodel.h"
 #include <itkTimeProbe.h>
+#include <itkImageRegionConstIterator.h>
 #include <vector>
 
 
@@ -65,10 +66,8 @@ namespace itk
 		int rows = model->rowCount();
 		std::cerr << "Number of input files = " << rows << endl;
 		
-		// Size of the images, values set when analysing 1st image
-		int xSize = 0;
-		int ySize = 0;
-		int zSize = 0;
+		// Size of the images, value set when analysing 1st image
+		unsigned int outputPixelNum = 1;
 		
 		typedef typename TInputImage::ValueType ValType;
 		
@@ -76,15 +75,12 @@ namespace itk
 		ValType MinN = 30;       // minimum value of 1st phase
 		ValType MaxN = 150;      // maximum value of 1st phase
 		
-		// 3D vector
-		typedef std::vector<std::vector<std::vector<ValType> > > Tensor; 
-		
 		// value of 1st phase for each voxel
-		Tensor N;
+		std::vector<ValType> N;
 		// maximum value for each voxel
-		Tensor Max;
+		std::vector<ValType> Max;
 		// number of phase for the maximum
-		Tensor Time;
+		std::vector<ValType> Time;
 		
 		// histogram for the number of phases (of the maxima)
 		std::vector<int> TimeHist(rows+1, 0);
@@ -124,63 +120,53 @@ namespace itk
 			// set vector size
 			if ( i == 0 ) 
 			{
-				xSize = outSize[0];
-				ySize = outSize[1];
-				zSize = outSize[2];
+				for ( unsigned int dim = 0; dim < TInputImage::ImageDimension; dim++ )
+				{
+					outputPixelNum *= outSize[dim];
+				}
 				
-				// resize the 3D vectors
-				N.resize(xSize, std::vector<std::vector<ValType> > (ySize, std::vector<ValType>(zSize) ) );
-				Max.resize(xSize, std::vector<std::vector<ValType> > (ySize, std::vector<ValType>(zSize) ) );
-				Time.resize(xSize, std::vector<std::vector<ValType> > (ySize, std::vector<ValType>(zSize) ) );
+				N.resize(outputPixelNum);
+				Max.resize(outputPixelNum);
+				Time.resize(outputPixelNum);
 			}
 			
 			typename TInputImage::IndexType VoIdx; // Voxel index
 			
-			for (int x = 0; x < xSize; x++)
+			typedef ImageRegionConstIterator<TInputImage> ImageIteratorType;
+			ImageIteratorType imIt( outImage, outImage->GetLargestPossibleRegion() );
+			
+			unsigned int outpix = 0;
+			
+			while ( !imIt.IsAtEnd() )
 			{
-
-				VoIdx[0] = x;
-				for (int y = 0; y < ySize; y++)
+				ValType val = imIt.Get();
+				
+				if ( i == 0 )
 				{
-					VoIdx[1] = y;
-					for (int z = 0; z < zSize; z++)
-					{
-						VoIdx[2] = z;
-						ValType val = outImage->GetPixel(VoIdx);
-						
-						if ( i==0 ) 
-						{
-							N[x][y][z] = val;
-							Max[x][y][z] = val;
-						}
-						
-						if ( val > Max[x][y][z] ) 
-						{
-							Max[x][y][z] = val;
-							Time[x][y][z] = i;
-						}
-						
-					}
+					N[outpix] = val;
+					Max[outpix] = val;
 				}
+				
+				if ( val > Max[outpix] )
+				{
+					Max[outpix] = val;
+					Time[outpix] = i;
+				}
+				
+				++outpix;
+				++imIt;
 			}
+
+			
 		}
 		
 		// analyse
 		
 		// loop over all voxel
-		for (int x = 0; x < xSize; x++)
+		for ( unsigned int pix = 0; pix < outputPixelNum; pix ++ )
 		{
-			for (int y = 0; y < ySize; y++)
-			{
-				for (int z = 0; z < zSize; z++)
-				{
-					// fill time histogram
-					// if ( M - N > Threshold && N > MinN && N < MaxN ) fill TimeHist in corresponding bin (phase)
-					// else	fill the 'otherwise' bin
-					if ( Max[x][y][z] - N[x][y][z] > Threshold && N[x][y][z] > MinN && N[x][y][z] < MaxN ) TimeHist[Time[x][y][z]]++;
-					else TimeHist[rows]++;
-				}
-			}
+			if ( Max[pix] - N[pix] > Threshold && N[pix] > MinN && N[pix] < MaxN ) TimeHist[Time[pix]]++;
+			else TimeHist[rows]++;
 		}
 		
 		// find the maximum bin

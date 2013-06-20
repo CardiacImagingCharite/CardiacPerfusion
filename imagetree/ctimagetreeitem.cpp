@@ -470,13 +470,16 @@ CTImageType::Pointer CTImageTreeItem::getITKImageByShrinkFactor(unsigned int shr
 	}
 	else
 	{
+		CTImageType::Pointer newImage; // new Image for output
+
 		// if map is empty, retrieve the image, shrink an return it
 		// if not, search for the largest usable shrink factor and shrink this image again
 		if ( m_imageMap.empty() )
 		{
 			retrieveITKImage();
+			//now image with shrink factor = 1 is set in the map
 			imageIt = m_imageMap.find(1);
-			return shrinkImage(imageIt->second, shrinkFactor);
+			newImage = shrinkImage(imageIt->second, shrinkFactor);
 		}
 		else
 		{
@@ -495,15 +498,20 @@ CTImageType::Pointer CTImageTreeItem::getITKImageByShrinkFactor(unsigned int shr
 			{
 				retrieveITKImage();
 				imageIt = m_imageMap.find(1);
-				return shrinkImage(imageIt->second, shrinkFactor);
+				newImage = shrinkImage(imageIt->second, shrinkFactor);
 			}
 			else
 			{
 				unsigned int newShrinkFactor = shrinkFactor / bestFactor;
 				imageIt = m_imageMap.find(bestFactor);
-				return shrinkImage(imageIt->second, newShrinkFactor);
+				newImage = shrinkImage(imageIt->second, newShrinkFactor);
 			}
 		}
+		
+		// add the new Image to the map
+		addImageToMap(newImage, shrinkFactor);
+		
+		return newImage;
 	}
 }
 

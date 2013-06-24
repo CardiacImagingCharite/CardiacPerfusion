@@ -49,6 +49,7 @@
 
 #include <boost/assign.hpp>
 #include <boost/foreach.hpp>
+#include <thread>
 
 #include "qfiledialog.h"
 #include "qstring.h"
@@ -204,6 +205,8 @@ KardioPerfusion::KardioPerfusion():
 	
 	connect(this->m_ui->mprView_ul->GetInteractorStyle() , SIGNAL( WindowLevelDeltaChanged(int, int) ) , this->m_ui->mprView_ur->GetInteractorStyle(), SLOT( WindowLevelDelta(int, int) ) );
 	connect(this->m_ui->mprView_ul->GetInteractorStyle() , SIGNAL( WindowLevelDeltaChanged(int, int) ) , this->m_ui->mprView_lr->GetInteractorStyle(), SLOT( WindowLevelDelta(int, int) ) );
+	
+	connect(this, SIGNAL( HighResolutionLoaded(const CTImageTreeItem*) ), this, SLOT( SetHRImage(const CTImageTreeItem*) ) );
 
 };
 
@@ -283,7 +286,10 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 				}
 				this->m_ui->num_phase->display(selected.indexes()[0].row());
 				if ( this->m_ui->cb_autoHRselchanged->isChecked() )
-					loadHighResolution();
+				{
+					std::thread t(&KardioPerfusion::loadHighResolution, this, dynamic_cast<CTImageTreeItem*>(&item));
+					t.detach();
+				}
 			}
 		}
 	}
@@ -306,8 +312,12 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 					segmentShow(SegItem);
 				}
 			}
-			if ( this->m_ui->cb_autoHRclicked->isChecked() )
-				loadHighResolution();
+// 			if ( this->m_ui->cb_autoHRclicked->isChecked() )
+// 			{
+// 				std::thread t(&KardioPerfusion::loadHighResolution, this, dynamic_cast<CTImageTreeItem*>(&item));
+// 				t.detach();
+// 				std::cerr << "clicked" << endl;
+// 			}	
 		}	
 	}
 }
@@ -1100,27 +1110,25 @@ void KardioPerfusion::on_actionOpen_Project_triggered() {
   }
 }
 
-void KardioPerfusion::on_btn_highResolution_clicked()
+void KardioPerfusion::loadHighResolution( const CTImageTreeItem *imageItem )
 {
-	// if no image is selected, print warning
-	if ( !m_displayedCTImage ) {
-		QMessageBox::warning(this,tr("Error"),tr("Select one volume for changing the resolution"));
-		return;
-	}
-	
-	loadHighResolution();
-}
-
-void KardioPerfusion::loadHighResolution()
-{
-	CTImageTreeItem *item = dynamic_cast<CTImageTreeItem*>( m_displayedCTImage->getBaseItem() );
-	if ( item->isCurrentlyShrinked() )
+	if ( imageItem->isCurrentlyShrinked() )
 	{
 		// retrieve (non shrinked) image from disk
-		item->retrieveITKImage();
-		item->setCurrentImageShrinked(false);
+		imageItem->retrieveITKImage();
+		imageItem->setCurrentImageShrinked(false);
+		HighResolutionLoaded(imageItem);
 	}
-	setImage(item);
+}
+
+void KardioPerfusion::SetHighResolutionImage(const CTImageTreeItem *imageItem)
+{
+	//create ITK VTK connector
+	CTImageTreeItem::ConnectorHandle connectorPtr;
+	connectorPtr = imageItem->getVTKConnector();
+	// if displayed item and new item is the same
+	if (connectorPtr == m_displayedCTImage )
+		setImage(imageItem);
 }
 
 

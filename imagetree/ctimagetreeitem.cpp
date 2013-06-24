@@ -401,8 +401,10 @@ void CTImageTreeItem::retrieveITKImage(QProgressDialog *progress, int progressSc
 	//create reader progress
 	ReaderProgress::Pointer progressor = ReaderProgress::New();
 	if (progress) 
+	{
 		progressor->setDialog( progress, progressScale, progressBase );
-	imageReader->AddObserver(itk::AnyEvent(), progressor);
+		imageReader->AddObserver(itk::AnyEvent(), progressor);
+	}
 	//try to read the images
 	try {
 		imageReader->Update();

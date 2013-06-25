@@ -47,31 +47,23 @@
 class autoAlignHeart {
   
 public:
-  //******************************
-  // Global type definitions
-  //******************************
   // Image Types
   
-  // const unsigned int InputDimension = 3;
-  
-  typedef itk::Image< signed short, 2 > SignedShortImageType2D;
-  typedef itk::Image< signed short, 3 > SignedShortImageType3D;
-  typedef itk::Image< unsigned char, 2 > UnsignedCharImageType2D;
-  typedef itk::Image< unsigned char, 3 > UnsignedCharImageType3D;
-  typedef itk::Image< itk::Vector< unsigned char , 3>, 2> ColorImageType2D;
-  typedef itk::Image< itk::Vector< unsigned char , 3>, 3> ColorImageType3D;
+  typedef itk::Image< CTPixelType, 2 > CTImageType2D;
+  typedef itk::Image< LabelPixelType, 2 > LabelImageType2D;
+  typedef itk::Image< BinaryPixelType, 2 > BinaryImageType2D;
   
   // Further type definitions
-  typedef itk::LinearInterpolateImageFunction< SignedShortImageType3D, double > InterpolatorType;
-  typedef itk::LinearInterpolateImageFunction< UnsignedCharImageType3D, double > InterpolatorBWType;
+  typedef itk::LinearInterpolateImageFunction< CTImageType, double > InterpolatorType;
+  typedef itk::LinearInterpolateImageFunction< LabelImageType, double > InterpolatorBWType;
   typedef itk::AffineTransform< double, 3 > AffineTransformType;
   
-  typedef itk::ResampleImageFilter< SignedShortImageType3D, SignedShortImageType3D > ResampleFilterType;
-  typedef itk::ResampleImageFilter< UnsignedCharImageType3D, UnsignedCharImageType3D > ResampleFilterBWType;
+  typedef itk::ResampleImageFilter< CTImageType, CTImageType > ResampleFilterType;
+  typedef itk::ResampleImageFilter< LabelImageType, LabelImageType > ResampleFilterBWType;
 
-  typedef itk::BinaryBallStructuringElement< unsigned char, 3 > StructuringElementType;
-  typedef itk::BinaryErodeImageFilter< UnsignedCharImageType3D, UnsignedCharImageType3D, StructuringElementType > ErodeFilterType;
-  typedef itk::BinaryDilateImageFilter< UnsignedCharImageType3D,	UnsignedCharImageType3D, StructuringElementType > DilateFilterType;
+  typedef itk::BinaryBallStructuringElement< BinaryPixelType, 3 > StructuringElementType;
+  typedef itk::BinaryErodeImageFilter< LabelImageType, LabelImageType, StructuringElementType > ErodeFilterType;
+  typedef itk::BinaryDilateImageFilter< LabelImageType, LabelImageType, StructuringElementType > DilateFilterType;
 
   typedef itk::LabelMap< itk::ShapeLabelObject< itk::SizeValueType, 2> > LabelMapType2D;
   typedef itk::LabelMap< itk::ShapeLabelObject< itk::SizeValueType, 3> > LabelMapType3D;
@@ -81,26 +73,26 @@ public:
   autoAlignHeart();
   virtual ~autoAlignHeart();
   void Align();
-  AffineTransformType::Pointer getTrafo(CTImageType* InputImage, int ThresholdLow = 200, int ThresholdUp = 1000, int KernelSize = 5, int OutputSelector = 0);
+  AffineTransformType::Pointer getTrafo(CTImageType* InputImage, int ThresholdLow = 200, int ThresholdUp = 1000, int KernelSize = 5);
   double getEllipsoidLength();
   void getCenter(double pos[3]);
 
 protected:
 
-  UnsignedCharImageType3D::Pointer resampleImage( UnsignedCharImageType3D::Pointer image, AffineTransformType* transform, InterpolatorBWType* interpolator, UnsignedCharImageType3D::SpacingType& outputSpacing, bool enlargeImage );
-  SignedShortImageType3D::Pointer resampleImage( SignedShortImageType3D::Pointer image, AffineTransformType* transform, InterpolatorType* interpolator, SignedShortImageType3D::SpacingType& outputSpacing, bool enlargeImage );
+  LabelImageType::Pointer resampleImage( LabelImageType::Pointer image, AffineTransformType* transform, InterpolatorBWType* interpolator, LabelImageType::SpacingType& outputSpacing, bool enlargeImage );
+  CTImageType::Pointer resampleImage( CTImageType::Pointer image, AffineTransformType* transform, InterpolatorType* interpolator, CTImageType::SpacingType& outputSpacing, bool enlargeImage );
   
-  UnsignedCharImageType3D::Pointer binaryThreshold( SignedShortImageType3D::Pointer image, SignedShortImageType3D::PixelType lowerThreshold, SignedShortImageType3D::PixelType upperThreshold, unsigned char insideValue, unsigned char outsideValue);
-  UnsignedCharImageType2D::Pointer binaryThreshold2D( SignedShortImageType2D::Pointer image, SignedShortImageType2D::PixelType lowerThreshold, SignedShortImageType2D::PixelType upperThreshold, unsigned char insideValue, unsigned char outsideValue);
+  BinaryImageType::Pointer binaryThreshold( CTImageType::Pointer image, CTImageType::PixelType lowerThreshold, CTImageType::PixelType upperThreshold, unsigned char insideValue, unsigned char outsideValue);
+  BinaryImageType2D::Pointer binaryThreshold2D( CTImageType2D::Pointer image, CTImageType2D::PixelType lowerThreshold, CTImageType2D::PixelType upperThreshold, unsigned char insideValue, unsigned char outsideValue);
 
-  LabelMapType3D::Pointer createLabelMap( UnsignedCharImageType3D::Pointer BWImage );
-  LabelMapType2D::Pointer createLabelMap2D( UnsignedCharImageType2D::Pointer BWImage );
+  LabelMapType3D::Pointer createLabelMap( LabelImageType::Pointer BWImage );
+  LabelMapType2D::Pointer createLabelMap2D( LabelImageType2D::Pointer BWImage );
   
-  SignedShortImageType3D::Pointer createImageFromLabelMap( LabelMapType3D::Pointer labelMap );
-  UnsignedCharImageType3D::Pointer createBWImageFromLabelMap( LabelMapType3D::Pointer labelMap );
+  CTImageType::Pointer createImageFromLabelMap( LabelMapType3D::Pointer labelMap );
+  LabelImageType::Pointer createBWImageFromLabelMap( LabelMapType3D::Pointer labelMap );
 
-  double getDistanceOfLargestBlobs ( SignedShortImageType3D::Pointer image, int sliceNumber );
-  LabelMapType2D::Pointer getBlobs( SignedShortImageType3D::Pointer image, int sliceNumber );
+  double getDistanceOfLargestBlobs ( CTImageType::Pointer image, int sliceNumber );
+  LabelMapType2D::Pointer getBlobs( CTImageType::Pointer image, int sliceNumber );
 
   double median( std::vector<double> vec );
   std::vector<double> medianFilterVector( std::vector<double> vec, int radius);

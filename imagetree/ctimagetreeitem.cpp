@@ -474,45 +474,24 @@ CTImageType::Pointer CTImageTreeItem::getITKImageByShrinkFactor(unsigned int shr
 	{
 		CTImageType::Pointer newImage; // new Image for output
 
-		// if map is empty, retrieve the image, shrink an return it
-		// if not, search for the largest usable shrink factor and shrink this image again
-		if ( m_imageMap.empty() )
+		// search for usable and already shrinked images in descending order
+		for ( ImageMapType::const_reverse_iterator it = m_imageMap.rbegin(); it != m_imageMap.rend(); ++it )
 		{
-			retrieveITKImage();
-			//now image with shrink factor = 1 is set in the map
-			imageIt = m_imageMap.find(1);
-			newImage = shrinkImage(imageIt->second, shrinkFactor);
-		}
-		else
-		{
-			unsigned int bestFactor = 0;
-			for ( auto kv : m_imageMap )
+			if ( it->first < shrinkFactor && (shrinkFactor % it->first == 0) )
 			{
-				unsigned int currentFactor = kv.first;
-				// check if usable and the largest
-				if ( currentFactor < shrinkFactor && (shrinkFactor % currentFactor == 0) && currentFactor > bestFactor)
-					bestFactor = currentFactor;
-			}
-			
-			// if non usable is found, retrieve, shrink and return it
-			// if one is found, shrink with the fraction and return it
-			if ( bestFactor == 0 )
-			{
-				retrieveITKImage();
-				imageIt = m_imageMap.find(1);
-				newImage = shrinkImage(imageIt->second, shrinkFactor);
-			}
-			else
-			{
-				unsigned int newShrinkFactor = shrinkFactor / bestFactor;
-				imageIt = m_imageMap.find(bestFactor);
-				newImage = shrinkImage(imageIt->second, newShrinkFactor);
+				unsigned int newShrinkFactor = shrinkFactor / it->first;
+				newImage = shrinkImage(it->second, newShrinkFactor);
+				// add the new Image to the map
+				addImageToMap(newImage, shrinkFactor);
+				return newImage;
 			}
 		}
 		
-		// add the new Image to the map
-		addImageToMap(newImage, shrinkFactor);
-		
+		// if non usable is found, retrieve, shrink and return it
+		retrieveITKImage();
+		//now image with shrink factor = 1 is set in the map
+		imageIt = m_imageMap.find(1);
+		newImage = shrinkImage(imageIt->second, shrinkFactor);
 		return newImage;
 	}
 }

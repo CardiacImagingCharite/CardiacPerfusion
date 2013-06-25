@@ -202,7 +202,7 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
       return false;
     }
     
-    typedef std::unordered_map< unsigned int, CTImageType::Pointer > ImageMapType;
+    typedef std::map< unsigned int, CTImageType::Pointer > ImageMapType;
     typedef ImageMapType::value_type ValuePair;
     ImageMapType m_imageMap; ///<map of shrink factor and correponding CTImageType::Pointer
     

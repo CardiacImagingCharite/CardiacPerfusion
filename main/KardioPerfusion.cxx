@@ -206,7 +206,7 @@ KardioPerfusion::KardioPerfusion():
 	connect(this->m_ui->mprView_ul->GetInteractorStyle() , SIGNAL( WindowLevelDeltaChanged(int, int) ) , this->m_ui->mprView_ur->GetInteractorStyle(), SLOT( WindowLevelDelta(int, int) ) );
 	connect(this->m_ui->mprView_ul->GetInteractorStyle() , SIGNAL( WindowLevelDeltaChanged(int, int) ) , this->m_ui->mprView_lr->GetInteractorStyle(), SLOT( WindowLevelDelta(int, int) ) );
 	
-	connect(this, SIGNAL( HighResolutionLoaded(const CTImageTreeItem*) ), this, SLOT( SetHRImage(const CTImageTreeItem*) ) );
+	connect(this, SIGNAL( HighResolutionLoaded(const CTImageTreeItem*) ), this, SLOT( SetHighResolutionImage(const CTImageTreeItem*)) );
 
 };
 

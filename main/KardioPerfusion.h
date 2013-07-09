@@ -47,6 +47,9 @@
 #include "mytabwidget.h"
 #include "maxSlopeAnalyzer.h"
 #include "realimagetreeitem.h"
+#include <thread>
+#include <stack>
+#include <mutex>
 
 
 #define VTK_CREATE(type, name) \
@@ -219,8 +222,8 @@ private:
 	void perfusionMapHide(const RealImageTreeItem *perfItem );
 	///Callback to update the widgets
 	static void updateFunc(vtkObject* caller, long unsigned int eventId, void* clientData, void* callData );
-	///load high resolution image of current ctimagetreeitem
-	void loadHighResolution( const CTImageTreeItem *imageItem ); 
+	///load high resolution image of ctimagetreeitem's in the stack
+	void loadHighResolution(); 
 	
 private:
 	
@@ -246,6 +249,10 @@ private:
 	QwtPlotPicker *m_picker;
 	vtkLookupTable *m_perfusionColorMap;
 	bool m_modelChanged; ///< True if model is changed until frist image is set
+	std::thread *m_loadHighResThread; ///< Thread for loading high resolution of CTImageTreeItem's
+	std::stack<CTImageTreeItem*> *m_loadHighResItemStack; ///< Stack of CTImageTreeItem's for loading high resolution
+	std::mutex m_loadHighResThreadMutex; ///< Mutex for locking the loadHighResolution thread
+	std::mutex m_loadHighResItemStackMutex; ///< Mutex for locking the loadHighResolution item stack
 };
 
 #endif // KardioPerfusion_H

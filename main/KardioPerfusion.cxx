@@ -89,6 +89,7 @@ KardioPerfusion::KardioPerfusion():
 	,m_markerPickerY(new QwtPlotMarker)
 	,m_grid(new QwtPlotGrid) 
 	,m_perfusionColorMap(vtkLookupTable::New())
+	,m_loadHighResItemStack(new std::stack<CTImageTreeItem*>)
 {
 	this->m_ui = new Ui_KardioPerfusion;
 	this->m_ui->setupUi(this);
@@ -287,13 +288,19 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 				this->m_ui->num_phase->display(selected.indexes()[0].row());
 				if ( this->m_ui->cb_autoHRselchanged->isChecked() )
 				{
-					std::thread t(&KardioPerfusion::loadHighResolution, this, dynamic_cast<CTImageTreeItem*>(&item));
-					t.detach();
+					// lock stack and push the item 
+					m_loadHighResItemStackMutex.lock();
+					m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
+					m_loadHighResItemStackMutex.unlock();
+					// start thread if not running (not locked)
+					if ( m_loadHighResThreadMutex.try_lock() )
+						m_loadHighResThread = new std::thread( &KardioPerfusion::loadHighResolution, this );
 				}
 			}
 		}
 	}
 }
+
 
 //callback if click on treeview occurs
 void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
@@ -1110,15 +1117,29 @@ void KardioPerfusion::on_actionOpen_Project_triggered() {
   }
 }
 
-void KardioPerfusion::loadHighResolution( const CTImageTreeItem *imageItem )
+void KardioPerfusion::loadHighResolution()
 {
-	if ( imageItem->isCurrentlyShrinked() )
+	// loop over stack
+	while ( !m_loadHighResItemStack->empty() )
 	{
-		// retrieve (non shrinked) image from disk
-		imageItem->retrieveITKImage();
-		imageItem->setCurrentImageShrinked(false);
-		HighResolutionLoaded(imageItem);
+		if ( m_loadHighResItemStackMutex.try_lock() )
+		{
+			// get item from stack and unlock the stack
+			CTImageTreeItem* imageItem = m_loadHighResItemStack->top();
+			m_loadHighResItemStack->pop();
+			m_loadHighResItemStackMutex.unlock();
+
+			if ( imageItem->isCurrentlyShrinked() )
+			{
+				// retrieve (non shrinked) image from disk
+				imageItem->retrieveITKImage();
+				imageItem->setCurrentImageShrinked(false);
+				HighResolutionLoaded(imageItem);
+			}
+		}
 	}
+	// unlock the thread
+	m_loadHighResThreadMutex.unlock();
 }
 
 void KardioPerfusion::SetHighResolutionImage(const CTImageTreeItem *imageItem)
@@ -1126,7 +1147,7 @@ void KardioPerfusion::SetHighResolutionImage(const CTImageTreeItem *imageItem)
 	//create ITK VTK connector
 	CTImageTreeItem::ConnectorHandle connectorPtr;
 	connectorPtr = imageItem->getVTKConnector();
-	// if displayed item and new item is the same
+	// if displayed item and new item is (still) the same
 	if (connectorPtr == m_displayedCTImage )
 		setImage(imageItem);
 }

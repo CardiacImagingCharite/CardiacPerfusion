@@ -54,7 +54,7 @@
 #include <boost/accumulators/statistics/mean.hpp>
 
 #include "itkImageFileWriter.h"
-#include "itkShrinkAverageFilter.h"
+#include "itkBinShrinkImageFilter.h"
 
 //Constructor
 CTImageTreeItem::CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict, bool IsShrinked, bool ResolutionChanged )
@@ -498,7 +498,7 @@ CTImageType::Pointer CTImageTreeItem::getITKImageByShrinkFactor(unsigned int shr
 
 CTImageType::Pointer CTImageTreeItem::shrinkImage(CTImageType::Pointer inputImage, unsigned int shrinkFactor)
 {
-	typedef itk::ShrinkAverageFilter<CTImageType, CTImageType> ShrinkAverageFilterType;
+	typedef itk::BinShrinkImageFilter<CTImageType, CTImageType> ShrinkAverageFilterType;
 	typename ShrinkAverageFilterType::Pointer shrinkAverageFilter = ShrinkAverageFilterType::New();
 	shrinkAverageFilter->SetInput( inputImage );
 	shrinkAverageFilter->SetShrinkFactor(0, shrinkFactor);

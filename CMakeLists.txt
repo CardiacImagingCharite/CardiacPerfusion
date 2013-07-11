@@ -148,6 +148,8 @@ SET( KardioPerfusionSrcs
 	itkfilter/itkFindLeftVentricle.h
 	itkfilter/itkShrinkAverageFilter.txx
 	itkfilter/itkShrinkAverageFilter.h
+	itkfilter/itkBinShrinkImageFilter.h
+	itkfilter/itkBinShrinkImageFilter.hxx
 
 )
 

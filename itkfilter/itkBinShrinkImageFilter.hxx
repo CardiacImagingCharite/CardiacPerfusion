@@ -30,8 +30,8 @@ namespace itk
 /**
  *
  */
-template< class TInputImage, class TOutputImage >
-BinShrinkImageFilter< TInputImage, TOutputImage >
+template< class TInputImage, class TOutputImage, typename TAccumulatePixelType >
+BinShrinkImageFilter< TInputImage, TOutputImage, TAccumulatePixelType >
 ::BinShrinkImageFilter()
 {
   for ( unsigned int j = 0; j < ImageDimension; j++ )
@@ -43,9 +43,9 @@ BinShrinkImageFilter< TInputImage, TOutputImage >
 /**
  *
  */
-template< class TInputImage, class TOutputImage >
+template< class TInputImage, class TOutputImage, typename TAccumulatePixelType >
 void
-BinShrinkImageFilter< TInputImage, TOutputImage >
+BinShrinkImageFilter< TInputImage, TOutputImage, TAccumulatePixelType >
 ::PrintSelf(std::ostream & os, Indent indent) const
 {
   Superclass::PrintSelf(os, indent);
@@ -61,9 +61,9 @@ BinShrinkImageFilter< TInputImage, TOutputImage >
 /**
  *
  */
-template< class TInputImage, class TOutputImage >
+template< class TInputImage, class TOutputImage, typename TAccumulatePixelType >
 void
-BinShrinkImageFilter< TInputImage, TOutputImage >
+BinShrinkImageFilter< TInputImage, TOutputImage, TAccumulatePixelType >
 ::SetShrinkFactors(unsigned int factor)
 {
   unsigned int j;
@@ -87,9 +87,9 @@ BinShrinkImageFilter< TInputImage, TOutputImage >
 }
 
 
-template< class TInputImage, class TOutputImage >
+template< class TInputImage, class TOutputImage, typename TAccumulatePixelType >
 void
-BinShrinkImageFilter< TInputImage, TOutputImage >
+BinShrinkImageFilter< TInputImage, TOutputImage, TAccumulatePixelType >
 ::SetShrinkFactor(unsigned int i, unsigned int factor)
 {
   if ( m_ShrinkFactors[i] == factor )
@@ -105,9 +105,9 @@ BinShrinkImageFilter< TInputImage, TOutputImage >
 /**
  *
  */
-template <class TInputImage, class TOutputImage>
+template <class TInputImage, class TOutputImage, typename TAccumulatePixelType>
 void
-BinShrinkImageFilter<TInputImage,TOutputImage>
+BinShrinkImageFilter<TInputImage,TOutputImage, TAccumulatePixelType>
 ::ThreadedGenerateData(const OutputImageRegionType& outputRegionForThread,
                        ThreadIdType threadId)
 {
@@ -116,8 +116,6 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
   // Get the input and output pointers
   InputImageConstPointer  inputPtr = this->GetInput();
   OutputImagePointer      outputPtr = this->GetOutput();
-
-  typedef typename NumericTraits<typename TInputImage::PixelType>::RealType AccumulatePixelType;
 
   typedef typename TOutputImage::PixelType OutputPixelType;
 
@@ -251,9 +249,9 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
 /**
  *
  */
-template <class TInputImage, class TOutputImage>
+template <class TInputImage, class TOutputImage, typename TAccumulatePixelType>
 void
-BinShrinkImageFilter<TInputImage,TOutputImage>
+BinShrinkImageFilter<TInputImage,TOutputImage, TAccumulatePixelType>
 ::GenerateInputRequestedRegion()
 {
   // call the superclass' implementation of this method
@@ -299,9 +297,9 @@ BinShrinkImageFilter<TInputImage,TOutputImage>
 }
 
 
-template <class TInputImage, class TOutputImage>
+template <class TInputImage, class TOutputImage, typename TAccumulatePixelType>
 void
-BinShrinkImageFilter<TInputImage,TOutputImage>
+BinShrinkImageFilter<TInputImage,TOutputImage, TAccumulatePixelType>
 ::GenerateOutputInformation()
 {
   // Call the superclass' implementation of this method

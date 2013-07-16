@@ -41,7 +41,7 @@ namespace itk
  * \ingroup ITKBinShrink
  * \ingroup Streamed
  */
-template <class TInputImage, class TOutputImage>
+template <class TInputImage, class TOutputImage, typename TAccumulatePixelType = typename NumericTraits<typename TInputImage::PixelType>::AccumulateType>
 class ITK_EXPORT BinShrinkImageFilter:
     public ImageToImageFilter<TInputImage,TOutputImage>
 {
@@ -69,6 +69,8 @@ public:
   typedef typename TOutputImage::IndexType            OutputIndexType;
   typedef typename TInputImage::IndexType             InputIndexType;
 
+  typedef TAccumulatePixelType                        AccumulatePixelType;
+  
   /** Typedef to describe the output image region type. */
   typedef typename TOutputImage::RegionType OutputImageRegionType;
 

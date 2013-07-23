@@ -1114,6 +1114,9 @@ void KardioPerfusion::on_actionOpen_Project_triggered() {
     m_imageModel.removeAllItems();
     m_imageModel.openModelFromFile(pname.toAscii().data());
     m_modelChanged = true;
+    // select the first image of the tree
+    QModelIndex first = m_imageModel.index(0, 0, QModelIndex() );
+    this->m_ui->treeView->setCurrentIndex(first);
   }
 }
 

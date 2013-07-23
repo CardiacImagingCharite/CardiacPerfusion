@@ -2,11 +2,14 @@
 <RCC version="1.0">
   <qresource prefix="/Icons">
     <!-- Typical file operations. -->
-    <file>fileopen.png</file>
-    <file>filesave.png</file>
-    <file>print.png</file>
-
+    <file>folder_open.png</file>
+    <file>import.png</file>
+    <file>save.png</file>
+    <file>print_icon.png</file>
+    <file>trash.png</file>
+    
     <!-- Help -->
+    <file>info.png</file>
     <file>help.png</file>
   </qresource>
 </RCC>

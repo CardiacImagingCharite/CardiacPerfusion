@@ -1051,9 +1051,9 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpenFile"/>
-    <addaction name="actionSave_Project"/>
     <addaction name="actionOpen_Project"/>
+    <addaction name="actionImportFile"/>
+    <addaction name="actionSave_Project"/>
     <addaction name="separator"/>
     <addaction name="actionHelp"/>
     <addaction name="actionExit"/>
@@ -1077,24 +1077,25 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionOpenFile"/>
+   <addaction name="actionOpen_Project"/>
+   <addaction name="actionImportFile"/>
    <addaction name="actionSave_Project"/>
    <addaction name="separator"/>
    <addaction name="actionHelp"/>
   </widget>
-  <action name="actionOpenFile">
+  <action name="actionImportFile">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="../Icons/icons.qrc">
-     <normaloff>:/Icons/fileopen.png</normaloff>:/Icons/fileopen.png</iconset>
+     <normaloff>:/Icons/import.png</normaloff>:/Icons/import.png</iconset>
    </property>
    <property name="text">
-    <string>Open Images...</string>
+    <string>Import Images...</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+O</string>
+    <string>Ctrl+I</string>
    </property>
   </action>
   <action name="actionExit">
@@ -1111,7 +1112,7 @@
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset resource="../Icons/icons.qrc">
+    <iconset>
      <normaloff>:/Icons/print.png</normaloff>:/Icons/print.png</iconset>
    </property>
    <property name="text">
@@ -1121,7 +1122,7 @@
   <action name="actionHelp">
    <property name="icon">
     <iconset resource="../Icons/icons.qrc">
-     <normaloff>:/Icons/help.png</normaloff>:/Icons/help.png</iconset>
+     <normaloff>:/Icons/info.png</normaloff>:/Icons/info.png</iconset>
    </property>
    <property name="text">
     <string>Help</string>
@@ -1130,7 +1131,7 @@
   <action name="actionSave_Project">
    <property name="icon">
     <iconset resource="../Icons/icons.qrc">
-     <normaloff>:/Icons/filesave.png</normaloff>:/Icons/filesave.png</iconset>
+     <normaloff>:/Icons/save.png</normaloff>:/Icons/save.png</iconset>
    </property>
    <property name="text">
     <string>Save Project</string>
@@ -1140,6 +1141,10 @@
    </property>
   </action>
   <action name="actionOpen_Project">
+   <property name="icon">
+    <iconset resource="../Icons/icons.qrc">
+     <normaloff>:/Icons/folder_open.png</normaloff>:/Icons/folder_open.png</iconset>
+   </property>
    <property name="text">
     <string>Open Project...</string>
    </property>

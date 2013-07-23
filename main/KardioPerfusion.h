@@ -90,7 +90,7 @@ class KardioPerfusion : public QMainWindow
 	public slots:
 
 	///Action to be taken upon file open
-	virtual void slotOpenFile();
+	virtual void slotImportFile();
 	///Action to exit the application
 	virtual void slotExit();
 	///Action to save a project

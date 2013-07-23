@@ -162,7 +162,7 @@ KardioPerfusion::KardioPerfusion():
 	this->m_ui->mprView_lr->SetPlot(this->m_ui->qwtPlot_tac);
 
 	// Set up action signals and slots
-	connect(this->m_ui->actionOpenFile, SIGNAL(triggered()), this, SLOT(slotOpenFile()));
+	connect(this->m_ui->actionImportFile, SIGNAL(triggered()), this, SLOT(slotImportFile()));
 	connect(this->m_ui->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
 	connect(this->m_ui->treeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
 		this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
@@ -218,7 +218,7 @@ KardioPerfusion::~KardioPerfusion()
 }
 
 // Action to be taken upon file open 
-void KardioPerfusion::slotOpenFile()
+void KardioPerfusion::slotImportFile()
 {
 /*	QString fname = QFileDialog::getOpenFileName(
     this,
@@ -232,7 +232,7 @@ void KardioPerfusion::slotOpenFile()
 	*/
 	QStringList fnames = QFileDialog::getOpenFileNames(
     this,
-    tr("Select one or more files to open"),
+    tr("Select one or more files to import"),
     "F:/data",
     "", 0, QFileDialog::ReadOnly|QFileDialog::HideNameFilterDetails);
   setFiles( fnames );

@@ -12,7 +12,7 @@ This code has been tested with
 * boost 1.48.0
 * zlib 1.2.5
 * VTK 5.8
-* ITK 4.2
+* ITK 4.4
 
 
 ### Installation
@@ -24,7 +24,7 @@ You may have to install libxrender-dev first
     sudo apt-get install libxrender-dev
     sudo apt-get install libxext-dev
 
-Download and extract the Qt 4.7.4 source and change to this directory
+Download and extract the Qt 4.8.4 source and change to this directory
     
     ./configure
     make
@@ -33,7 +33,7 @@ Download and extract the Qt 4.7.4 source and change to this directory
 In .profile (if your shell is bash, ksh, zsh or sh), add the following
 lines:
 
-    PATH=/usr/local/Trolltech/Qt-4.7.4/bin:$PATH
+    PATH=/usr/local/Trolltech/Qt-4.8.4/bin:$PATH
     export PATH
 
 with
@@ -59,10 +59,7 @@ You may have to install `libbz2-dev`, `python-dev` and
     sudo apt-get install python-bzutils
     sudo apt-get install libbz2-dev
 
-Download and extract boost 1.48.0 source and change to this directory.
-Apply the following patch:
-http://pastebin.com/gYBAr2Td
-Do:
+Download and extract boost 1.48.0 source and change to this directory
 
     ./bootstrap.sh
     ./b2
@@ -122,7 +119,7 @@ configure ("c") and generate ("g") Makefiles.
 
 #### ITK
 
-Download and extract InsightToolkit 4.2.0 source.
+Download and extract InsightToolkit 4.4.0 source.
 Create a build directory
 
     mkdir binITK
@@ -130,7 +127,7 @@ Create a build directory
 
 Run CMake configuration tool
 
-    ccmake ../InsightToolkit-4.2.0
+    ccmake ../InsightToolkit-4.4.0
   
 configure ("c") and change the following options:
 

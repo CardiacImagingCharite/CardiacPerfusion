@@ -204,24 +204,12 @@ INCLUDE(${VTK_USE_FILE})
 ENDIF(NOT VTK_BINARY_DIR)
 
 #Find ITK directory 
-FIND_PACKAGE ( ITK )
+FIND_PACKAGE ( ITK 4.4 REQUIRED )
 IF ( ITK_FOUND )
       INCLUDE( ${ITK_USE_FILE} )
 ELSE(ITK_FOUND)
   MESSAGE(FATAL_ERROR "Cannot build without ITK.  Please set ITK_DIR.")
 ENDIF( ITK_FOUND )
-
-#Find GDCM directory
-#FIND_PACKAGE ( GDCM REQUIRED )
-#INCLUDE( ${GDCM_USE_FILE} )
-
-IF(WIN32)
-  SET(GDCM_LIBRARY_DIRS "${GDCM_DIR}/bin")
-#  SET(GDCM_LIBRARIES gdcmcharls.lib gdcmCommon.lib gdcmDICT.lib
-#    gdcmDSED.lib gdcmexpat.lib gdcmgetopt.lib gdcmIOD.lib gdcmjpeg8.lib 
-#	gdcmjpeg12.lib gdcmjpeg16.lib gdcmMSFF.lib gdcmopenjpeg.lib gdcmzlib.lib)
-ELSE(WIN32)
-ENDIF(WIN32)
 
 SET(Boost_USE_STATIC_LIBS   ON)
 SET(Boost_USE_MULTITHREADED ON)
@@ -237,9 +225,6 @@ INCLUDE(${QT_USE_FILE})
 
 FIND_PATH(ITK_APPS FindInsightApplications.cmake
 		HINTS ITK_DIR/../)
-
-#FIND_PATH(ITK_APPS_LIB VolviewPlugIns
-#		HINTS ITK_DIR/../)
 
 
 # Use the include path and library for Qt that is used by VTK and for the ITK-VTK-Filter

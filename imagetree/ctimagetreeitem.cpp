@@ -62,6 +62,11 @@ CTImageTreeItem::CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFi
     getUIDFromDict(m_dict, m_itemUID);
 }
 
+CTImageTreeItem::~CTImageTreeItem()
+{
+}
+
+
 TreeItem *CTImageTreeItem::clone(TreeItem *clonesParent) const {
 	if (clonesParent==NULL) clonesParent = const_cast<TreeItem*>(parent());
 	CTImageTreeItem *c = new CTImageTreeItem( clonesParent, m_HeaderFields, m_dict );

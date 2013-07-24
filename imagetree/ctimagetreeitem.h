@@ -58,7 +58,7 @@ class CTImageTreeItem : public ITKVTKTreeItem< CTImageType >
     typedef ITKVTKTreeItem< CTImageType > BaseClass;
 	///Constructor of the class.
     CTImageTreeItem(TreeItem * parent, DicomTagListPointer headerFields, const itk::MetaDataDictionary &_dict=itk::MetaDataDictionary(), bool IsShrinked = false, bool ResolutionChanged = false);
-	
+	virtual ~CTImageTreeItem();
 	CTImageTreeItem():m_imageTime(-1) {}
 	///Clones this item. 
 	/*!

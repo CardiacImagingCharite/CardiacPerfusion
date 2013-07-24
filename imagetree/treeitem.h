@@ -59,7 +59,7 @@ class TreeItem : boost::noncopyable {
     TreeItem(TreeItem *parent);
     explicit TreeItem(CTImageTreeModel *model);
     ///Destructor
-	~TreeItem();
+	virtual ~TreeItem();
 	///Gets the child item at a specific number.
 	/*!
 	\param number Desired number of the child.

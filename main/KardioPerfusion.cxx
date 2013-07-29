@@ -1117,6 +1117,17 @@ void KardioPerfusion::on_actionOpen_Project_triggered() {
     // select the first image of the tree
     QModelIndex first = m_imageModel.index(0, 0, QModelIndex() );
     this->m_ui->treeView->setCurrentIndex(first);
+    // load high resolution for the items
+    for ( int i = m_imageModel.rowCount() -1; i >= 0; i-- )
+    {
+	    QModelIndex ImIdx = m_imageModel.index(i, 1);
+	    TreeItem& item = m_imageModel.getItem(ImIdx);
+	    m_loadHighResItemStackMutex.lock();
+	    m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
+	    m_loadHighResItemStackMutex.unlock();
+    }
+    if ( m_loadHighResThreadMutex.try_lock() )
+	    m_loadHighResThread = new std::thread( &KardioPerfusion::loadHighResolution, this );
   }
 }
 

@@ -285,17 +285,18 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 						segmentShow(SegItem);
 					}
 				}
+				//display number of phase
 				this->m_ui->num_phase->display(selected.indexes()[0].row());
-				if ( this->m_ui->cb_autoHRselchanged->isChecked() )
-				{
-					// lock stack and push the item 
-					m_loadHighResItemStackMutex.lock();
-					m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
-					m_loadHighResItemStackMutex.unlock();
-					// start thread if not running (not locked)
-					if ( m_loadHighResThreadMutex.try_lock() )
-						m_loadHighResThread = new std::thread( &KardioPerfusion::loadHighResolution, this );
-				}
+
+				// load high resolution of item
+
+				// lock stack and push the item 
+				m_loadHighResItemStackMutex.lock();
+				m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
+				m_loadHighResItemStackMutex.unlock();
+				// start thread if not running (not locked)
+				if ( m_loadHighResThreadMutex.try_lock() )
+					m_loadHighResThread = new std::thread( &KardioPerfusion::loadHighResolution, this );
 			}
 		}
 	}
@@ -319,12 +320,6 @@ void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 					segmentShow(SegItem);
 				}
 			}
-// 			if ( this->m_ui->cb_autoHRclicked->isChecked() )
-// 			{
-// 				std::thread t(&KardioPerfusion::loadHighResolution, this, dynamic_cast<CTImageTreeItem*>(&item));
-// 				t.detach();
-// 				std::cerr << "clicked" << endl;
-// 			}	
 		}	
 	}
 }
@@ -1100,7 +1095,7 @@ void KardioPerfusion::on_actionSave_Project_triggered() {
     pname,
     tr("Project Files (*.perfproj)"));
   if (!pname.isEmpty()) {
-    m_imageModel.saveModelToFile(pname.toAscii().data(), this->m_ui->sb_ShrinkFactorSaving->value());
+    m_imageModel.saveModelToFile(pname.toAscii().data(), 4);
   }
 }
 

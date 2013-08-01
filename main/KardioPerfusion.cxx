@@ -653,6 +653,9 @@ void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
     
     int i = findLV->GetImageIndex(&m_imageModel);
     
+    // for testing: set phase manual?
+    if ( this->m_ui->cb_AAHmanual->isChecked() ) i = this->m_ui->sb_AAHphase->value();
+    
     QModelIndex ImIdx = m_imageModel.index(i, 1);
     TreeItem* item = &m_imageModel.getItem(ImIdx);
     

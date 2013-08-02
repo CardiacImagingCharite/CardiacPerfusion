@@ -114,6 +114,7 @@ KardioPerfusion::KardioPerfusion():
 	this->m_ui->qwtPlot_tac->setAxisScale(2,0,20);
 	this->m_ui->qwtPlot_tac->setAxisScale(0,0,500);
 	this->m_ui->qwtPlot_tac->setAxisAutoScale(0);
+	this->m_ui->qwtPlot_tac->setAxisAutoScale(2);
 
 	m_markerStart->setLabel(tr("Start"));
 	m_markerStart->setLabelAlignment(Qt::AlignRight|Qt::AlignTop);

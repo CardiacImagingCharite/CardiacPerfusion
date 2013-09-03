@@ -81,7 +81,7 @@ const DicomTagList KardioPerfusion::m_CTModelHeaderFields = boost::assign::list_
 
 // Constructor
 KardioPerfusion::KardioPerfusion():
-     m_imageModel(m_CTModelHeaderFields)
+     m_imageModelPtr( new CTImageTreeModel(m_CTModelHeaderFields) )
 	,m_pendingAction(-1)
 	,m_markerStart(new QwtPlotMarker) 
 	,m_markerEnd(new QwtPlotMarker)
@@ -94,7 +94,7 @@ KardioPerfusion::KardioPerfusion():
 	this->m_ui = new Ui_KardioPerfusion;
 	this->m_ui->setupUi(this);
   
-	this->m_ui->treeView->setModel( &m_imageModel );
+	this->m_ui->treeView->setModel( m_imageModelPtr.get() );
 
 	//m_tacDialog = NULL;
 	m_oneWindowIsMax = false;
@@ -153,9 +153,9 @@ KardioPerfusion::KardioPerfusion():
 	this->m_ui->mprView_ur->setOrientation(1);	//coronal
 	this->m_ui->mprView_lr->setOrientation(2);	//sagittal
 
-	this->m_ui->mprView_ul->SetRootItem(&m_imageModel.getRootItem());
-	this->m_ui->mprView_ur->SetRootItem(&m_imageModel.getRootItem());
-	this->m_ui->mprView_lr->SetRootItem(&m_imageModel.getRootItem());
+	this->m_ui->mprView_ul->SetRootItem(&m_imageModelPtr->getRootItem());
+	this->m_ui->mprView_ur->SetRootItem(&m_imageModelPtr->getRootItem());
+	this->m_ui->mprView_lr->SetRootItem(&m_imageModelPtr->getRootItem());
 
 
 	this->m_ui->mprView_ul->SetPlot(this->m_ui->qwtPlot_tac);
@@ -255,7 +255,7 @@ void KardioPerfusion::loadDicomData(DicomSelectorDialogPtr dicomSelector) {
 	//execute the dialog
 	dicomSelector->exec();
 	//set image data to m_imageModel
-	dicomSelector->getSelectedImageDataList(m_imageModel);
+	dicomSelector->getSelectedImageDataList(*m_imageModelPtr);
 	m_modelChanged = true;
 }
 
@@ -273,7 +273,7 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 		if(selected.indexes()[0].isValid())
 		{
 			//get clicked item
-			TreeItem& item = m_imageModel.getItem(selected.indexes()[0]);
+			TreeItem& item = m_imageModelPtr->getItem(selected.indexes()[0]);
 			//check if item is a CT image
 			if (item.isA(typeid(CTImageTreeItem))) {
 			
@@ -308,7 +308,7 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 void KardioPerfusion::on_treeView_clicked(const QModelIndex &index) {
 	if (index.isValid()) {
   		//get clicked item
-  		TreeItem &item = m_imageModel.getItem( index );
+		TreeItem &item = m_imageModelPtr->getItem(index);
 		//check if item is a CT image
 		if (item.isA(typeid(CTImageTreeItem))) {
 			
@@ -330,7 +330,7 @@ void KardioPerfusion::on_treeView_doubleClicked(const QModelIndex &index) {
 	//check if the index is valid
 	if (index.isValid()) {
 		//get clicked item
-		TreeItem &item = m_imageModel.getItem( index );
+		TreeItem &item = m_imageModelPtr->getItem( index );
 		if(item.isA(typeid(BinaryImageTreeItem)))
 		{
 			BinaryImageTreeItem *SegItem = dynamic_cast<BinaryImageTreeItem*>(&item);
@@ -503,7 +503,7 @@ void KardioPerfusion::on_btn_analyse_clicked()
 	for(QModelIndexList::Iterator index = selectedIndex.begin(); index != selectedIndex.end(); ++index) {
 		if (index->isValid()) {
 			//get item at specific index
-			TreeItem *item = &m_imageModel.getItem( *index );
+			TreeItem *item = &m_imageModelPtr->getItem( *index );
 			//add image to the dialog if it is a CT image
 			if (item->isA(typeid(CTImageTreeItem))) {
 				m_maxSlopeAnalyzer->addImage( dynamic_cast<CTImageTreeItem*>(item) );
@@ -515,7 +515,7 @@ void KardioPerfusion::on_btn_analyse_clicked()
 
 	std::list<TreeItem *> itemList;
 	//add root item to the item list
-	itemList.push_back( &m_imageModel.getItem(QModelIndex()) );
+	itemList.push_back( &m_imageModelPtr->getItem(QModelIndex()) );
 	while(!itemList.empty()) {
 		//get the last item of the list
 		TreeItem *currentItem = itemList.back();
@@ -572,7 +572,7 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 		if(selectedIndexes.count() == 1)
 		{
 			//get the item from the image model
-			TreeItem* item = &m_imageModel.getItem(selectedIndexes[0]);
+			TreeItem* item = &m_imageModelPtr->getItem(selectedIndexes[0]);
 			//test if item is a CT image
 			if(item->isA(typeid(BinaryImageTreeItem)))
 			{
@@ -591,7 +591,7 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 				for(QModelIndexList::Iterator index = selectedIndex.begin(); index != selectedIndex.end(); ++index) {
 					if (index->isValid()) {
 						//get item at specific index
-						TreeItem *item = &m_imageModel.getItem( *index );
+						TreeItem *item = &m_imageModelPtr->getItem( *index );
 						//add image to the dialog if it is a CT image
 						if (item->isA(typeid(CTImageTreeItem))) {
 							m_maxSlopeAnalyzer->addImage( dynamic_cast<CTImageTreeItem*>(item) );
@@ -605,12 +605,12 @@ void KardioPerfusion::on_btn_perfusionMap_clicked()
 
 				PerfusionMapCreator* mapCreator = new PerfusionMapCreator(m_maxSlopeAnalyzer, arterySegment, this->m_ui->sb_shrinkFactor->value());
 
-				//RealImageType::Pointer perfusionMap = mapCreator->getPerfusionMap(&m_imageModel);
+				//RealImageType::Pointer perfusionMap = mapCreator->getPerfusionMap(m_imageModel.get());
 				RealImageTreeItem::ImageType::Pointer perfusionMap;
-				perfusionMap = mapCreator->calculatePerfusionMap(&m_imageModel);
+				perfusionMap = mapCreator->calculatePerfusionMap(m_imageModelPtr.get());
 
 
-				TreeItem* root = &m_imageModel.getRootItem();
+				TreeItem* root = &m_imageModelPtr->getRootItem();
 
 			
 				double opacity = (double)this->m_ui->slider_opacity->value()/10;
@@ -652,13 +652,13 @@ void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
     FindLVType::Pointer findLV = FindLVType::New();
     findLV->setMatrixSize(this->m_ui->sb_matrixSizeFindLV->value());
     
-    int i = findLV->GetImageIndex(&m_imageModel);
+    int i = findLV->GetImageIndex(m_imageModelPtr.get());
     
     // for testing: set phase manual?
     if ( this->m_ui->cb_AAHmanual->isChecked() ) i = this->m_ui->sb_AAHphase->value();
     
-    QModelIndex ImIdx = m_imageModel.index(i, 1);
-    TreeItem* item = &m_imageModel.getItem(ImIdx);
+    QModelIndex ImIdx = m_imageModelPtr->index(i, 1);
+    TreeItem* item = &m_imageModelPtr->getItem(ImIdx);
     
     std::cout << "Image number used for calculating trafo = " << i << endl;
     
@@ -723,7 +723,7 @@ BinaryImageTreeItem *KardioPerfusion::focusSegmentFromSelection(void) {
 	//if index is valid
 	if (selectedIndex[0].isValid()) {
 		//get selected item
-		TreeItem *item = &m_imageModel.getItem( selectedIndex[0] );
+		TreeItem *item = &m_imageModelPtr->getItem( selectedIndex[0] );
 		//if item is a CT image
 		if (item->isA(typeid(CTImageTreeItem))) {
 			// get CT item
@@ -826,7 +826,7 @@ void KardioPerfusion::treeViewContextMenu(const QPoint &pos) {
 		//if one item is selected
 		if (indexList.count() == 1) {
 			//get tree item
-			TreeItem &item = m_imageModel.getItem(indexList[0]);
+			TreeItem &item = m_imageModelPtr->getItem(indexList[0]);
 			//if item is a CT image
 			if (item.isA(typeid(CTImageTreeItem))) {
 				//create action for adding a segment and connect is to the callback
@@ -875,7 +875,7 @@ void KardioPerfusion::removeSelectedImages() {
 	//iterate over index list
 	BOOST_FOREACH( const QModelIndex &idx, indexList) {
 		//get tree item
-		TreeItem &remitem = m_imageModel.getItem( idx );
+		TreeItem &remitem = m_imageModelPtr->getItem( idx );
 		//if item type is a CT image
 		if (remitem.isA(typeid(CTImageTreeItem))) {
 			//get CT image
@@ -892,7 +892,7 @@ void KardioPerfusion::removeSelectedImages() {
 			segmentHide( remitemPtr );
 		}
 		//remove the index from the image model
-		m_imageModel.removeItem( idx );
+		m_imageModelPtr->removeItem( idx );
 	}
 }
 
@@ -943,7 +943,7 @@ void KardioPerfusion::createSegmentForSelectedImage() {
 	//if one item is selected
 	if (indexList.count() == 1) {
 		//get selected item 
-		TreeItem &item = m_imageModel.getItem(indexList[0]);
+		TreeItem &item = m_imageModelPtr->getItem(indexList[0]);
 		//if item is a CT image
 		if (item.isA(typeid(CTImageTreeItem))) {
 			//generate segment
@@ -959,7 +959,7 @@ void KardioPerfusion::changeColorForSelectedSegment() {
 	//if one item is selected
 	if (indexList.count() == 1) {
 		//get selected item
-		TreeItem &item = m_imageModel.getItem(indexList[0]);
+		TreeItem &item = m_imageModelPtr->getItem(indexList[0]);
 		//if item is a segment
 		if (item.isA(typeid(BinaryImageTreeItem))) {
 			//get segment
@@ -1092,14 +1092,14 @@ void KardioPerfusion::on_btn_arteryInput_selected(const SegmentInfo *segment) {
 }
 
 void KardioPerfusion::on_actionSave_Project_triggered() {
-  QString pname( QString::fromStdString( m_imageModel.getSerializationPath() ) );
+  QString pname( QString::fromStdString( m_imageModelPtr->getSerializationPath() ) );
   if (pname.isEmpty()) pname = "./unnamed.perfproj";
   pname = QFileDialog::getSaveFileName( this,
     tr("Save Project"),
     pname,
     tr("Project Files (*.perfproj)"));
   if (!pname.isEmpty()) {
-    m_imageModel.saveModelToFile(pname.toAscii().data(), 4);
+    m_imageModelPtr->saveModelToFile(pname.toAscii().data(), 4);
   }
 }
 
@@ -1110,17 +1110,17 @@ void KardioPerfusion::on_actionOpen_Project_triggered() {
     tr("Project Files (*.perfproj)"));
   if (!pname.isEmpty()) {
     setImage(NULL);
-    m_imageModel.removeAllItems();
-    m_imageModel.openModelFromFile(pname.toAscii().data());
+    m_imageModelPtr->removeAllItems();
+    m_imageModelPtr->openModelFromFile(pname.toAscii().data());
     m_modelChanged = true;
     // select the first image of the tree
-    QModelIndex first = m_imageModel.index(0, 0, QModelIndex() );
+    QModelIndex first = m_imageModelPtr->index(0, 0, QModelIndex() );
     this->m_ui->treeView->setCurrentIndex(first);
     // load high resolution for the items
-    for ( int i = m_imageModel.rowCount() -1; i >= 0; i-- )
+    for ( int i = m_imageModelPtr->rowCount() -1; i >= 0; i-- )
     {
-	    QModelIndex ImIdx = m_imageModel.index(i, 1);
-	    TreeItem& item = m_imageModel.getItem(ImIdx);
+	    QModelIndex ImIdx = m_imageModelPtr->index(i, 1);
+	    TreeItem& item = m_imageModelPtr->getItem(ImIdx);
 	    m_loadHighResItemStackMutex.lock();
 	    m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
 	    m_loadHighResItemStackMutex.unlock();
@@ -1174,7 +1174,7 @@ void KardioPerfusion::slider_opacity_changed()
 	//if one item is selected
 	if (indexList.count() == 1) {
 		//get selected item
-		TreeItem &item = m_imageModel.getItem(indexList[0]);
+		TreeItem &item = m_imageModelPtr->getItem(indexList[0]);
 		//if item is a segment
 		if (item.isA(typeid(RealImageTreeItem))) {
 			//get segment

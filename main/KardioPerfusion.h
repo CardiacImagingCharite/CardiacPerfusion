@@ -227,7 +227,7 @@ private:
 	
 private:
 	
-	CTImageTreeModel m_imageModel;
+	std::shared_ptr<CTImageTreeModel> m_imageModelPtr;
 	CTImageTreeItem::ConnectorHandle m_displayedCTImage;
 
         typedef std::set< BinaryImageTreeItem::ConnectorHandle > DisplayedSegmentContainer;

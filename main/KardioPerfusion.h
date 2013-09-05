@@ -253,6 +253,7 @@ private:
 	std::stack<CTImageTreeItem*> *m_loadHighResItemStack; ///< Stack of CTImageTreeItem's for loading high resolution
 	std::mutex m_loadHighResThreadMutex; ///< Mutex for locking the loadHighResolution thread
 	std::mutex m_loadHighResItemStackMutex; ///< Mutex for locking the loadHighResolution item stack
+	bool m_modelSaved; ///< True if image model is saved as shared_ptr in the load high resolution thread
 };
 
 #endif // KardioPerfusion_H

@@ -90,6 +90,7 @@ KardioPerfusion::KardioPerfusion():
 	,m_grid(new QwtPlotGrid) 
 	,m_perfusionColorMap(vtkLookupTable::New())
 	,m_loadHighResItemStack(new std::stack<CTImageTreeItem*>)
+	,m_modelSaved(true)
 {
 	this->m_ui = new Ui_KardioPerfusion;
 	this->m_ui->setupUi(this);
@@ -1110,13 +1111,23 @@ void KardioPerfusion::on_actionOpen_Project_triggered() {
     tr("Project Files (*.perfproj)"));
   if (!pname.isEmpty()) {
     setImage(NULL);
-    m_imageModelPtr->removeAllItems();
+    // clear stack
+    while ( !m_loadHighResItemStack->empty() )
+	    m_loadHighResItemStack->pop();
+    // wait till old model is saved for loader thread
+    while ( !m_modelSaved )
+	    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    m_imageModelPtr.reset(new CTImageTreeModel(m_CTModelHeaderFields));
+    m_modelSaved = false;
+    this->m_ui->treeView->setModel( m_imageModelPtr.get() );
+    connect(this->m_ui->treeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+		this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
     m_imageModelPtr->openModelFromFile(pname.toAscii().data());
     m_modelChanged = true;
     // select the first image of the tree
     QModelIndex first = m_imageModelPtr->index(0, 0, QModelIndex() );
     this->m_ui->treeView->setCurrentIndex(first);
-    // load high resolution for the items
+    // fill stack for load high resolution
     for ( int i = m_imageModelPtr->rowCount() -1; i >= 0; i-- )
     {
 	    QModelIndex ImIdx = m_imageModelPtr->index(i, 1);
@@ -1125,6 +1136,7 @@ void KardioPerfusion::on_actionOpen_Project_triggered() {
 	    m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
 	    m_loadHighResItemStackMutex.unlock();
     }
+    // start 'load high resolution' thread if not running
     if ( m_loadHighResThreadMutex.try_lock() )
 	    m_loadHighResThread = new std::thread( &KardioPerfusion::loadHighResolution, this );
   }
@@ -1135,6 +1147,9 @@ void KardioPerfusion::loadHighResolution()
 	// loop over stack
 	while ( !m_loadHighResItemStack->empty() )
 	{
+		// save old model; otherwise retrieveITKImage crashes
+		std::shared_ptr<CTImageTreeModel> savedModelPtr = m_imageModelPtr;
+		m_modelSaved = true;
 		if ( m_loadHighResItemStackMutex.try_lock() )
 		{
 			// get item from stack and unlock the stack
@@ -1147,7 +1162,9 @@ void KardioPerfusion::loadHighResolution()
 				// retrieve (non shrinked) image from disk
 				imageItem->retrieveITKImage();
 				imageItem->setCurrentImageShrinked(false);
-				HighResolutionLoaded(imageItem);
+				if ( savedModelPtr == m_imageModelPtr ) {
+					HighResolutionLoaded(imageItem);
+				}
 			}
 		}
 	}

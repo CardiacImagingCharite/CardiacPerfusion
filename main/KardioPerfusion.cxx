@@ -290,15 +290,10 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 				//display number of phase
 				this->m_ui->num_phase->display(selected.indexes()[0].row());
 
-				// load high resolution of item
-
-				// lock stack and push the item 
+				// lock stack and push the item for load high resolution
 				m_loadHighResItemStackMutex.lock();
 				m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
 				m_loadHighResItemStackMutex.unlock();
-				// start thread if not running (not locked)
-				if ( m_loadHighResThreadMutex.try_lock() )
-					m_loadHighResThread = new std::thread( &KardioPerfusion::loadHighResolution, this );
 			}
 		}
 	}
@@ -1105,41 +1100,41 @@ void KardioPerfusion::on_actionSave_Project_triggered() {
 }
 
 void KardioPerfusion::on_actionOpen_Project_triggered() {
-  QString pname = QFileDialog::getOpenFileName( this,
-    tr("Open Project"),
-    "./unnamed.perfproj",
-    tr("Project Files (*.perfproj)"));
-  if (!pname.isEmpty()) {
-    setImage(NULL);
-    // clear stack
-    while ( !m_loadHighResItemStack->empty() )
-	    m_loadHighResItemStack->pop();
-    // wait till old model is saved for loader thread
-    while ( !m_modelSaved )
-	    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    m_imageModelPtr.reset(new CTImageTreeModel(m_CTModelHeaderFields));
-    m_modelSaved = false;
-    this->m_ui->treeView->setModel( m_imageModelPtr.get() );
-    connect(this->m_ui->treeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-		this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
-    m_imageModelPtr->openModelFromFile(pname.toAscii().data());
-    m_modelChanged = true;
-    // select the first image of the tree
-    QModelIndex first = m_imageModelPtr->index(0, 0, QModelIndex() );
-    this->m_ui->treeView->setCurrentIndex(first);
-    // fill stack for load high resolution
-    for ( int i = m_imageModelPtr->rowCount() -1; i >= 0; i-- )
-    {
-	    QModelIndex ImIdx = m_imageModelPtr->index(i, 1);
-	    TreeItem& item = m_imageModelPtr->getItem(ImIdx);
-	    m_loadHighResItemStackMutex.lock();
-	    m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
-	    m_loadHighResItemStackMutex.unlock();
-    }
-    // start 'load high resolution' thread if not running
-    if ( m_loadHighResThreadMutex.try_lock() )
-	    m_loadHighResThread = new std::thread( &KardioPerfusion::loadHighResolution, this );
-  }
+	QString pname = QFileDialog::getOpenFileName( this,
+						      tr("Open Project"),
+						      "./unnamed.perfproj",
+					       tr("Project Files (*.perfproj)"));
+	if (!pname.isEmpty()) {
+		setImage(NULL);
+		// clear stack
+		while ( !m_loadHighResItemStack->empty() )
+			m_loadHighResItemStack->pop();
+		// wait till old model is saved for loader thread
+		while ( !m_modelSaved )
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		m_imageModelPtr.reset(new CTImageTreeModel(m_CTModelHeaderFields));
+		m_modelSaved = false;
+		this->m_ui->treeView->setModel( m_imageModelPtr.get() );
+		connect(this->m_ui->treeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+			this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
+		m_imageModelPtr->openModelFromFile(pname.toAscii().data());
+		m_modelChanged = true;
+		// select the first image of the tree
+		QModelIndex first = m_imageModelPtr->index(0, 0, QModelIndex() );
+		this->m_ui->treeView->setCurrentIndex(first);
+		// fill stack for load high resolution
+		for ( int i = m_imageModelPtr->rowCount() -1; i >= 0; i-- )
+		{
+			QModelIndex ImIdx = m_imageModelPtr->index(i, 1);
+			TreeItem& item = m_imageModelPtr->getItem(ImIdx);
+			m_loadHighResItemStackMutex.lock();
+			m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
+			m_loadHighResItemStackMutex.unlock();
+		}
+		// start 'load high resolution' thread if not running
+		if ( m_loadHighResThreadMutex.try_lock() )
+			m_loadHighResThread = new std::thread( &KardioPerfusion::loadHighResolution, this );
+	}
 }
 
 void KardioPerfusion::loadHighResolution()

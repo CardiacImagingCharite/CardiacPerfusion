@@ -224,6 +224,8 @@ private:
 	static void updateFunc(vtkObject* caller, long unsigned int eventId, void* clientData, void* callData );
 	///load high resolution image of ctimagetreeitem's in the stack
 	void loadHighResolution(); 
+	///Check if stack of items for loading high resolution is empty, with use of mutex.
+	bool loadHighResItemStackEmpty();
 	
 private:
 	
@@ -253,7 +255,7 @@ private:
 	std::stack<CTImageTreeItem*> *m_loadHighResItemStack; ///< Stack of CTImageTreeItem's for loading high resolution
 	std::mutex m_loadHighResThreadMutex; ///< Mutex for locking the loadHighResolution thread
 	std::mutex m_loadHighResItemStackMutex; ///< Mutex for locking the loadHighResolution item stack
-	bool m_modelSaved; ///< True if image model is saved as shared_ptr in the load high resolution thread
+	std::mutex m_modelMutex; ///< Mutex for locking the image tree model
 };
 
 #endif // KardioPerfusion_H

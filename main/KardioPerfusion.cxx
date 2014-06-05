@@ -289,7 +289,9 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 				}
 				//display number of phase
 				this->m_ui->num_phase->display(selected.indexes()[0].row());
-
+				
+				this->m_initial_real_z_slice_thinkness=std::fabs(dynamic_cast<CTImageTreeItem*>(&item)->getITKImage()->GetSpacing()[2]);
+				std::cout<<"new z spacing is "<<this->m_initial_real_z_slice_thinkness<<std::endl;
 				// lock stack and push the item for load high resolution
 				m_loadHighResItemStackMutex.lock();
 				m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
@@ -1169,11 +1171,13 @@ void KardioPerfusion::loadHighResolution()
 			if ( savedModelPtr == m_imageModelPtr ) {
 				HighResolutionLoaded(imageItem);
 			}
+		this->m_initial_real_z_slice_thinkness=std::fabs(dynamic_cast<CTImageTreeItem*>(imageItem)->getITKImage()->GetSpacing()[2]);
 			m_modelMutex.unlock();
 		}
 	}
 	// unlock the thread
 	m_loadHighResThreadMutex.unlock();
+
 }
 
 void KardioPerfusion::SetHighResolutionImage(const CTImageTreeItem *imageItem)
@@ -1216,12 +1220,13 @@ void KardioPerfusion::slider_opacity_changed()
 	
 }
 void KardioPerfusion::slider_thickness_changed()
-{		
+{
 
-
-			this->m_ui->mprView_lr->setThickness(this->m_ui->slider_thickness->value());
-			this->m_ui->mprView_ul->setThickness(this->m_ui->slider_thickness->value());
-			this->m_ui->mprView_ur->setThickness(this->m_ui->slider_thickness->value());
+int nslices= std::floor(this->m_ui->slider_thickness->value()/this->m_initial_real_z_slice_thinkness);
+if (nslices==0) nslices=1;
+			this->m_ui->mprView_lr->setThickness(nslices);
+			this->m_ui->mprView_ul->setThickness(nslices);
+			this->m_ui->mprView_ur->setThickness(nslices);
 			
 			this->m_ui->mprView_lr->updateWidget();
 			this->m_ui->mprView_ul->updateWidget();

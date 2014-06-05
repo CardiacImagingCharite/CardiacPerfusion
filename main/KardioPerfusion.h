@@ -242,8 +242,8 @@ private:
 
 
 	static const DicomTagList m_CTModelHeaderFields;
-	int m_pendingAction;
-
+	int  m_pendingAction;
+	double  m_initial_real_z_slice_thinkness;
 	bool m_oneWindowIsMax;
 	MaxSlopeAnalyzer* m_maxSlopeAnalyzer;
 

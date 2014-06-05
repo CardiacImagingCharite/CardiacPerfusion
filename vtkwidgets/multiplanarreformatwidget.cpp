@@ -410,6 +410,7 @@ void MultiPlanarReformatWidget::resetView()
 void MultiPlanarReformatWidget::updateWidget()
 { 
 	this->m_reslice->SetSlabNumberOfSlices(m_thickness);
+	std::cout<<"number of slices "<<m_thickness<<std::endl;
 	this->update();
 }
 

@@ -29,7 +29,7 @@
     Siehe die GNU General Public License für weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
-    Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
+    Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>. 
 */
 
 #include "ui_KardioPerfusion.h"

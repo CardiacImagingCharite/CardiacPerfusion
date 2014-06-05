@@ -164,6 +164,8 @@ class KardioPerfusion : public QMainWindow
 	void on_btn_arteryInput_selected(const SegmentInfo *segment);
 	///Slot will be called, if the slider value has changed
 	void slider_opacity_changed();
+	///Slot will be called, if the slider value has changed
+	void slider_thickness_changed();
 	///Renames a selected item
 	void renameTreeviewItem();
 protected:

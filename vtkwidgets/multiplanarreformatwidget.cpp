@@ -74,7 +74,7 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 {
 	//create button and add menu to it
 	m_menuButton = new QPushButton(this);
-
+	m_thickness=1;
 	m_menuButton->resize(20,20);
 	m_menuButton->move(this->size().width()-20,this->size().height()-20);
 
@@ -90,10 +90,10 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 
 	// Set up reslice
 	m_reslice->SetOutputDimensionality(2);
-	//m_reslice->SetBackgroundLevel(-1000);
-	//m_reslice->SetInterpolationModeToCubic();
-		m_reslice->SetSlabModeToMean();
-		m_reslice->SetSlabNumberOfSlices(2);
+	m_reslice->SetBackgroundLevel(-1000);
+	m_reslice->SetInterpolationModeToCubic();
+	m_reslice->SetSlabModeToMean();
+	m_reslice->SetSlabNumberOfSlices(m_thickness);
 	// bind vtkRenderWindow to Qt window
 	this->SetRenderWindow(m_imageViewer->GetRenderWindow());
 
@@ -182,7 +182,7 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
       
     m_reslice->SetInput( m_image );
     m_reslice->SetOutputSpacing(1,1,1);
-	m_imageViewer->SetInput(m_reslice->GetOutput());
+		m_imageViewer->SetInput(m_reslice->GetOutput());
 	
     window->AddRenderer(m_imageViewer->GetRenderer());
   }
@@ -408,7 +408,8 @@ void MultiPlanarReformatWidget::resetView()
 }
 
 void MultiPlanarReformatWidget::updateWidget()
-{
+{ 
+	this->m_reslice->SetSlabNumberOfSlices(m_thickness);
 	this->update();
 }
 

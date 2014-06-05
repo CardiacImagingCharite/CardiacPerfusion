@@ -200,7 +200,7 @@ public slots:
 	///Resets the view.
 	void resetView();
 	void updateWidget();
-
+	void setThickness(int s){m_thickness=s;};
 signals:
 	void doubleClicked(MultiPlanarReformatWidget &); ///< double click with LMB
 
@@ -219,6 +219,7 @@ protected:
 	vtkSmartPointer<vtkInteractorStyleProjectionView> m_interactorStyle; ///< special InteractorStyle for Projected Volumes
 	int m_orientation;
 	QPushButton *m_menuButton;
+	int m_thickness;
 
 private:
 	static void mouseMoveCallback(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);

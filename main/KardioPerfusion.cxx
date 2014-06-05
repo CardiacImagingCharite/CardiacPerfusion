@@ -209,7 +209,8 @@ KardioPerfusion::KardioPerfusion():
 	connect(this->m_ui->mprView_ul->GetInteractorStyle() , SIGNAL( WindowLevelDeltaChanged(int, int) ) , this->m_ui->mprView_lr->GetInteractorStyle(), SLOT( WindowLevelDelta(int, int) ) );
 	
 	connect(this, SIGNAL( HighResolutionLoaded(const CTImageTreeItem*) ), this, SLOT( SetHighResolutionImage(const CTImageTreeItem*)) );
-
+	connect( this->m_ui->slider_thickness, SIGNAL( valueChanged( int ) ), this->m_ui->sb_thickness, SLOT(setValue(int)) );
+	connect( this->m_ui->slider_thickness, SIGNAL( valueChanged( int ) ), this, SLOT(slider_thickness_changed()) );
 };
 
 KardioPerfusion::~KardioPerfusion()
@@ -1188,7 +1189,7 @@ void KardioPerfusion::SetHighResolutionImage(const CTImageTreeItem *imageItem)
 
 
 void KardioPerfusion::slider_opacity_changed()
-{		
+{		std::cout<<"here opacity"<<std::endl;
 	//get list of selected items
 	QModelIndexList indexList = this->m_ui->treeView->selectionModel()->selectedRows();
 	//if one item is selected
@@ -1206,6 +1207,37 @@ void KardioPerfusion::slider_opacity_changed()
 			this->m_ui->mprView_ur->update();
 		}
 	}
+
+	//m_perfusionColorMap->SetAlpha((double)this->m_ui->slider_opacity->value()/10);
+	
+	//this->m_ui->mprView_lr->refreshView();
+	//this->m_ui->mprView_ur->GetRenderWindow()->Render();
+	//this->m_ui->mprView_ul->GetRenderWindow()->GetInteractor()->Render();
+	
+}
+void KardioPerfusion::slider_thickness_changed()
+{		
+// 	//get list of selected items
+// 	QModelIndexList indexList = this->m_ui->treeView->selectionModel()->selectedRows();
+// 	//if one item is selected
+// 	if (indexList.count() == 1) {
+// 		//get selected item
+// 		TreeItem &item = m_imageModelPtr->getItem(indexList[0]);
+// 		//if item is a segment
+// 		if (item.isA(typeid(RealImageTreeItem))) {
+// 			//get segment
+// 			RealImageTreeItem &perfusionMap = dynamic_cast<RealImageTreeItem&>(item);
+// 			perfusionMap.setOpacity((double)this->m_ui->slider_opacity->value()/10);
+
+			this->m_ui->mprView_lr->setThickness(this->m_ui->slider_thickness->value());
+			this->m_ui->mprView_ul->setThickness(this->m_ui->slider_thickness->value());
+			this->m_ui->mprView_ur->setThickness(this->m_ui->slider_thickness->value());
+			
+			this->m_ui->mprView_lr->updateWidget();
+			this->m_ui->mprView_ul->updateWidget();
+			this->m_ui->mprView_ur->updateWidget();
+	//	}
+	//}
 
 	//m_perfusionColorMap->SetAlpha((double)this->m_ui->slider_opacity->value()/10);
 	

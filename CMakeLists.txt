@@ -298,6 +298,7 @@ TARGET_LINK_LIBRARIES( KardioPerfusion
   vtkFiltering
   vtkVolumeRendering
 #  ITKVTKIntegration
+z
 )
 
 # add a target to generate API documentation with Doxygen

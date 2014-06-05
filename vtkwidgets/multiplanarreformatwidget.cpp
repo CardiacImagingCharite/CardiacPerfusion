@@ -90,9 +90,10 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 
 	// Set up reslice
 	m_reslice->SetOutputDimensionality(2);
-	m_reslice->SetBackgroundLevel(-1000);
-	m_reslice->SetInterpolationModeToCubic();
-
+	//m_reslice->SetBackgroundLevel(-1000);
+	//m_reslice->SetInterpolationModeToCubic();
+		m_reslice->SetSlabModeToMean();
+		m_reslice->SetSlabNumberOfSlices(2);
 	// bind vtkRenderWindow to Qt window
 	this->SetRenderWindow(m_imageViewer->GetRenderWindow());
 

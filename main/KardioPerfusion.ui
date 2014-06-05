@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1182</width>
-    <height>899</height>
+    <height>905</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,7 +42,7 @@
          <height>903</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,0,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,0,0,0,0">
         <property name="sizeConstraint">
          <enum>QLayout::SetMaximumSize</enum>
         </property>
@@ -658,6 +658,36 @@
           </item>
           <item>
            <widget class="QSpinBox" name="sb_AAHphase"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_27">
+          <item>
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Slice Thickness</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="slider_Thickness_3">
+            <property name="maximum">
+             <number>10</number>
+            </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
+            <property name="pageStep">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>6</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>

@@ -1217,17 +1217,7 @@ void KardioPerfusion::slider_opacity_changed()
 }
 void KardioPerfusion::slider_thickness_changed()
 {		
-// 	//get list of selected items
-// 	QModelIndexList indexList = this->m_ui->treeView->selectionModel()->selectedRows();
-// 	//if one item is selected
-// 	if (indexList.count() == 1) {
-// 		//get selected item
-// 		TreeItem &item = m_imageModelPtr->getItem(indexList[0]);
-// 		//if item is a segment
-// 		if (item.isA(typeid(RealImageTreeItem))) {
-// 			//get segment
-// 			RealImageTreeItem &perfusionMap = dynamic_cast<RealImageTreeItem&>(item);
-// 			perfusionMap.setOpacity((double)this->m_ui->slider_opacity->value()/10);
+
 
 			this->m_ui->mprView_lr->setThickness(this->m_ui->slider_thickness->value());
 			this->m_ui->mprView_ul->setThickness(this->m_ui->slider_thickness->value());
@@ -1236,15 +1226,7 @@ void KardioPerfusion::slider_thickness_changed()
 			this->m_ui->mprView_lr->updateWidget();
 			this->m_ui->mprView_ul->updateWidget();
 			this->m_ui->mprView_ur->updateWidget();
-	//	}
-	//}
 
-	//m_perfusionColorMap->SetAlpha((double)this->m_ui->slider_opacity->value()/10);
-	
-	//this->m_ui->mprView_lr->refreshView();
-	//this->m_ui->mprView_ur->GetRenderWindow()->Render();
-	//this->m_ui->mprView_ul->GetRenderWindow()->GetInteractor()->Render();
-	
 }
 
 void KardioPerfusion::renameTreeviewItem()

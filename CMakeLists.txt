@@ -1,7 +1,7 @@
 
 #####################################################################################
 #										    #
-#    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie	    #
+#    Copyright 2012 Charitï¿½ Universitï¿½tsmedizin Berlin, Institut fï¿½r Radiologie	    #
 #                                                                                   #
 #	 This file is part of KardioPerfusion.                                      #
 #                                                                                   #
@@ -20,15 +20,15 @@
 #                                                                                   #
 #    Diese Datei ist Teil von KardioPerfusion.                                      #
 #                                                                                   #
-#    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen        #
+#    KardioPerfusion ist Freie Software: Sie kï¿½nnen es unter den Bedingungen        #
 #    der GNU General Public License, wie von der Free Software Foundation,          #
-#    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren                   #
-#    veröffentlichten Version, weiterverbreiten und/oder modifizieren.              #
+#    Version 3 der Lizenz oder (nach Ihrer Option) jeder spï¿½teren                   #
+#    verï¿½ffentlichten Version, weiterverbreiten und/oder modifizieren.              #
 #                                                                                   #
-#    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber         #
-#    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite             #
-#    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.     #
-#    Siehe die GNU General Public License für weitere Details.                      #
+#    KardioPerfusion wird in der Hoffnung, dass es nï¿½tzlich sein wird, aber         #
+#    OHNE JEDE GEWï¿½HRLEISTUNG, bereitgestellt; sogar ohne die implizite             #
+#    Gewï¿½hrleistung der MARKTFï¿½HIGKEIT oder EIGNUNG Fï¿½R EINEN BESTIMMTEN ZWECK.     #
+#    Siehe die GNU General Public License fï¿½r weitere Details.                      #
 #                                                                                   #
 #    Sie sollten eine Kopie der GNU General Public License zusammen mit diesem      #
 #    Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.     #
@@ -298,7 +298,6 @@ TARGET_LINK_LIBRARIES( KardioPerfusion
   vtkFiltering
   vtkVolumeRendering
 #  ITKVTKIntegration
-z
 )
 
 # add a target to generate API documentation with Doxygen

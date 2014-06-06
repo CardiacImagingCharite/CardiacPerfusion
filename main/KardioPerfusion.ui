@@ -119,6 +119,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QCheckBox" name="cb_repeat">
+              <property name="text">
+               <string>rep.</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QSlider" name="slider_loopSpeed">
               <property name="minimum">
                <number>1</number>

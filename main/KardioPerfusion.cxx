@@ -1284,7 +1284,11 @@ void KardioPerfusion::setNextImage()
 {
 	QModelIndex indx = this->m_ui->treeView->currentIndex();
 	QModelIndex newIndx;
-	if (indx.row() + 1 == m_imageModelPtr->rowCount() ) newIndx = m_imageModelPtr->index(0, 1);
+	if (indx.row() + 1 == m_imageModelPtr->rowCount() ) 
+	{
+		if ( this->m_ui->cb_repeat->isChecked() ) newIndx = m_imageModelPtr->index(0, 1);
+		else m_imageLoopTimer->stop();
+	}
 	else newIndx = m_imageModelPtr->index(indx.row() + 1, 1);
 	this->m_ui->treeView->setCurrentIndex(newIndx);
 }

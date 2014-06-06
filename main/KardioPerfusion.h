@@ -166,6 +166,8 @@ class KardioPerfusion : public QMainWindow
 	void on_btn_arteryInput_selected(const SegmentInfo *segment);
 	///Slot will be called, if the slider value has changed
 	void slider_opacity_changed();
+	///Slot will be called, if the slider value has changed
+	void slider_thickness_changed();
 	///Renames a selected item
 	void renameTreeviewItem();
 	///Slot will be called, if the value of the loopSpeed slider has changed
@@ -246,8 +248,8 @@ private:
 
 
 	static const DicomTagList m_CTModelHeaderFields;
-	int m_pendingAction;
-
+	int  m_pendingAction;
+	double  m_initial_real_z_slice_thinkness;
 	bool m_oneWindowIsMax;
 	MaxSlopeAnalyzer* m_maxSlopeAnalyzer;
 

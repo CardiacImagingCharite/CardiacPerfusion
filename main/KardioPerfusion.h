@@ -141,6 +141,8 @@ class KardioPerfusion : public QMainWindow
 	void on_btn_clearPlot_clicked();
 	///Action for clicking on writeResult-Button
 	void on_btn_writeResults_clicked();
+	///Action for clicking on Play-button
+	void on_btn_play_clicked();
 	///Slot for the contextmenu of the treeView.
 	/*! 
 	\param pos contains the position of the contextmenu.
@@ -166,6 +168,8 @@ class KardioPerfusion : public QMainWindow
 	void slider_opacity_changed();
 	///Renames a selected item
 	void renameTreeviewItem();
+	///Slot will be called, if the value of the loopSpeed slider has changed
+	void on_slider_loopSpeed_changed();
 protected:
 	///clears pending actions
     void clearPendingAction();
@@ -175,6 +179,8 @@ signals:
 	
 protected slots:
 	void SetHighResolutionImage(const CTImageTreeItem *imageItem);
+	///sets the next image of the image tree to the output view
+	void setNextImage();
 
 protected slots:
 
@@ -250,6 +256,8 @@ private:
 	QwtPlotGrid *m_grid;
 	QwtPlotPicker *m_picker;
 	vtkLookupTable *m_perfusionColorMap;
+	QTimer *m_imageLoopTimer; ///< Timer for the image loop
+	bool m_play; ///< True if image loop plays
 	bool m_modelChanged; ///< True if model is changed until frist image is set
 	std::thread *m_loadHighResThread; ///< Thread for loading high resolution of CTImageTreeItem's
 	std::stack<CTImageTreeItem*> *m_loadHighResItemStack; ///< Stack of CTImageTreeItem's for loading high resolution

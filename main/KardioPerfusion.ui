@@ -112,17 +112,33 @@
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_13">
+             <widget class="QPushButton" name="btn_play">
+              <property name="text">
+               <string>Play/Pause</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="slider_loopSpeed">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>50</number>
+              </property>
+              <property name="sliderPosition">
+               <number>50</number>
+              </property>
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
+              <property name="invertedAppearance">
+               <bool>true</bool>
               </property>
-             </spacer>
+             </widget>
             </item>
            </layout>
           </item>

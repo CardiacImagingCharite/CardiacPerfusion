@@ -87,7 +87,8 @@ KardioPerfusion::KardioPerfusion():
 	,m_markerEnd(new QwtPlotMarker)
 	,m_markerPickerX(new QwtPlotMarker)
 	,m_markerPickerY(new QwtPlotMarker)
-	,m_grid(new QwtPlotGrid) 
+	,m_grid(new QwtPlotGrid)
+	,m_imageLoopTimer(new QTimer)
 	,m_perfusionColorMap(vtkLookupTable::New())
 	,m_loadHighResItemStack(new std::stack<CTImageTreeItem*>)
 {
@@ -210,6 +211,9 @@ KardioPerfusion::KardioPerfusion():
 	
 	connect(this, SIGNAL( HighResolutionLoaded(const CTImageTreeItem*) ), this, SLOT( SetHighResolutionImage(const CTImageTreeItem*)) );
 
+	connect(m_imageLoopTimer, SIGNAL(timeout()), this, SLOT(setNextImage()));
+	m_imageLoopTimer->start(10 * this->m_ui->slider_loopSpeed->value());
+	connect(this->m_ui->slider_loopSpeed, SIGNAL(valueChanged(int)), this, SLOT(on_slider_loopSpeed_changed()));
 };
 
 KardioPerfusion::~KardioPerfusion()
@@ -1268,3 +1272,25 @@ void KardioPerfusion::on_btn_writeResults_clicked()
   }
 
 }
+
+void KardioPerfusion::on_btn_play_clicked()
+{
+	if ( m_imageLoopTimer->isActive() ) m_imageLoopTimer->stop();
+	else m_imageLoopTimer->start(10 * this->m_ui->slider_loopSpeed->value());
+}
+
+
+void KardioPerfusion::setNextImage()
+{
+	QModelIndex indx = this->m_ui->treeView->currentIndex();
+	QModelIndex newIndx;
+	if (indx.row() + 1 == m_imageModelPtr->rowCount() ) newIndx = m_imageModelPtr->index(0, 1);
+	else newIndx = m_imageModelPtr->index(indx.row() + 1, 1);
+	this->m_ui->treeView->setCurrentIndex(newIndx);
+}
+
+void KardioPerfusion::on_slider_loopSpeed_changed()
+{
+	m_imageLoopTimer->start(10 * this->m_ui->slider_loopSpeed->value());
+}
+

@@ -196,18 +196,23 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
   if(m_orientation ==0)//axial
 	{
 				this->m_interactorStyle->SetIncrement(m_image->GetSpacing()[2]);
-				this->m_interactorStyle->SetSliceNumber((extent[0] + extent[1])/2);
+				this->m_interactorStyle->SetSliceNumber((extent[1] - extent[0])/2);
+					m_reslice->SetOutputSpacing(1,1,m_image->GetSpacing()[2]);				
 	}
 	else if (m_orientation==1)//coronal
 	{
 				this->m_interactorStyle->SetIncrement(m_image->GetSpacing()[1]);
-				this->m_interactorStyle->SetSliceNumber( (extent[2] + extent[3])/2);
+				this->m_interactorStyle->SetSliceNumber( (extent[3] - extent[2])/2);
+					m_reslice->SetOutputSpacing(1,1,m_image->GetSpacing()[0]);
+				
 	}
 	else if (m_orientation==2)//sagittal
 	{
 				this->m_interactorStyle->SetIncrement(m_image->GetSpacing()[0]);
-				this->m_interactorStyle->SetSliceNumber((extent[4] + extent[5])/2);
+				this->m_interactorStyle->SetSliceNumber((extent[5] - extent[4])/2);
+					m_reslice->SetOutputSpacing(1,1,m_image->GetSpacing()[1]);				
 	}
+
 
   this->update();
 	
@@ -225,9 +230,9 @@ void MultiPlanarReformatWidget::setTranslation() {
   m_image->GetOrigin(origin);
 
   double center[3];
-  center[0] = origin[0] + spacing[0] * 0.5 * (extent[0] + extent[1]); 
-  center[1] = origin[1] + spacing[1] * 0.5 * (extent[2] + extent[3]); 
-  center[2] = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5]); 
+  center[0] = origin[0] + spacing[0] * 0.5 * (extent[1] - extent[0]); 
+  center[1] = origin[1] + spacing[1] * 0.5 * (extent[3] - extent[2]); 
+  center[2] = origin[2] + spacing[2] * 0.5 * (extent[5] - extent[4]); 
       
   // Set the point through which to slice
   m_reslicePlaneTransform->SetElement(0, 3, center[0]);
@@ -526,7 +531,7 @@ void MultiPlanarReformatWidget::SetThickness(int s)
 	{
 		m_thickness=1;
 		std::cout<<"Slice thickness is now overall 1"<<std::endl;
-		return;
+
 	}
 	else if( m_orientation == 0)//axial
 	{

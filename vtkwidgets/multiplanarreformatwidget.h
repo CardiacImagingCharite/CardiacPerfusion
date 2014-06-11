@@ -200,8 +200,7 @@ public slots:
 	///Resets the view.
 	void resetView();
 	void updateWidget();
-	void setThickness(int s){m_thickness=s;};
-
+	void SetThickness(int s);
 signals:
 	void doubleClicked(MultiPlanarReformatWidget &); ///< double click with LMB
 

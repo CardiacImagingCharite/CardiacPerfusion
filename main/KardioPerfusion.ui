@@ -714,7 +714,7 @@
              <number>0</number>
             </property>
             <property name="maximum">
-             <number>20</number>
+             <number>40</number>
             </property>
             <property name="singleStep">
              <number>1</number>
@@ -739,13 +739,13 @@
           <item>
            <widget class="QSpinBox" name="sb_thickness">
             <property name="readOnly">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="minimum">
-             <number>1</number>
+             <number>0</number>
             </property>
             <property name="maximum">
-             <number>20</number>
+             <number>40</number>
             </property>
             <property name="value">
              <number>1</number>
@@ -1346,5 +1346,6 @@
   <slot>cb_enableGamma_toggled()</slot>
   <slot>slider_opacity_changed()</slot>
   <slot>slider_thickness_changed()</slot>
+  <slot>sb_thickness_changed()</slot>
  </slots>
 </ui>

@@ -433,9 +433,7 @@ void MultiPlanarReformatWidget::resetView()
 
 void MultiPlanarReformatWidget::updateWidget()
 { 
-	this->m_reslice->SetSlabNumberOfSlices(m_thickness);
-	std::cout<<"number of slices "<<m_thickness<<std::endl;
-	this->m_annotation->Modified();
+
 	this->update();
 }
 
@@ -521,4 +519,31 @@ void MultiPlanarReformatWidget::scaleImage(const double length)
 		transform->Delete();
 		m_imageViewer->Render();
 	}
+}
+void MultiPlanarReformatWidget::SetThickness(int s)
+{
+	if (s==0)
+	{
+		m_thickness=1;
+		std::cout<<"Slice thickness is now overall 1"<<std::endl;
+		return;
+	}
+	else if( m_orientation == 0)//axial
+	{
+	m_thickness =  std::abs(std::floor(s/m_image->GetSpacing()[2]));
+	std::cout<<"Axial slice thickness is "<< m_thickness<< " slices"<<std::endl;
+	}
+	else if (m_orientation == 1)//sagittal
+	{
+		m_thickness = std::abs( std::floor(s/m_image->GetSpacing()[0]));
+	std::cout<<"sagittal slice thickness is "<< m_thickness<< " slices"<<std::endl;
+		
+	}
+	else if (m_orientation == 2) //coronal
+	{
+		m_thickness =  std::abs(std::floor(s/m_image->GetSpacing()[1]));
+	std::cout<<"Coronal slice thickness is "<< m_thickness<< " slices"<<std::endl;
+	}
+	m_reslice->SetSlabNumberOfSlices(m_thickness);
+	return;
 }

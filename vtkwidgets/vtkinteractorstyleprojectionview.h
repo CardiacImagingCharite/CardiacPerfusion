@@ -126,10 +126,13 @@ public:
 	void removeAction(int action);
 	void resetActions();
 
+	
 public slots:
     void Zoom( int delta );
     void WindowLevelDelta(int dw, int dl);
-    
+		void SetIncrement(double m){m_sliceIncrement=m;};    
+		void SetSliceNumber(int x);
+		int  GetSliceNumber(){return m_sliceNumber;};
 signals:
 	void ColorTableChanged();
 	void ZoomChanged(int delta);
@@ -145,7 +148,7 @@ protected:
 	bool restrictAction();
 	void saveDisplayState(void);
 	void updateDisplay(void);
- 
+	int m_sliceNumber;
 
 	struct DisplayState {
 		int window;
@@ -175,7 +178,7 @@ protected:
 	//@}
 
 	bool m_stateCtrl;///< State of the CTRL-Key
-	float m_sliceIncrement; ///< Value to Increment the Viewers Z-Position when slicing
+	double m_sliceIncrement; ///< Value to Increment the Viewers Z-Position when slicing
 	vtkTextActor *m_leftMBHint; ///< Hint actor for showing the Action associated with the Left Mouse Button
 	float m_leftMBHintAlpha; ///< alpha value for #m_leftMBHint
 	vtkImageViewer2 *m_imageViewer;
@@ -194,6 +197,7 @@ protected:
 	BinaryImageTreeItem* m_arterySegment;
 private:
 	vtkTransform *m_tempTransform;
+
 };
 
 #endif // VTKINTERACTORSTYLEPROJECTIONVIEW_H

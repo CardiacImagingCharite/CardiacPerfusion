@@ -201,8 +201,10 @@ public slots:
 	void resetView();
 	void updateWidget();
 	void setThickness(int s){m_thickness=s;};
+
 signals:
 	void doubleClicked(MultiPlanarReformatWidget &); ///< double click with LMB
+
 
 protected:
 	///double click event
@@ -220,6 +222,8 @@ protected:
 	int m_orientation;
 	QPushButton *m_menuButton;
 	int m_thickness;
+	int m_sliceCount;
+
 
 private:
 	static void mouseMoveCallback(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);

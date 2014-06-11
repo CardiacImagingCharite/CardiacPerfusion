@@ -72,6 +72,7 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
   m_reslicePlaneTransform(vtkMatrix4x4::New()),
   m_interactorStyle(vtkSmartPointer<vtkInteractorStyleProjectionView>::New())
 {
+	m_sliceCount = 0;
 	//create button and add menu to it
 	m_menuButton = new QPushButton(this);
 	m_thickness=1;
@@ -108,6 +109,7 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	m_annotation->SetMaximumFontSize( 12 );
 	//m_annotation->SetText( 0, "Off Image" );
 	m_annotation->SetText( 2, "<window>\n<level>" );
+	//m_annotation->SetText( 3, "<image_and_max>" );
 	m_annotation->GetTextProperty()->SetColor( 1,0,0);
 
 	m_interactorStyle->SetAnnotation(m_annotation);
@@ -181,12 +183,34 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
     if ( changeTranslation ) setTranslation();
       
     m_reslice->SetInput( m_image );
-    m_reslice->SetOutputSpacing(1,1,1);
+   //  m_reslice->SetOutputSpacing(m_image->GetSpacing());
+   m_reslice->SetOutputSpacing(1,1,1);
 		m_imageViewer->SetInput(m_reslice->GetOutput());
-	
+
     window->AddRenderer(m_imageViewer->GetRenderer());
   }
+  int extent[6];
+  for(int i = 0; i < 3; i++)
+    m_image->GetAxisUpdateExtent(i, extent[i*2], extent[i*2+1]); 
+  
+  if(m_orientation ==0)//axial
+	{
+				this->m_interactorStyle->SetIncrement(m_image->GetSpacing()[2]);
+				this->m_interactorStyle->SetSliceNumber((extent[0] + extent[1])/2);
+	}
+	else if (m_orientation==1)//coronal
+	{
+				this->m_interactorStyle->SetIncrement(m_image->GetSpacing()[1]);
+				this->m_interactorStyle->SetSliceNumber( (extent[2] + extent[3])/2);
+	}
+	else if (m_orientation==2)//sagittal
+	{
+				this->m_interactorStyle->SetIncrement(m_image->GetSpacing()[0]);
+				this->m_interactorStyle->SetSliceNumber((extent[4] + extent[5])/2);
+	}
+
   this->update();
+	
 }
 
 void MultiPlanarReformatWidget::setTranslation() {
@@ -411,6 +435,7 @@ void MultiPlanarReformatWidget::updateWidget()
 { 
 	this->m_reslice->SetSlabNumberOfSlices(m_thickness);
 	std::cout<<"number of slices "<<m_thickness<<std::endl;
+	this->m_annotation->Modified();
 	this->update();
 }
 

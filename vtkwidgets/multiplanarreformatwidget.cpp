@@ -228,11 +228,16 @@ void MultiPlanarReformatWidget::setTranslation() {
   double origin[3];
   m_image->GetSpacing(spacing);
   m_image->GetOrigin(origin);
-
+std::cout<<"or"<<m_orientation<<"translation extents [0] "<<extent[0]<<std::endl;
+std::cout<<"or"<<m_orientation<<"translation extents [1] "<<extent[1]<<std::endl;
+std::cout<<"or"<<m_orientation<<"translation extents [2] "<<extent[2]<<std::endl;
+std::cout<<"or"<<m_orientation<<"translation extents[3] "<<extent[3]<<std::endl;
+std::cout<<"or"<<m_orientation<<"translation extents[4] "<<extent[4]<<std::endl;
+std::cout<<"or"<<m_orientation<<"translation extents[5] "<<extent[5]<<std::endl;
   double center[3];
-  center[0] = origin[0] + spacing[0] * 0.5 * (extent[1] - extent[0]); 
-  center[1] = origin[1] + spacing[1] * 0.5 * (extent[3] - extent[2]); 
-  center[2] = origin[2] + spacing[2] * 0.5 * (extent[5] - extent[4]); 
+  center[0] = origin[0] + spacing[0] * 0.5 * (extent[0] + extent[1]); 
+  center[1] = origin[1] + spacing[1] * 0.5 * (extent[2] + extent[3]); 
+  center[2] = origin[2] + spacing[2] * 0.5 * (extent[4] + extent[5]); 
       
   // Set the point through which to slice
   m_reslicePlaneTransform->SetElement(0, 3, center[0]);

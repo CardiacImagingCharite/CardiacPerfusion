@@ -682,23 +682,9 @@ void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
     
     // put trafo elements into an array
     double trafoElements[12];
-//     for (int i = 0; i < 12; i++) {
-//       trafoElements[i] = trafo->GetParameters()[i];
-//     }
-// Picking random Euler angles (radians)
-// x =  0.78540
-// y =  0.78540
-// z =  0.78540
-// 
-// Rotation matrix is:
-// R =
-// 
-//    0.50000  -0.14645   0.85355
-//    0.50000   0.85355  -0.14645
-//   -0.70711   0.50000   0.50000
-
-
-
+    for (int i = 0; i < 12; i++) {
+      trafoElements[i] = trafo->GetParameters()[i];
+    }
 		trafoElements[0] =0.50 ;
 		trafoElements[1] =-0.14645 ;
 		trafoElements[2] =0.85355 ;

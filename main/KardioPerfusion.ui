@@ -714,7 +714,7 @@
              <number>0</number>
             </property>
             <property name="maximum">
-             <number>40</number>
+             <number>200</number>
             </property>
             <property name="singleStep">
              <number>1</number>
@@ -745,7 +745,7 @@
              <number>0</number>
             </property>
             <property name="maximum">
-             <number>40</number>
+             <number>200</number>
             </property>
             <property name="value">
              <number>1</number>
@@ -1347,5 +1347,6 @@
   <slot>slider_opacity_changed()</slot>
   <slot>slider_thickness_changed()</slot>
   <slot>sb_thickness_changed()</slot>
+  <slot>on_slider_loopSpeed_changed()</slot>
  </slots>
 </ui>

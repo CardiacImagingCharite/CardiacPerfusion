@@ -238,11 +238,11 @@ void vtkInteractorStyleProjectionView::dipatchActions() {
 	if(!m_stateCtrl)
 	{
 		if ( m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = m_ActionSpin; return; }
-		if ( m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = m_ActionNone; return; }
-		if ( m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = m_ActionEmitZoom; return; }
-		if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = m_leftButtonAction; return; }
-		if (!m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = m_ActionPan; return; }
-		if (!m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = m_ActionRotate; return; }
+		if ( m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = m_ActionNone; return; }
+		if ( m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = m_ActionEmitZoom; return; }
+		if ( m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = m_leftButtonAction; return; }
+		if (!m_stateLButton &&  m_stateMButton && !m_stateRButton) { m_interAction = m_ActionPan; return; }
+		if (!m_stateLButton &&  m_stateMButton &&  m_stateRButton) { m_interAction = m_ActionRotate; return; }
 		if (!m_stateLButton && !m_stateMButton &&  m_stateRButton) { m_interAction = m_ActionSlice; return; }
 		if (!m_stateLButton && !m_stateMButton && !m_stateRButton) { m_interAction = m_ActionNone; return; }
 	}

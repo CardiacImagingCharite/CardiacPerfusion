@@ -477,9 +477,9 @@ if (m_orientation) {
     m_tempTransform->SetMatrix( m_orientation );
     m_tempTransform->Translate(0, 0, dpos* m_sliceIncrement);
     m_tempTransform->GetMatrix( m_orientation );
-			this->SetSliceNumber(this->GetSliceNumber()+dpos);
+    this->SetSliceNumber(this->GetSliceNumber()+dpos);
     updateDisplay();
-}
+  }
   
 }
 
@@ -504,7 +504,6 @@ void vtkInteractorStyleProjectionView::WindowLevelDelta( int dw/**<[in] delta wi
 		if (dl) 
 		{
 			m_imageViewer->SetColorLevel(dl);
-
 		}
 		updateDisplay();
 	}
@@ -900,5 +899,4 @@ void vtkInteractorStyleProjectionView::PickPerfusionValues()
 		m_sliceNumber = x;
 	std::string s = std::to_string(m_sliceNumber);
 	m_annotation->SetText( 3, s.c_str() );
-
 	}

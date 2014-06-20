@@ -204,7 +204,6 @@ public slots:
 signals:
 	void doubleClicked(MultiPlanarReformatWidget &); ///< double click with LMB
 
-
 protected:
 	///double click event
 	void mouseDoubleClickEvent ( QMouseEvent * e );
@@ -222,7 +221,6 @@ protected:
 	QPushButton *m_menuButton;
 	int m_thickness;
 	int m_sliceCount;
-
 
 private:
 	static void mouseMoveCallback(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);

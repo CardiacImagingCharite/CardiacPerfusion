@@ -125,7 +125,6 @@ public:
 	void activateAction(int action);
 	void removeAction(int action);
 	void resetActions();
-
 	
 public slots:
     void Zoom( int delta );
@@ -197,7 +196,6 @@ protected:
 	BinaryImageTreeItem* m_arterySegment;
 private:
 	vtkTransform *m_tempTransform;
-
 };
 
 #endif // VTKINTERACTORSTYLEPROJECTIONVIEW_H

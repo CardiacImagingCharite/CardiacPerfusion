@@ -109,7 +109,6 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
 	m_annotation->SetMaximumFontSize( 12 );
 	//m_annotation->SetText( 0, "Off Image" );
 	m_annotation->SetText( 2, "<window>\n<level>" );
-	//m_annotation->SetText( 3, "<image_and_max>" );
 	m_annotation->GetTextProperty()->SetColor( 1,0,0);
 
 	m_interactorStyle->SetAnnotation(m_annotation);
@@ -183,7 +182,6 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
     if ( changeTranslation ) setTranslation();
       
     m_reslice->SetInput( m_image );
-   //  m_reslice->SetOutputSpacing(m_image->GetSpacing());
    m_reslice->SetOutputSpacing(1,1,1);
 		m_imageViewer->SetInput(m_reslice->GetOutput());
 
@@ -215,7 +213,6 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
 
 }
   this->update();
-	
 }
 
 void MultiPlanarReformatWidget::setTranslation() {

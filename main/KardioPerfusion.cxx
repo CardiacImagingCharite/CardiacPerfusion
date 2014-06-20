@@ -216,6 +216,7 @@ KardioPerfusion::KardioPerfusion():
 	connect(this->m_ui->slider_loopSpeed, SIGNAL(valueChanged(int)), this, SLOT(on_slider_loopSpeed_changed()));
 
 	connect( this->m_ui->slider_thickness, SIGNAL( valueChanged( int ) ), this->m_ui->sb_thickness, SLOT(setValue(int)) );
+	connect( this->m_ui->sb_thickness, SIGNAL( valueChanged( int ) ), this->m_ui->slider_thickness, SLOT(setValue(int)) );
 	connect( this->m_ui->slider_thickness, SIGNAL( valueChanged( int ) ), this, SLOT(slider_thickness_changed()) );
 };
 
@@ -295,9 +296,6 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 				}
 				//display number of phase
 				this->m_ui->num_phase->display(selected.indexes()[0].row());
-				
-				this->m_initial_real_z_slice_thinkness=std::fabs(dynamic_cast<CTImageTreeItem*>(&item)->getITKImage()->GetSpacing()[2]);
-				std::cout<<"new z spacing is "<<this->m_initial_real_z_slice_thinkness<<std::endl;
 				// lock stack and push the item for load high resolution
 				m_loadHighResItemStackMutex.lock();
 				m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
@@ -1110,7 +1108,7 @@ void KardioPerfusion::on_actionSave_Project_triggered() {
 void KardioPerfusion::on_actionOpen_Project_triggered() {
 	QString pname = QFileDialog::getOpenFileName( this,
 						      tr("Open Project"),
-						      "./unnamed.perfproj",
+						      "",
 					       tr("Project Files (*.perfproj)"));
 	if (!pname.isEmpty()) {
 		setImage(NULL);
@@ -1177,7 +1175,6 @@ void KardioPerfusion::loadHighResolution()
 			if ( savedModelPtr == m_imageModelPtr ) {
 				HighResolutionLoaded(imageItem);
 			}
-		this->m_initial_real_z_slice_thinkness=std::fabs(dynamic_cast<CTImageTreeItem*>(imageItem)->getITKImage()->GetSpacing()[2]);
 			m_modelMutex.unlock();
 		}
 	}
@@ -1228,11 +1225,11 @@ void KardioPerfusion::slider_opacity_changed()
 void KardioPerfusion::slider_thickness_changed()
 {
 
-int nslices= std::floor(this->m_ui->slider_thickness->value()/this->m_initial_real_z_slice_thinkness);
-if (nslices==0) nslices=1;
-			this->m_ui->mprView_lr->setThickness(nslices);
-			this->m_ui->mprView_ul->setThickness(nslices);
-			this->m_ui->mprView_ur->setThickness(nslices);
+int nslices= this->m_ui->slider_thickness->value();
+
+			this->m_ui->mprView_lr->SetThickness(nslices);
+			this->m_ui->mprView_ul->SetThickness(nslices);
+			this->m_ui->mprView_ur->SetThickness(nslices);
 			
 			this->m_ui->mprView_lr->updateWidget();
 			this->m_ui->mprView_ul->updateWidget();

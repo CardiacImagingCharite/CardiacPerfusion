@@ -72,6 +72,7 @@ MultiPlanarReformatWidget::MultiPlanarReformatWidget(QWidget* parent, Qt::WFlags
   m_reslicePlaneTransform(vtkMatrix4x4::New()),
   m_interactorStyle(vtkSmartPointer<vtkInteractorStyleProjectionView>::New())
 {
+	m_sliceCount = 0;
 	//create button and add menu to it
 	m_menuButton = new QPushButton(this);
 	m_thickness=1;
@@ -185,7 +186,32 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
 		m_imageViewer->SetInput(m_reslice->GetOutput());
 	
     window->AddRenderer(m_imageViewer->GetRenderer());
-  }
+  
+  int extent[6];
+  for(int i = 0; i < 3; i++)
+    m_image->GetAxisUpdateExtent(i, extent[i*2], extent[i*2+1]); 
+  
+  if(m_orientation ==0)//axial
+	{
+				this->m_interactorStyle->SetIncrement(m_image->GetSpacing()[2]);
+				this->m_interactorStyle->SetSliceNumber((extent[1] - extent[0])/2);
+					m_reslice->SetOutputSpacing(1,1,m_image->GetSpacing()[2]);				
+	}
+	else if (m_orientation==1)//coronal
+	{
+				this->m_interactorStyle->SetIncrement(m_image->GetSpacing()[1]);
+				this->m_interactorStyle->SetSliceNumber( (extent[3] - extent[2])/2);
+					m_reslice->SetOutputSpacing(1,1,m_image->GetSpacing()[0]);
+				
+	}
+	else if (m_orientation==2)//sagittal
+	{
+				this->m_interactorStyle->SetIncrement(m_image->GetSpacing()[0]);
+				this->m_interactorStyle->SetSliceNumber((extent[5] - extent[4])/2);
+					m_reslice->SetOutputSpacing(1,1,m_image->GetSpacing()[1]);				
+	}
+
+}
   this->update();
 }
 
@@ -409,8 +435,7 @@ void MultiPlanarReformatWidget::resetView()
 
 void MultiPlanarReformatWidget::updateWidget()
 { 
-	this->m_reslice->SetSlabNumberOfSlices(m_thickness);
-	std::cout<<"number of slices "<<m_thickness<<std::endl;
+
 	this->update();
 }
 
@@ -496,4 +521,31 @@ void MultiPlanarReformatWidget::scaleImage(const double length)
 		transform->Delete();
 		m_imageViewer->Render();
 	}
+}
+void MultiPlanarReformatWidget::SetThickness(int s)
+{
+	if (s==0)
+	{
+		m_thickness=1;
+// 		std::cout<<"Slice thickness is now overall 1"<<std::endl;
+
+	}
+	else if( m_orientation == 0)//axial
+	{
+	m_thickness =  std::abs(std::floor(s/m_image->GetSpacing()[2]));
+// 	std::cout<<"Axial slice thickness is "<< m_thickness<< " slices"<<std::endl;
+	}
+	else if (m_orientation == 1)//sagittal
+	{
+		m_thickness = std::abs( std::floor(s/m_image->GetSpacing()[0]));
+// 	std::cout<<"sagittal slice thickness is "<< m_thickness<< " slices"<<std::endl;
+		
+	}
+	else if (m_orientation == 2) //coronal
+	{
+		m_thickness =  std::abs(std::floor(s/m_image->GetSpacing()[1]));
+// 	std::cout<<"Coronal slice thickness is "<< m_thickness<< " slices"<<std::endl;
+	}
+	m_reslice->SetSlabNumberOfSlices(m_thickness);
+	return;
 }

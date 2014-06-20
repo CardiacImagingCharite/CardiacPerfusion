@@ -144,6 +144,8 @@ class KardioPerfusion : public QMainWindow
 	///Action for clicking on Play-button
 	void on_btn_play_clicked();
 	///Slot for the contextmenu of the treeView.
+	void on_btn_5mm_clicked();
+	void on_btn_8mm_clicked();
 	/*! 
 	\param pos contains the position of the contextmenu.
 	*/

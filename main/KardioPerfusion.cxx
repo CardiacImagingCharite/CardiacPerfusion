@@ -1316,3 +1316,13 @@ void KardioPerfusion::on_slider_loopSpeed_changed()
 	m_imageLoopTimer->start(10 * this->m_ui->slider_loopSpeed->value());
 }
 
+void KardioPerfusion::on_btn_5mm_clicked()
+{
+	this->m_ui->slider_thickness->setValue(5.0);
+}
+
+void KardioPerfusion::on_btn_8mm_clicked()
+{
+	this->m_ui->slider_thickness->setValue(8.0);
+}
+

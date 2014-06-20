@@ -182,9 +182,9 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
     if ( changeTranslation ) setTranslation();
       
     m_reslice->SetInput( m_image );
-   m_reslice->SetOutputSpacing(1,1,1);
+    m_reslice->SetOutputSpacing(1,1,1);
 		m_imageViewer->SetInput(m_reslice->GetOutput());
-
+	
     window->AddRenderer(m_imageViewer->GetRenderer());
   
   int extent[6];
@@ -225,12 +225,7 @@ void MultiPlanarReformatWidget::setTranslation() {
   double origin[3];
   m_image->GetSpacing(spacing);
   m_image->GetOrigin(origin);
-// std::cout<<"or"<<m_orientation<<"translation extents [0] "<<extent[0]<<std::endl;
-// std::cout<<"or"<<m_orientation<<"translation extents [1] "<<extent[1]<<std::endl;
-// std::cout<<"or"<<m_orientation<<"translation extents [2] "<<extent[2]<<std::endl;
-// std::cout<<"or"<<m_orientation<<"translation extents[3] "<<extent[3]<<std::endl;
-// std::cout<<"or"<<m_orientation<<"translation extents[4] "<<extent[4]<<std::endl;
-// std::cout<<"or"<<m_orientation<<"translation extents[5] "<<extent[5]<<std::endl;
+
   double center[3];
   center[0] = origin[0] + spacing[0] * 0.5 * (extent[0] + extent[1]); 
   center[1] = origin[1] + spacing[1] * 0.5 * (extent[2] + extent[3]); 

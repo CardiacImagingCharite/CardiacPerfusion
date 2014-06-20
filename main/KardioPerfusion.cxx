@@ -296,7 +296,6 @@ void KardioPerfusion::onSelectionChanged(const QItemSelection & selected, const 
 				}
 				//display number of phase
 				this->m_ui->num_phase->display(selected.indexes()[0].row());
-
 				// lock stack and push the item for load high resolution
 				m_loadHighResItemStackMutex.lock();
 				m_loadHighResItemStack->push(dynamic_cast<CTImageTreeItem*>(&item));
@@ -685,8 +684,6 @@ void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
     for (int i = 0; i < 12; i++) {
       trafoElements[i] = trafo->GetParameters()[i];
     }
-		
-		
     
     // apply rotation to widgets
     this->m_ui->mprView_ur->rotateImage( trafoElements );

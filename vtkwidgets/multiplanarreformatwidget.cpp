@@ -188,7 +188,7 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
 		m_imageViewer->SetInput(m_reslice->GetOutput());
 
     window->AddRenderer(m_imageViewer->GetRenderer());
-  }
+  
   int extent[6];
   for(int i = 0; i < 3; i++)
     m_image->GetAxisUpdateExtent(i, extent[i*2], extent[i*2+1]); 
@@ -213,7 +213,7 @@ void MultiPlanarReformatWidget::setImage(vtkImageData *image/**<[in] Volume (3D)
 					m_reslice->SetOutputSpacing(1,1,m_image->GetSpacing()[1]);				
 	}
 
-
+}
   this->update();
 	
 }

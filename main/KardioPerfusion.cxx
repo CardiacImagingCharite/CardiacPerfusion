@@ -1111,7 +1111,7 @@ void KardioPerfusion::on_actionSave_Project_triggered() {
 void KardioPerfusion::on_actionOpen_Project_triggered() {
 	QString pname = QFileDialog::getOpenFileName( this,
 						      tr("Open Project"),
-						      "./unnamed.perfproj",
+						      "",
 					       tr("Project Files (*.perfproj)"));
 	if (!pname.isEmpty()) {
 		setImage(NULL);

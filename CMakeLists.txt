@@ -48,7 +48,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x -O3 -fpermissive")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x -O3 -fpermissive -Wno-unused-local-typedefs")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -223,17 +223,12 @@ SET(QT_QMAKE_EXECUTABLE ${VTK_QT_QMAKE_EXECUTABLE} CACHE FILEPATH "")
 FIND_PACKAGE(Qt4 REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
-FIND_PATH(ITK_APPS FindInsightApplications.cmake
-		HINTS ITK_DIR/../)
-
-
 # Use the include path and library for Qt that is used by VTK and for the ITK-VTK-Filter
 INCLUDE_DIRECTORIES(
   ${QT_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_QTCORE_INCLUDE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${QWT_INCLUDE_DIR}
-  ${ITK_APPS}/Auxiliary/vtk
   ${HeaderDirs}
 )
 
@@ -241,7 +236,6 @@ LINK_DIRECTORIES(
  ${Boost_LIBRARY_DIRS}
  ${GDCM_LIBRARY_DIRS}
  ${QWT_LIBRARY_DIR}
- ${ITK_APPS_LIB}/VolviewPlugIns/bin/Debug
 )
 
 

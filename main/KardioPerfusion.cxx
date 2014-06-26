@@ -140,7 +140,8 @@ KardioPerfusion::KardioPerfusion():
 	m_markerPickerX->attach(this->m_ui->qwtPlot_tac);
 	m_markerPickerY->attach(this->m_ui->qwtPlot_tac);
   
-  
+  shortcut_f9 = new QShortcut(QKeySequence(Qt::Key_F9), this);
+  shortcut_f10 = new QShortcut(QKeySequence(Qt::Key_F10), this);
 	m_grid->enableX(true); m_grid->enableX(false);
 	m_grid->attach(this->m_ui->qwtPlot_tac);
 
@@ -218,6 +219,9 @@ KardioPerfusion::KardioPerfusion():
 	connect( this->m_ui->slider_thickness, SIGNAL( valueChanged( int ) ), this->m_ui->sb_thickness, SLOT(setValue(int)) );
 	connect( this->m_ui->sb_thickness, SIGNAL( valueChanged( int ) ), this->m_ui->slider_thickness, SLOT(setValue(int)) );
 	connect( this->m_ui->slider_thickness, SIGNAL( valueChanged( int ) ), this, SLOT(slider_thickness_changed()) );
+	connect(shortcut_f9, SIGNAL(activated()), this, SLOT(setPreviousImage()));
+	connect(shortcut_f10, SIGNAL(activated()), this, SLOT(setNextImage()));
+
 };
 
 KardioPerfusion::~KardioPerfusion()
@@ -706,7 +710,31 @@ void KardioPerfusion::on_btn_autoAlignHeart_clicked() {
     this->m_ui->mprView_ul->panImage(ellCenter);
     this->m_ui->mprView_lr->panImage(ellCenter);
 }
+//action for autoAlignHeart-Button
+void KardioPerfusion::on_btn_resetAlignment_clicked() {
+  
+    // get tranformation from autoAlignHeart
+    autoAlignHeart::AffineTransformType::Pointer trafo = autoAlignHeart::AffineTransformType::New();
+		trafo->SetIdentity();
+			
+	std::cout << "transformation elements: " << trafo->GetParameters() << std::endl;
+	std::cout << "transformation elements: " << trafo->GetParameters() << std::endl;
+// 	itk::Vector< double, 3 > axis;
+// 	axis.Fill( 0 );
+// 	axis[1] = 1;
+// 	trafo->Rotate3D( axis, 1.57, true );
+    // put trafo elements into an array
+    double trafoElements[12];
+    for (int i = 0; i < 12; i++) {
+      trafoElements[i] = trafo->GetParameters()[i];
+    }
+    
+    // apply rotation to widgets
+    this->m_ui->mprView_ur->rotateImage( trafoElements );
+    this->m_ui->mprView_ul->rotateImage( trafoElements );
+    this->m_ui->mprView_lr->rotateImage( trafoElements );
 
+}
 //callback for exit
 void KardioPerfusion::slotExit() {
 	qApp->exit();
@@ -1310,7 +1338,18 @@ void KardioPerfusion::setNextImage()
 	else newIndx = m_imageModelPtr->index(indx.row() + 1, 1);
 	this->m_ui->treeView->setCurrentIndex(newIndx);
 }
+void KardioPerfusion::setPreviousImage()
+{
+	QModelIndex indx = this->m_ui->treeView->currentIndex();
+	QModelIndex newIndx;
+	if (indx.row() - 1 < 0  ) 
+	{
+	newIndx = m_imageModelPtr->index(m_imageModelPtr->rowCount()-1, 1);
 
+	}
+	else newIndx = m_imageModelPtr->index(indx.row() - 1, 1);
+	this->m_ui->treeView->setCurrentIndex(newIndx);
+}
 void KardioPerfusion::on_slider_loopSpeed_changed()
 {
 	m_imageLoopTimer->start(10 * this->m_ui->slider_loopSpeed->value());

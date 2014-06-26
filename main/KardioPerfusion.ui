@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1182</width>
-    <height>905</height>
+    <height>911</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,11 +38,11 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>331</width>
+         <width>335</width>
          <height>903</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,0,0,0,0,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,0,0,0,0,0">
         <property name="sizeConstraint">
          <enum>QLayout::SetMaximumSize</enum>
         </property>
@@ -659,11 +659,25 @@
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="btn_autoAlignHeart">
-          <property name="text">
-           <string>Auto Align Heart</string>
+         <layout class="QHBoxLayout" name="horizontalLayout_19">
+          <property name="topMargin">
+           <number>10</number>
           </property>
-         </widget>
+          <item>
+           <widget class="QPushButton" name="btn_autoAlignHeart">
+            <property name="text">
+             <string>Auto Align Heart</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_resetAlignment">
+            <property name="text">
+             <string>Reset Alignment</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_16">
@@ -734,6 +748,9 @@
             <property name="tickPosition">
              <enum>QSlider::TicksAbove</enum>
             </property>
+            <property name="tickInterval">
+             <number>10</number>
+            </property>
            </widget>
           </item>
           <item>
@@ -768,24 +785,31 @@
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="btn_5mm">
-          <property name="text">
-           <string>5 mm</string>
+         <layout class="QHBoxLayout" name="horizontalLayout_18">
+          <property name="topMargin">
+           <number>0</number>
           </property>
-          <property name="shortcut">
-           <string>5</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_8mm">
-          <property name="text">
-           <string>8 mm</string>
-          </property>
-          <property name="shortcut">
-           <string>8</string>
-          </property>
-         </widget>
+          <item>
+           <widget class="QPushButton" name="btn_8mm">
+            <property name="text">
+             <string>8 mm</string>
+            </property>
+            <property name="shortcut">
+             <string>8</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_5mm">
+            <property name="text">
+             <string>5 mm</string>
+            </property>
+            <property name="shortcut">
+             <string>5</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <spacer name="verticalSpacer">
@@ -1138,7 +1162,7 @@
      <x>0</x>
      <y>0</y>
      <width>1182</width>
-     <height>20</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

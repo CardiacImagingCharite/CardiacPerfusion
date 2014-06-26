@@ -38,6 +38,7 @@
 
 #include <QMainWindow>
 #include <QObject>
+#include <QShortcut>
 #include "vtkSmartPointer.h"    // Required for smart pointer internal ivars.
 #include "ctimagetreemodel.h"
 #include "binaryimagetreeitem.h"
@@ -135,8 +136,10 @@ class KardioPerfusion : public QMainWindow
 	void mprWidget_doubleClicked(MultiPlanarReformatWidget &w);
 	///Action for double clicking on a mytabwidget.
 	void tabWidget_doubleClicked(MyTabWidget &w);
-        ///Action for clicking on autoAlignHeart-Button
-        void on_btn_autoAlignHeart_clicked();
+  ///Action for clicking on autoAlignHeart-Button
+  void on_btn_autoAlignHeart_clicked();
+  ///Action for clicking on resetAlignment-Button
+  void on_btn_resetAlignment_clicked();
 	///Action for clicking on clearPlot-Button
 	void on_btn_clearPlot_clicked();
 	///Action for clicking on writeResult-Button
@@ -185,6 +188,8 @@ protected slots:
 	void SetHighResolutionImage(const CTImageTreeItem *imageItem);
 	///sets the next image of the image tree to the output view
 	void setNextImage();
+	///sets the pervious image of the image tree to the output view
+	void setPreviousImage();
 
 protected slots:
 
@@ -267,6 +272,8 @@ private:
 	std::mutex m_loadHighResThreadMutex; ///< Mutex for locking the loadHighResolution thread
 	std::mutex m_loadHighResItemStackMutex; ///< Mutex for locking the loadHighResolution item stack
 	std::mutex m_modelMutex; ///< Mutex for locking the image tree model
+	QShortcut *shortcut_f9; 
+	QShortcut *shortcut_f10; 
 };
 
 #endif // KardioPerfusion_H

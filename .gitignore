@@ -118,3 +118,5 @@ Ankh.NoLoad
 #misc
 *.csv
 *.png
+/.kdev4
+*.kdev4

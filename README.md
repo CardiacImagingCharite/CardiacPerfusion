@@ -124,7 +124,8 @@ Create a build directory
 
     mkdir binITK
     cd binITK
-
+ look for file vcl_config_compiler.h.in, and change 
+ VCL_CAN_STATIC_CONST_INIT_{FLOAT,INT} to 0
 Run CMake configuration tool
 
     ccmake ../InsightToolkit-4.4.0

@@ -33,7 +33,7 @@
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
 */
 
-#define BOOST_FILESYSTEM_VERSION 2
+#define BOOST_FILESYSTEM_VERSION 3
 
 #include "dicomselectordialog.h"
 #include <QFileSystemModel>
@@ -101,7 +101,7 @@ void DicomSelectorDialog::exec() {
 					}
 					else if ( boost::filesystem::is_regular_file( itr->status() )) 
 					{
-						m_fileNames.push_back( itr->path().directory_string().c_str() );
+						m_fileNames.push_back( itr->path().string().c_str() );
 					}
 				}
 			}

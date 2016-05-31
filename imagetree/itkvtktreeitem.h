@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Charité Universitätsmedizin Berlin, Institut für Radiologie
+    Copyright 2012 CharitÃ© UniversitÃ¤tsmedizin Berlin, Institut fÃ¼r Radiologie
 	Copyright 2010 Henning Meyer
 
 	This file is part of KardioPerfusion.
@@ -19,15 +19,15 @@
 
     Diese Datei ist Teil von KardioPerfusion.
 
-    KardioPerfusion ist Freie Software: Sie können es unter den Bedingungen
+    KardioPerfusion ist Freie Software: Sie kÃ¶nnen es unter den Bedingungen
     der GNU General Public License, wie von der Free Software Foundation,
-    Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
-    veröffentlichten Version, weiterverbreiten und/oder modifizieren.
+    Version 3 der Lizenz oder (nach Ihrer Option) jeder spÃ¤teren
+    verÃ¶ffentlichten Version, weiterverbreiten und/oder modifizieren.
 
-    KardioPerfusion wird in der Hoffnung, dass es nützlich sein wird, aber
-    OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
-    Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
-    Siehe die GNU General Public License für weitere Details.
+    KardioPerfusion wird in der Hoffnung, dass es nÃ¼tzlich sein wird, aber
+    OHNE JEDE GEWÃ„HRLEISTUNG, bereitgestellt; sogar ohne die implizite
+    GewÃ¤hrleistung der MARKTFÃ„HIGKEIT oder EIGNUNG FÃœR EINEN BESTIMMTEN ZWECK.
+    Siehe die GNU General Public License fÃ¼r weitere Details.
 
     Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
@@ -146,7 +146,7 @@ class ITKVTKTreeItem : public TreeItem {
     }
 
   private:
-    typedef boost::weak_ptr<VTKConnectorDataBasePtr::value_type> WeakConnectorHandle;
+    typedef boost::weak_ptr<VTKConnectorDataBasePtr::element_type> WeakConnectorHandle;
     WeakConnectorHandle m_weakConnector;
     
   protected:
